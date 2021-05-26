@@ -1,0 +1,9 @@
+[tool.pytest.ini_options]
+addopts = "--strict-markers --durations=10 --color=yes --showlocals"
+python_files="test_*.py tests.py *_test.py"
+
+[pycodestyle]
+max-line-length = 100
+[flake8]
+ignore = "E501"
+
