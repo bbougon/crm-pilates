@@ -22,3 +22,6 @@ test:
 
 run:
 	./run.sh
+
+linter:
+	flake8 main.py

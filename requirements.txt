@@ -1,9 +1,12 @@
 fastapi
 uvicorn[standard]
 gunicorn
+pydantic
 
 # test
 coverage
 mimesis
 mock
 pytest
+flake8
+requests
