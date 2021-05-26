@@ -4,7 +4,7 @@
 persistent_path := local.persistent
 local_virtualenv_path := local.virtualenv
 
-install-virtualenv: clean
+install-virtualenv:
 	./install-virtualenv.sh
 
 requirements:
@@ -17,7 +17,7 @@ run-all: run
 ## TESTS AND CHECKS ##
 ######################
 
-test:
+tests:
 	./local.virtualenv/bin/pytest $(args)
 
 run:
