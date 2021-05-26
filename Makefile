@@ -20,5 +20,5 @@ run-all: run
 test:
 	./local.virtualenv/bin/pytest $(args)
 
-coverage:
-	./scripts/local/coverage.sh $(args)
+run:
+	./run.sh
