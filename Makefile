@@ -9,7 +9,6 @@ install-virtualenv:
 
 requirements:
 	./install-virtualenv.sh requirements.txt
-	#./scripts/local/freeze-requirements.sh
 
 run-all: run
 
