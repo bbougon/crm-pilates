@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+gunicorn
+
+# test
+coverage
+mimesis
+mock
+pytest
