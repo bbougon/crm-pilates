@@ -5,6 +5,8 @@ CRM Pilates is an application to manage Pilates classroom for small and medium P
 ## Development
 CRM Pilates is made with `python 3.9.2`
 
+[Documentation](https://miro.com/app/board/o9J_leSmQNU=/)
+
 Everything is in the Makefile
 
 - Installation
