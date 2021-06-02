@@ -4,7 +4,12 @@
 name: Python application
 
 on:
-  [push]
+  push:
+    branches:
+      - main
+  pull_request:
+    brances:
+      - main
 
 jobs:
   build:
