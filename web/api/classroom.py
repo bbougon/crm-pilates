@@ -1,4 +1,4 @@
-from fastapi import status, APIRouter
+from fastapi import status, APIRouter, Response
 
 from domain.classroom import Classroom, Duration, TimeUnit
 from web.schema.classroom_creation import ClassroomCreation
@@ -6,7 +6,7 @@ from web.schema.classroom_creation import ClassroomCreation
 router = APIRouter()
 
 
-@router.post("/classroom",
+@router.post("/classrooms",
              status_code=status.HTTP_201_CREATED,
              responses={
                  201: {
@@ -14,10 +14,11 @@ router = APIRouter()
                  }
              }
              )
-def create_classroom(classroom_creation: ClassroomCreation):
+def create_classroom(classroom_creation: ClassroomCreation, response: Response):
     classroom = Classroom.create(
         classroom_creation.name, classroom_creation.schedule, classroom_creation.start_date,
         Duration(classroom_creation.duration.duration, TimeUnit(classroom_creation.duration.unit.value)))
+    response.headers["location"] = f"/classrooms/{classroom.id}"
     return {"name": classroom.name,
             "schedule": classroom.schedule, "id": classroom.id, "start_date": classroom.start_date,
             "duration": {"duration": classroom.duration.duration, "unit": classroom.duration.time_unit.value}}

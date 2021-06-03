@@ -1,5 +1,7 @@
 from datetime import time, date
 
+from fastapi import Response
+
 from web.api.classroom import create_classroom
 from web.schema.classroom_creation import ClassroomCreation
 
@@ -8,7 +10,7 @@ def test_create_classroom():
     classroom_json = {"name": "advanced classroom", "schedule": "10:00", "start_date": "2020-02-11",
                       "duration": {"duration": 45, "unit": "MINUTE"}}
 
-    response = create_classroom(ClassroomCreation.parse_obj(classroom_json))
+    response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response())
 
     assert response["name"] == "advanced classroom"
     assert response["schedule"] == time(hour=10, minute=00)

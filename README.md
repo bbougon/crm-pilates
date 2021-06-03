@@ -25,7 +25,7 @@ Everything is in the Makefile
 1. Run the API (see above section)
 2. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8000/classroom -X POST --data '{"name": "advanced class", "schedule": "10:00", "start_date": "2021-05-10", "duration": {"duration": 50, "unit": "MINUTE"}}' -H"Content-Type: application/json" -v | jq
+   curl http://localhost:8000/classrooms -X POST --data '{"name": "advanced class", "schedule": "10:00", "start_date": "2021-05-10", "duration": {"duration": 50, "unit": "MINUTE"}}' -H"Content-Type: application/json" -v | jq
    ```
    Expected result:
    ```bash
