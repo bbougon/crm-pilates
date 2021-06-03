@@ -1,22 +1,21 @@
-from datetime import datetime
 import uuid
-from pydantic.types import UUID4
+from datetime import date, time
 
 
 class Classroom():
 
     name:str
-    hour:str
-    day:datetime
+    schedule:str
+    start_date:date
 
     def __init__(self):
         self.id = uuid.uuid4()
 
 
     @staticmethod
-    def create(name:str, hour:str, date: datetime):
+    def create(name:str, schedule:time, start_date: date):
         classroom = Classroom()
         classroom.name = name
-        classroom.hour = datetime.strptime(hour, '%H:%M').time()
-        classroom.day = date
+        classroom.schedule = schedule
+        classroom.start_date = start_date
         return classroom

@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import date, time
+
 from pydantic import BaseModel
 
 
 class ClassroomCreation(BaseModel):
     name: str
-    hour: str
-    day: date
+    schedule: time
+    start_date: date

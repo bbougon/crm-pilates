@@ -16,6 +16,6 @@ router = APIRouter()
              )
 def create_classroom(classroom_creation: ClassroomCreation):
     classroom = Classroom.create(
-        classroom_creation.name, classroom_creation.hour, classroom_creation.day)
+        classroom_creation.name, classroom_creation.schedule, classroom_creation.start_date)
     return {"name": classroom.name,
-            "hour": classroom.hour, "id": classroom.id}
+            "schedule": classroom.schedule, "id": classroom.id, "start_date": classroom.start_date}
