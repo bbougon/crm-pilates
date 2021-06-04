@@ -2,6 +2,8 @@ import uuid
 from datetime import date, time
 from enum import Enum
 
+from domain.repository import AggregateRoot
+
 
 class TimeUnit(Enum):
     HOUR = "HOUR"
@@ -22,7 +24,7 @@ class Duration():
         return isinstance(o, Duration) and self.duration == o.duration and self.time_unit == o.time_unit
 
 
-class Classroom():
+class Classroom(AggregateRoot):
 
     name:str
     schedule:str
