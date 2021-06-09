@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, time
+from datetime import datetime
 from enum import Enum
 
 from domain.repository import AggregateRoot
@@ -28,7 +28,7 @@ class Classroom(AggregateRoot):
 
     name:str
     schedule:str
-    start_date:date
+    start_date:datetime
     duration:Duration
 
     def __init__(self):
@@ -36,10 +36,9 @@ class Classroom(AggregateRoot):
 
 
     @staticmethod
-    def create(name:str, schedule:time, start_date: date, duration: Duration = Duration(1, TimeUnit.HOUR)):
+    def create(name:str, start_date: datetime, duration: Duration = Duration(1, TimeUnit.HOUR)):
         classroom = Classroom()
         classroom.name = name
-        classroom.schedule = schedule
         classroom.start_date = start_date
         classroom.duration = duration
         return classroom
