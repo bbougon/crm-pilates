@@ -34,7 +34,6 @@ class Classroom(AggregateRoot):
     def __init__(self):
         self.id = uuid.uuid4()
 
-
     @staticmethod
     def create(name:str, start_date: datetime, duration: Duration = Duration(1, TimeUnit.HOUR)):
         classroom = Classroom()
