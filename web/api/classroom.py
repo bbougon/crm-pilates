@@ -15,6 +15,7 @@ repo = Repositories({"classroom": MemoryClassroomRepository()})
 def repository_provider():
     return repo
 
+
 @router.post("/classrooms",
              status_code=status.HTTP_201_CREATED,
              responses={
@@ -23,7 +24,8 @@ def repository_provider():
                  }
              }
              )
-def create_classroom(classroom_creation: ClassroomCreation, response: Response, repositories: Repositories = Depends(repository_provider)):
+def create_classroom(classroom_creation: ClassroomCreation, response: Response,
+                     repositories: Repositories = Depends(repository_provider)):
     classroom = Classroom.create(
         classroom_creation.name, classroom_creation.start_date,
         Duration(classroom_creation.duration.duration, TimeUnit(classroom_creation.duration.unit.value)))
