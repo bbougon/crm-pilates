@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import status, APIRouter, Response, Depends
 
 from domain.classroom import Classroom, Duration, TimeUnit
@@ -7,6 +9,11 @@ from web.schema.classroom_creation import ClassroomCreation
 
 router = APIRouter()
 
+repo = MemoryClassroomRepository()
+
+
+def repository_provider():
+    return repo
 
 @router.post("/classrooms",
              status_code=status.HTTP_201_CREATED,
@@ -16,7 +23,7 @@ router = APIRouter()
                  }
              }
              )
-def create_classroom(classroom_creation: ClassroomCreation, response: Response, repository: ClassroomRepository = Depends(MemoryClassroomRepository)):
+def create_classroom(classroom_creation: ClassroomCreation, response: Response, repository: ClassroomRepository = Depends(repository_provider)):
     classroom = Classroom.create(
         classroom_creation.name, classroom_creation.start_date,
         Duration(classroom_creation.duration.duration, TimeUnit(classroom_creation.duration.unit.value)))
@@ -24,3 +31,4 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response, 
     repository.persist(classroom)
     return {"name": classroom.name, "id": classroom.id, "start_date": classroom.start_date,
             "duration": {"duration": classroom.duration.duration, "unit": classroom.duration.time_unit.value}}
+
