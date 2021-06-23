@@ -3,13 +3,13 @@ from uuid import UUID
 from fastapi import status, APIRouter, Response, Depends
 
 from domain.classroom import Classroom, Duration, TimeUnit
-from domain.classroom_repository import ClassroomRepository
+from infrastructure.repositories import Repositories
 from infrastructure.tests.memory_classroom_repository import MemoryClassroomRepository
 from web.schema.classroom_creation import ClassroomCreation
 
 router = APIRouter()
 
-repo = MemoryClassroomRepository()
+repo = Repositories({"classroom": MemoryClassroomRepository()})
 
 
 def repository_provider():
@@ -23,12 +23,16 @@ def repository_provider():
                  }
              }
              )
-def create_classroom(classroom_creation: ClassroomCreation, response: Response, repository: ClassroomRepository = Depends(repository_provider)):
+def create_classroom(classroom_creation: ClassroomCreation, response: Response, repositories: Repositories = Depends(repository_provider)):
     classroom = Classroom.create(
         classroom_creation.name, classroom_creation.start_date,
         Duration(classroom_creation.duration.duration, TimeUnit(classroom_creation.duration.unit.value)))
     response.headers["location"] = f"/classrooms/{classroom.id}"
-    repository.persist(classroom)
+    repositories.classroom.persist(classroom)
     return {"name": classroom.name, "id": classroom.id, "start_date": classroom.start_date,
             "duration": {"duration": classroom.duration.duration, "unit": classroom.duration.time_unit.value}}
 
+
+@router.get("/classrooms/{id}")
+def get_classroom(id: UUID, repositories: Repositories = Depends(repository_provider)):
+    return repositories.classroom.get_by_id(id)

@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import Response
 
+from infrastructure.repositories import Repositories
 from infrastructure.tests.memory_classroom_repository import MemoryClassroomRepository
 from web.api.classroom import create_classroom
 from web.schema.classroom_creation import ClassroomCreation
@@ -12,7 +13,8 @@ def test_create_classroom():
     classroom_json = {"name": "advanced classroom", "start_date": "2020-02-11T10:00:00",
                       "duration": {"duration": 45, "unit": "MINUTE"}}
 
-    response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(), repository)
+    response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
+                                Repositories({"classroom": repository}))
 
     assert response["name"] == "advanced classroom"
     assert response["start_date"] == datetime(2020, 2, 11, 10, 0)
