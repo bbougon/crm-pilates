@@ -1,9 +1,14 @@
 from abc import abstractmethod
 
-from command.command import Command
+from command.response import Event
+
+
+class Command:
+    pass
+
 
 class CommandHandler:
 
     @abstractmethod
-    def execute(self, command: Command) -> None:
+    def execute(self, command: Command) -> Event:
         ...

@@ -1,14 +1,12 @@
-from command.command import Command
-from domain.classroom.classroom_command_handler import ClassroomCreationCommandHandler
-from infrastructure.repositories import Repositories
+from command.command_handler import Command
+from command.response import Response
 
 
 class CommandBus:
 
-    def __init__(self, repositories: Repositories) -> None:
+    def __init__(self, handlers: dict) -> None:
         super().__init__()
-        self.repositories = repositories
-        self.handlers = {"classroom_creation_command": ClassroomCreationCommandHandler(repositories)}
+        self.handlers = handlers
 
-    def send(self, command: Command) -> None:
-        return self.handlers["classroom_creation_command"].execute(command)
+    def send(self, command: Command) -> Response:
+        return Response(self.handlers[command.__class__.__name__].execute(command))

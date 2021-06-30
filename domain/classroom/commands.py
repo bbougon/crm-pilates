@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from command.command import Command
+from command.command_handler import Command
 from web.schema.classroom_creation import Duration
 
 

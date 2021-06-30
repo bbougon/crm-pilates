@@ -3,6 +3,8 @@ from datetime import datetime
 from fastapi import Response
 
 from command.command_bus import CommandBus
+from domain.classroom.classroom_command_handler import ClassroomCreationCommandHandler
+from domain.classroom.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 from infrastructure.tests.memory_classroom_repository import MemoryClassroomRepository
 from web.api.classroom import create_classroom
@@ -15,7 +17,8 @@ def test_create_classroom():
                       "duration": {"duration": 45, "unit": "MINUTE"}}
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
-                                CommandBus(Repositories({"classroom": repository})))
+                                CommandBus({ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(
+                                    Repositories({"classroom": repository}))}))
 
     assert response["name"] == "advanced classroom"
     assert response["start_date"] == datetime(2020, 2, 11, 10, 0)
