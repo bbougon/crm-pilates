@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from domain.classroom import Classroom, TimeUnit, Duration
+from domain.classroom.classroom import Classroom, TimeUnit, Duration
 
 
 def test_create_classroom():

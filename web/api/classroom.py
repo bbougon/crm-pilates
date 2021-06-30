@@ -2,7 +2,8 @@ from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends
 
-from domain.classroom import Classroom, Duration, TimeUnit
+from command.command_bus import CommandBus
+from domain.classroom.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 from infrastructure.tests.memory_classroom_repository import MemoryClassroomRepository
 from web.schema.classroom_creation import ClassroomCreation
@@ -16,6 +17,12 @@ def repository_provider():
     return repo
 
 
+command_bus = CommandBus(repo)
+
+
+def command_bus_provider():
+    return command_bus
+
 @router.post("/classrooms",
              status_code=status.HTTP_201_CREATED,
              responses={
@@ -25,14 +32,13 @@ def repository_provider():
              }
              )
 def create_classroom(classroom_creation: ClassroomCreation, response: Response,
-                     repositories: Repositories = Depends(repository_provider)):
-    classroom = Classroom.create(
-        classroom_creation.name, classroom_creation.start_date,
-        Duration(classroom_creation.duration.duration, TimeUnit(classroom_creation.duration.unit.value)))
-    response.headers["location"] = f"/classrooms/{classroom.id}"
-    repositories.classroom.persist(classroom)
-    return {"name": classroom.name, "id": classroom.id, "start_date": classroom.start_date,
-            "duration": {"duration": classroom.duration.duration, "unit": classroom.duration.time_unit.value}}
+                     command_bus_impl:CommandBus = Depends(command_bus_provider)):
+    command = ClassroomCreationCommand(classroom_creation.name, classroom_creation.duration,
+                                       classroom_creation.start_date)
+    response__ = command_bus_impl.send(command)
+    response.headers["location"] = f"/classrooms/{response__.id}"
+    return {"name": response__.name, "id": response__.id, "start_date": response__.start_date,
+            "duration": {"duration": response__.duration.duration, "unit": response__.duration.time_unit.value}}
 
 
 @router.get("/classrooms/{id}")
