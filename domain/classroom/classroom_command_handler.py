@@ -11,6 +11,7 @@ from infrastructure.repositories import Repositories
 class ClassroomCreated(Event):
     id: int
     name: str
+    position: int
     duration: Duration
     schedule: Schedule
 
@@ -22,9 +23,9 @@ class ClassroomCreationCommandHandler(CommandHandler):
         self.repositories = repositories
 
     def execute(self, command: ClassroomCreationCommand) -> ClassroomCreated:
-        classroom = Classroom.create(command.name, command.start_date, stop_date=command.stop_date,
+        classroom = Classroom.create(command.name, command.start_date, command.position, stop_date=command.stop_date,
                                      duration=Duration(duration=command.duration.duration,
                                                        time_unit=TimeUnit(command.duration.unit.value)))
         self.repositories.classroom.persist(classroom)
-        return ClassroomCreated(id=classroom.id, name=classroom.name, duration=classroom.duration,
+        return ClassroomCreated(id=classroom.id, name=classroom.name, position = classroom.position, duration=classroom.duration,
                                 schedule=classroom.schedule)

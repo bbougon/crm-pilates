@@ -17,6 +17,7 @@ class Duration(BaseModel):
 
 class ClassroomCreation(BaseModel):
     name: str
+    position: int
     start_date: datetime
     stop_date: Optional[datetime]
     duration: Duration = Duration.parse_obj({"duration": 1, "unit": TimeUnit.HOUR})

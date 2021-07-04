@@ -28,6 +28,7 @@ class Schedule:
 
 class Classroom(AggregateRoot):
     name: str
+    position: int
     schedule: Schedule
     duration: Duration
 
@@ -35,10 +36,11 @@ class Classroom(AggregateRoot):
         self.id = uuid.uuid4()
 
     @staticmethod
-    def create(name: str, start_date: datetime, stop_date: datetime = None,
+    def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
                duration: Duration = Duration(duration=1, time_unit=TimeUnit.HOUR)):
         classroom = Classroom()
         classroom.name = name
+        classroom.position = position
         classroom.schedule = Schedule(start=start_date, stop=stop_date)
         classroom.duration = duration
         return classroom
