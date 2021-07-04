@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -17,4 +18,5 @@ class Duration(BaseModel):
 class ClassroomCreation(BaseModel):
     name: str
     start_date: datetime
+    stop_date: Optional[datetime]
     duration: Duration = Duration.parse_obj({"duration": 1, "unit": TimeUnit.HOUR})

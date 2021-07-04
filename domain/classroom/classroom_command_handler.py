@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from datetime import datetime
 
-from command.response import Event
 from command.command_handler import CommandHandler
-from domain.classroom.classroom import Classroom, Duration, TimeUnit
+from command.response import Event
+from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule
 from domain.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 
@@ -13,7 +12,7 @@ class ClassroomCreated(Event):
     id: int
     name: str
     duration: Duration
-    start_date: datetime
+    schedule: Schedule
 
 
 class ClassroomCreationCommandHandler(CommandHandler):
@@ -23,8 +22,9 @@ class ClassroomCreationCommandHandler(CommandHandler):
         self.repositories = repositories
 
     def execute(self, command: ClassroomCreationCommand) -> ClassroomCreated:
-        classroom = Classroom.create(command.name, command.start_date,
-                                     Duration(command.duration.duration, TimeUnit(command.duration.unit.value)))
+        classroom = Classroom.create(command.name, command.start_date, stop_date=command.stop_date,
+                                     duration=Duration(duration=command.duration.duration,
+                                                       time_unit=TimeUnit(command.duration.unit.value)))
         self.repositories.classroom.persist(classroom)
         return ClassroomCreated(id=classroom.id, name=classroom.name, duration=classroom.duration,
-                                start_date=classroom.start_date)
+                                schedule=classroom.schedule)

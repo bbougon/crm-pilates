@@ -7,6 +7,7 @@ from web.schema.classroom_creation import Duration
 
 @dataclass
 class ClassroomCreationCommand(Command):
-  name: str
-  duration: Duration
-  start_date: datetime
+    name: str
+    duration: Duration
+    start_date: datetime
+    stop_date: datetime

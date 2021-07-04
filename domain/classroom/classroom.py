@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
@@ -10,34 +11,34 @@ class TimeUnit(Enum):
     MINUTE = "MINUTE"
 
 
-class Duration():
-
+@dataclass
+class Duration:
     time_unit: TimeUnit
     duration: int
-
-    def __init__(self, duration: int, time_unit: TimeUnit) -> None:
-        super().__init__()
-        self.duration = duration
-        self.time_unit = time_unit
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Duration) and self.duration == o.duration and self.time_unit == o.time_unit
 
 
-class Classroom(AggregateRoot):
+@dataclass
+class Schedule:
+    start: datetime
+    stop: datetime
 
-    name:str
-    schedule:str
-    start_date:datetime
-    duration:Duration
+
+class Classroom(AggregateRoot):
+    name: str
+    schedule: Schedule
+    duration: Duration
 
     def __init__(self):
         self.id = uuid.uuid4()
 
     @staticmethod
-    def create(name:str, start_date: datetime, duration: Duration = Duration(1, TimeUnit.HOUR)):
+    def create(name: str, start_date: datetime, stop_date: datetime = None,
+               duration: Duration = Duration(duration=1, time_unit=TimeUnit.HOUR)):
         classroom = Classroom()
         classroom.name = name
-        classroom.start_date = start_date
+        classroom.schedule = Schedule(start=start_date, stop=stop_date)
         classroom.duration = duration
         return classroom
