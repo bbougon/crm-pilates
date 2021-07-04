@@ -1,8 +1,8 @@
 from command.command_bus import CommandBus
 from domain.classroom.classroom_command_handler import ClassroomCreationCommandHandler
-from domain.classroom.commands import ClassroomCreationCommand
+from domain.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
-from infrastructure.tests.memory_classroom_repository import MemoryClassroomRepository
+from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
 
 repo = Repositories({"classroom": MemoryClassroomRepository()})
 

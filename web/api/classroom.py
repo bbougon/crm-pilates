@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import status, APIRouter, Response, Depends
 
 from command.command_bus import CommandBus
-from domain.classroom.commands import ClassroomCreationCommand
+from domain.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 from infrastructure.providers import repository_provider, command_bus_provider
 from web.schema.classroom_creation import ClassroomCreation

@@ -14,7 +14,7 @@ Everything is in the Makefile
   `make requirements` will install the virtual env and all dependencies needed
 - Test
 
-  `make tests` will run all the tests
+  `make test` will run all the tests
 - Run the API
 
   `make run-all` will run the application with all the modules
@@ -29,7 +29,7 @@ Nat Pryce [ADR tools](https://github.com/npryce/adr-tools)
 1. Run the API (see above section)
 2. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8000/classrooms -X POST --data '{"name": "advanced class", "schedule": "10:00", "start_date": "2021-05-10", "duration": {"duration": 50, "unit": "MINUTE"}}' -H"Content-Type: application/json" -v | jq
+   curl http://localhost:8000/classrooms -X POST --data '{"name": "advanced class", "start_date": "2021-05-10T10:00", "duration": {"duration": 50, "unit": "MINUTE"}}' -H"Content-Type: application/json" -v | jq
    ```
    Expected result:
    ```bash

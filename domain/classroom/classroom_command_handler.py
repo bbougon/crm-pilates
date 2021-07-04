@@ -4,7 +4,7 @@ from datetime import datetime
 from command.response import Event
 from command.command_handler import CommandHandler
 from domain.classroom.classroom import Classroom, Duration, TimeUnit
-from domain.classroom.commands import ClassroomCreationCommand
+from domain.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 
 

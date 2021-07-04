@@ -16,7 +16,7 @@ run-all: run
 ## TESTS AND CHECKS ##
 ######################
 
-tests:
+test:
 	./local.virtualenv/bin/pytest $(args)
 
 run:
