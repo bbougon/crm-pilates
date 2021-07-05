@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 
 from command.command_bus import CommandBus
-from command.response import Event
 from command.command_handler import CommandHandler, Command
+from infrastructure.event import Event
 
 
 @dataclass
 class SimpleCommand(Command):
     name: str
+
 
 @dataclass
 class SimpleCommandExecuted(Event):

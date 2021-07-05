@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from command.response import Event
+from infrastructure.event import Event
 
 
 class Command:

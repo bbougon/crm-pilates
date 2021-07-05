@@ -5,8 +5,9 @@ pydantic
 
 # test
 coverage
+flake8
+immobilus
 mimesis
 mock
 pytest
-flake8
 requests

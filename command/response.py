@@ -1,5 +1,4 @@
-class Event:
-    pass
+from infrastructure.event import Event
 
 
 class Response:

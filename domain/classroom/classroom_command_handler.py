@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
 from command.command_handler import CommandHandler
-from command.response import Event
+from infrastructure.event import Event, eventsourced
 from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule
 from domain.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 
 
+@eventsourced
 @dataclass
 class ClassroomCreated(Event):
     id: int
