@@ -5,9 +5,10 @@ class Event:
     pass
 
 
-def eventsourced(event: Event):
+def eventsourced(event: Event) -> Event:
 
     @functools.wraps(event)
     def wrapper_eventsourced(*args, **kwargs):
         pass
-    return wrapper_eventsourced
+
+    return event
