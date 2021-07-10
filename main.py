@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
 from api import api_router
+from infrastructure.event.event_store import StoreLocator
+from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
 app = FastAPI(
     title="CRM Pilates",
@@ -12,3 +14,4 @@ app = FastAPI(
 
 
 app.include_router(api_router)
+StoreLocator.store = MemoryEventStore()

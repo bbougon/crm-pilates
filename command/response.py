@@ -1,5 +1,4 @@
-class Event:
-    pass
+from infrastructure.event.event_store import Event
 
 
 class Response:
