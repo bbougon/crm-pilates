@@ -11,4 +11,4 @@ class ClassroomCreationCommand(Command):
     position: int
     duration: Duration
     start_date: datetime
-    stop_date: datetime
+    stop_date: datetime = None

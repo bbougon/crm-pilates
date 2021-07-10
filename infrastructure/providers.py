@@ -20,10 +20,3 @@ command_bus = CommandBus(handlers)
 
 def command_bus_provider():
     return command_bus
-
-
-event_store = None
-
-
-def event_store_provider():
-    yield event_store

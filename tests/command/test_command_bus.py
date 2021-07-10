@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from command.command_bus import CommandBus
 from command.command_handler import CommandHandler, Command
-from infrastructure.event import Event
+from infrastructure.event.event_store import Event
 
 
 @dataclass
