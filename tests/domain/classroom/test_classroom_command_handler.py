@@ -15,14 +15,14 @@ from web.schema.classroom_creation import Duration
 
 @immobilus("2020-4-03 10:24:15.230")
 def test_classroom_creation_event_is_stored():
-    infrastructure.event.event_store.store_locator.store = MemoryEventStore()
+    StoreLocator.store = MemoryEventStore()
     command_handler = ClassroomCreationCommandHandler(Repositories({"classroom": MemoryClassroomRepository()}))
 
     classroom_created: ClassroomCreated = command_handler.execute(
         ClassroomCreationCommand(name="classroom", position=2, start_date=datetime(2020, 5, 7, 11, 0),
                                  duration=Duration.parse_obj({"duration": 1, "unit": "HOUR"})))
 
-    events = infrastructure.event.event_store.store_locator.store.get_all()
+    events = StoreLocator.store.get_all()
     assert len(events) == 1
     assert events[0].type == "ClassroomCreated"
     assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)

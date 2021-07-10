@@ -26,12 +26,7 @@ class EventStore:
 
 
 class StoreLocator:
-
-    def __init__(self, store=None):
-        self.store = store
-
-
-store_locator = StoreLocator()
+    store = None
 
 
 class EventSourced:
@@ -41,5 +36,5 @@ class EventSourced:
 
     def __call__(self, *args, **kwargs) -> Event:
         event = self.event(*args, **kwargs)
-        store_locator.store.persist(event)
+        StoreLocator.store.persist(event)
         return event
