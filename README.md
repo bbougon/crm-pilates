@@ -23,6 +23,8 @@ Everything is in the Makefile
 
 Nat Pryce [ADR tools](https://github.com/npryce/adr-tools) 
 
+ADR index is kept [here](./adr/README.md)
+
 #### API
 
 ##### Create a classroom
