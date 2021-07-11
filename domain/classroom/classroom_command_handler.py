@@ -1,7 +1,9 @@
+from uuid import UUID
+
 from command.command_handler import CommandHandler
 from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule
 from domain.commands import ClassroomCreationCommand
-from infrastructure.event.event_store import Event, EventSourced
+from event.event_store import Event, EventSourced
 from infrastructure.repositories import Repositories
 
 
@@ -13,9 +15,9 @@ class ClassroomCreated(Event):
     duration: Duration
     schedule: Schedule
 
-    def __init__(self, id: str, name: str, position: int, duration: Duration, schedule: Schedule) -> None:
-        super().__init__()
-        self.id = id
+    def __init__(self, id: UUID, name: str, position: int, duration: Duration, schedule: Schedule) -> None:
+        super().__init__(id)
+        self.__root_id = id
         self.name = name
         self.position = position
         self.duration = duration
@@ -26,7 +28,7 @@ class ClassroomCreated(Event):
 
     def _to_payload(self):
         return {
-            "id": self.id,
+            "id": self.root_id,
             "name": self.name,
             "position": self.position,
             "duration": self.duration.__dict__,

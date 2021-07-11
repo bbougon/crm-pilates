@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 
+import settings
 from api import api_router
-from infrastructure.event.event_store import StoreLocator
-from tests.infrastructure.event.memory_event_store import MemoryEventStore
+from event.event_store import StoreLocator
+from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 
 app = FastAPI(
     title="CRM Pilates",
@@ -14,4 +15,4 @@ app = FastAPI(
 
 
 app.include_router(api_router)
-StoreLocator.store = MemoryEventStore()
+StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)

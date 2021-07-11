@@ -1,4 +1,4 @@
-from infrastructure.event.event_store import Event
+from event.event_store import Event
 
 
 class Response:

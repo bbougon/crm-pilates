@@ -1,13 +1,17 @@
+import uuid
 from abc import abstractmethod
 from datetime import datetime
+from uuid import UUID
 
 
 class Event:
 
-    def __init__(self) -> None:
+    def __init__(self, root_id: UUID) -> None:
         super().__init__()
-        self.type = self.__class__.__name__
-        self.timestamp = datetime.now()
+        self.id: UUID = uuid.uuid4()
+        self.root_id: UUID = root_id
+        self.type: str = self.__class__.__name__
+        self.timestamp: datetime = datetime.now()
 
     @property
     def payload(self):
@@ -26,7 +30,7 @@ class EventStore:
 
 
 class StoreLocator:
-    store = None
+    store: EventStore = None
 
 
 class EventSourced:

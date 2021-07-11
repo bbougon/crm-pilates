@@ -5,13 +5,16 @@ from fastapi import Response
 from command.command_bus import CommandBus
 from domain.classroom.classroom_command_handler import ClassroomCreationCommandHandler
 from domain.commands import ClassroomCreationCommand
+from event.event_store import StoreLocator
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
+from tests.infrastructure.event.memory_event_store import MemoryEventStore
 from web.api.classroom import create_classroom
 from web.schema.classroom_creation import ClassroomCreation
 
 
 def test_create_classroom():
+    StoreLocator.store = MemoryEventStore()
     repository = MemoryClassroomRepository()
     classroom_json = {"name": "advanced classroom", "start_date": "2020-02-11T10:00:00", "position": 3,
                       "duration": {"duration": 45, "unit": "MINUTE"}}
@@ -30,6 +33,7 @@ def test_create_classroom():
 
 
 def test_create_scheduled_classroom():
+    StoreLocator.store = MemoryEventStore()
     repository = MemoryClassroomRepository()
     classroom_json = {"name": "advanced classroom", "start_date": "2020-02-11T10:00:00", "position": 4,
                       "stop_date": "2020-03-11T10:00:00", "duration": {"duration": 45, "unit": "MINUTE"}}

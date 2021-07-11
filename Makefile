@@ -10,6 +10,19 @@ install-virtualenv:
 requirements:
 	./install-virtualenv.sh requirements.txt
 
+settings:
+	$(local_virtualenv_path)/bin/ansible-playbook scripts/ansible/playbook_settings.yml --inventory scripts/ansible/local.yml --diff --extra-vars "settings_destination={{ repository_path }}"
+
+install-persistent:
+	mkdir -p $(persistent_path)
+	mkdir -p $(persistent_path)/event
+	touch $(persistent_path)/event/event_store.db
+
+create-local-database:
+	python ./scripts/create_database.py
+
+install: requirements install-persistent create-local-database
+
 run-all: run
 
 ######################

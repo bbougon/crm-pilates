@@ -1,16 +1,12 @@
 import sqlite3
 
-import immobilus
-import pytest
 
-
-
-@pytest.fixture
-def database(tmpdir):
-    database_file = tmpdir.join("event_store.db")
-    connect = sqlite3.connect(database_file)
+def create_tables():
+    connect = sqlite3.connect("./local.persistent/event/event_store.db")
     cursor = connect.cursor()
     cursor.execute('''CREATE TABLE event (id text, root_id text, type text, timestamp text, payload text)''')
     connect.commit()
     connect.close()
-    return database_file
+
+
+create_tables()

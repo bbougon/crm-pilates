@@ -1,4 +1,4 @@
-from infrastructure.event.event_store import EventStore, Event
+from event.event_store import EventStore, Event
 
 
 class MemoryEventStore(EventStore):

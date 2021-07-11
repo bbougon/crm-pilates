@@ -2,11 +2,10 @@ from datetime import datetime
 
 from immobilus import immobilus
 
-import infrastructure
 from domain.classroom.classroom import TimeUnit
 from domain.classroom.classroom_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
 from domain.commands import ClassroomCreationCommand
-from infrastructure.event.event_store import StoreLocator
+from event.event_store import StoreLocator
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
@@ -27,7 +26,7 @@ def test_classroom_creation_event_is_stored():
     assert events[0].type == "ClassroomCreated"
     assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
     assert events[0].payload == {
-        "id": classroom_created.id,
+        "id": classroom_created.root_id,
         "name": "classroom", "position": 2,
         "duration": {
             "duration": 1,

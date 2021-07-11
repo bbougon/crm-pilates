@@ -1,11 +1,14 @@
 from fastapi.testclient import TestClient
 
+from event.event_store import StoreLocator
+from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from main import app
 
 client = TestClient(app)
 
 
-def test_post_classroom():
+def test_post_classroom(database):
+    StoreLocator.store = SQLiteEventStore(database)
     response = client.post("/classrooms",
                            json={"name": "advanced classroom", "position": 3, "start_date": "2019-08-05T10:00"})
 
