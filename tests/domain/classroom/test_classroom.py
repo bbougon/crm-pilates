@@ -1,6 +1,8 @@
+import uuid
 from datetime import datetime
 
-from domain.classroom.classroom import Classroom, TimeUnit, Duration
+from domain.classroom.classroom import Classroom, TimeUnit, Duration, Attendee
+from domain.exceptions import DomainException
 
 
 def test_create_classroom():
@@ -22,3 +24,11 @@ def test_classroom_is_scheduled():
 
     assert classroom.schedule.start == datetime(2020, 3, 19)
     assert classroom.schedule.stop == datetime(2020, 6, 19)
+
+
+def test_cannot_add_attendees_when_position_overflown():
+    classroom = Classroom.create("machine", datetime(2020, 3, 19), 1, stop_date=datetime(2020, 6, 19))
+    try:
+        classroom.add_attendees([Attendee.create(uuid.uuid4()), Attendee.create(uuid.uuid4())])
+    except DomainException as e:
+        assert e.message == "Cannot add anymore attendees (position available: 1 - attendee(s) you try to add: 2)"

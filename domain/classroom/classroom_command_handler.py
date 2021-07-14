@@ -4,7 +4,7 @@ from typing import List
 from uuid import UUID
 
 from command.command_handler import CommandHandler
-from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule
+from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule, Attendee
 from domain.client.client import Client
 from domain.commands import ClassroomCreationCommand
 from event.event_store import Event, EventSourced
@@ -38,17 +38,6 @@ class ClassroomCreated(Event):
             "schedule": self.schedule.__dict__,
             "attendees": self.attendees
         }
-
-
-class Attendee:
-
-    def __init__(self, id: UUID) -> None:
-        super().__init__()
-        self.id = id
-
-    @staticmethod
-    def create(id: UUID) -> Attendee:
-        return Attendee(id)
 
 
 class ClassroomCreationCommandHandler(CommandHandler):

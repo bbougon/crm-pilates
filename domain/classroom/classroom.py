@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from uuid import UUID
 
 from domain.repository import AggregateRoot
 
@@ -35,7 +36,7 @@ class Classroom(AggregateRoot):
         self.position = position
         self.schedule = schedule
         self.duration = duration
-        self.attendees = []
+        self.attendees: [Attendee] = []
 
     @staticmethod
     def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
@@ -47,5 +48,16 @@ class Classroom(AggregateRoot):
         classroom.duration = duration
         return classroom
 
-    def add_attendees(self, attendees):
+    def add_attendees(self, attendees: [Attendee]):
         self.attendees = attendees
+
+
+class Attendee:
+
+    def __init__(self, id: UUID) -> None:
+        super().__init__()
+        self.id = id
+
+    @staticmethod
+    def create(id: UUID) -> Attendee:
+        return Attendee(id)
