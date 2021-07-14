@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PYTHON='python'
+PYTHON='python3'
 DEPS="-r ${1-requirements.txt}"
 WHEEL_DIR=$HOME/.pip/wheelhouse
 
