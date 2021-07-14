@@ -12,3 +12,4 @@ mimesis
 mock
 pytest
 requests
+pytest-mock

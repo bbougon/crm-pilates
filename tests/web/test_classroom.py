@@ -1,8 +1,13 @@
+import uuid
 from datetime import datetime
+from fastapi import HTTPException
 
 from fastapi import Response
 
+from domain.classroom.classroom import Classroom
+from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
+from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest, RepositoryProviderForTest
 from web.api.classroom import create_classroom
@@ -52,5 +57,26 @@ def test_create_classroom_with_attendees(memory_event_store):
     assert response["attendees"][1]["id"] == clients[1].id
 
 
-def test_handle_business_exception(memory_event_store):
-    assert True
+def test_handle_business_exception(memory_event_store, mocker):
+    mocker.patch.object(Classroom, "add_attendees", side_effect=DomainException("something wrong occurred"))
+    classroom_json = ClassroomJsonBuilderForTest().build()
+
+    try:
+        create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
+                         CommandBusProviderForTest().for_classroom().provide())
+    except HTTPException as e:
+        assert e.status_code == 409
+        assert e.detail == "something wrong occurred"
+
+
+def test_handle_aggregate_not_found_exception(memory_event_store, mocker):
+    unknown_uuid = uuid.uuid4()
+    mocker.patch.object(MemoryClientRepository, "get_by_id", side_effect=AggregateNotFoundException(unknown_uuid))
+    classroom_json = ClassroomJsonBuilderForTest().with_attendees([unknown_uuid]).build()
+
+    try:
+        create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
+                         CommandBusProviderForTest().for_classroom().provide())
+    except HTTPException as e:
+        assert e.status_code == 404
+        assert e.detail == f"One of the attendees with id '{unknown_uuid}' has not been found"

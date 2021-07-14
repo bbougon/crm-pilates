@@ -61,7 +61,7 @@ class ClassroomJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
         super().__init__()
-        self.classroom_name: str = Text().text(5)
+        self.classroom_name: str = Text().text(1)
         self.position: int = Numbers().integer_number(1, 6)
         self.start_date: datetime = Datetime().datetime()
         self.stop_date: datetime = None
