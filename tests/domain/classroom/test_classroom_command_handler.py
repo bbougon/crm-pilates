@@ -8,7 +8,7 @@ from domain.commands import ClassroomCreationCommand
 from event.event_store import StoreLocator
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
-from tests.builders.builders_for_test import ClientContextBuilder
+from tests.builders.builders_for_test import ClientContextBuilderForTest
 from web.schema.classroom_creation import Duration
 
 
@@ -41,7 +41,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
 
 @immobilus("2019-05-07 08:24:15.230")
 def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
-    client_repository, clients = ClientContextBuilder().with_clients(2).persist().build()
+    client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
     command_handler = ClassroomCreationCommandHandler(
         Repositories({"classroom": MemoryClassroomRepository(), "client": client_repository}))
 

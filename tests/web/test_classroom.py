@@ -7,16 +7,15 @@ from domain.classroom.classroom_command_handler import ClassroomCreationCommandH
 from domain.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
-from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
-from tests.builders.builders_for_test import ClientBuilderForTest
+from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest
 from web.api.classroom import create_classroom
-from web.schema.classroom_creation import ClassroomCreation
+from web.schema.classroom_creation import ClassroomCreation, TimeUnit
 
 
 def test_create_classroom(memory_event_store):
     repository = MemoryClassroomRepository()
-    classroom_json = {"name": "advanced classroom", "start_date": "2020-02-11T10:00:00", "position": 3,
-                      "duration": {"duration": 45, "unit": "MINUTE"}}
+    classroom_json = ClassroomJsonBuilderForTest().with_name("advanced classroom").with_start_date(
+        datetime(2020, 2, 11, 10)).with_position(3).with_duration(45, TimeUnit.MINUTE).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBus({ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(
@@ -33,31 +32,27 @@ def test_create_classroom(memory_event_store):
 
 def test_create_scheduled_classroom(memory_event_store):
     repository = MemoryClassroomRepository()
-    classroom_json = {"name": "advanced classroom", "start_date": "2020-02-11T10:00:00", "position": 4,
-                      "stop_date": "2020-03-11T10:00:00", "duration": {"duration": 45, "unit": "MINUTE"}}
+    start_date = datetime(2020, 2, 11, 10, 0)
+    stop_date = datetime(2020, 3, 11, 10, 0)
+    classroom_json = ClassroomJsonBuilderForTest().with_start_date(start_date).with_stop_date(stop_date).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBus({ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(
                                     Repositories({"classroom": repository}))}))
 
-    assert response["start_date"] == datetime(2020, 2, 11, 10, 0)
-    assert response["stop_date"] == datetime(2020, 3, 11, 10, 0)
+    assert response["start_date"] == start_date
+    assert response["stop_date"] == stop_date
 
 
 def test_create_classroom_with_attendees(memory_event_store):
     classroom_repository = MemoryClassroomRepository()
-    client_repository = MemoryClientRepository()
-    first_client = ClientBuilderForTest().build()
-    second_client = ClientBuilderForTest().build()
-    client_repository.persist(first_client)
-    client_repository.persist(second_client)
-    classroom_json = {"name": "advanced classroom", "start_date": "2020-02-11T10:00:00", "position": 4,
-                      "stop_date": "2020-03-11T10:00:00", "duration": {"duration": 45, "unit": "MINUTE"},
-                      "attendees": [{"client_id": first_client.id}, {"client_id": second_client.id}]}
+    client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
+    classroom_json = ClassroomJsonBuilderForTest().with_attendees(
+        [{"client_id": clients[0].id}, {"client_id": clients[1].id}]).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBus({ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(
                                     Repositories({"classroom": classroom_repository, "client": client_repository}))}))
 
     assert len(response["attendees"]) == 2
-    assert response["attendees"][1]["id"] == second_client.id
+    assert response["attendees"][1]["id"] == clients[1].id
