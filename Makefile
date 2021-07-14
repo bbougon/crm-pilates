@@ -25,6 +25,9 @@ install: requirements install-persistent create-local-database
 
 run-all: run
 
+coverage:
+	./scripts/coverage.sh
+
 ######################
 ## TESTS AND CHECKS ##
 ######################

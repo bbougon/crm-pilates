@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from datetime import datetime
 from typing import List
+from uuid import UUID
 
 from mimesis import Person, Text, Numbers, Datetime
 
@@ -44,10 +45,15 @@ class ClientContextBuilderForTest(Builder):
             self.clients.append(ClientBuilderForTest().build())
         return self
 
-    def persist(self) -> ClientContextBuilderForTest:
+    def persist(self, repository = None) -> ClientContextBuilderForTest:
+        if repository:
+            self.repository = repository
         for client in self.clients:
             self.repository.persist(client)
         return self
+
+    def with_one_client(self) -> ClientContextBuilderForTest:
+        return self.with_clients(1)
 
 
 class ClassroomJsonBuilderForTest(Builder):
@@ -58,20 +64,20 @@ class ClassroomJsonBuilderForTest(Builder):
         self.position: int = Numbers().integer_number(1, 6)
         self.start_date: datetime = Datetime().datetime()
         self.stop_date: datetime = None
-        self.attendees: List[dict] = []
+        self.attendees: List[UUID] = []
         self.duration: dict = None
 
     def build(self):
         classroom = {"name": self.classroom_name, "position": self.position, "start_date": self.start_date.isoformat()}
         if self.attendees:
-            classroom["attendees"] = self.attendees
+            classroom["attendees"] = list(map(lambda attendee: {"client_id": attendee.hex},self.attendees))
         if self.stop_date:
             classroom["stop_date"] = self.stop_date
         if self.duration:
             classroom["duration"] = self.duration
         return classroom
 
-    def with_attendees(self, attendees: List[dict]) -> ClassroomJsonBuilderForTest:
+    def with_attendees(self, attendees: List[UUID]) -> ClassroomJsonBuilderForTest:
         self.attendees.extend(attendees)
         return self
 

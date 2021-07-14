@@ -29,9 +29,6 @@ class ClassroomCreated(Event):
         self.schedule = schedule
         self.attendees = list(map(lambda attendee: {"id": attendee.id}, attendees))
 
-    def __call__(self, *args, **kwargs):
-        pass
-
     def _to_payload(self):
         return {
             "id": self.root_id,

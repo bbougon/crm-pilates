@@ -5,6 +5,7 @@ pydantic
 
 # test
 coverage
+pytest-cov
 flake8
 immobilus
 mimesis

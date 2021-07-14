@@ -3,8 +3,12 @@ from domain.classroom.classroom_command_handler import ClassroomCreationCommandH
 from domain.commands import ClassroomCreationCommand
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
+from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
 
-repo = Repositories({"classroom": MemoryClassroomRepository()})
+repo = Repositories({
+    "classroom": MemoryClassroomRepository(),
+    "client": MemoryClientRepository()
+})
 
 handlers = {
     ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(repo)

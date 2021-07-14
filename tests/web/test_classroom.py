@@ -47,8 +47,7 @@ def test_create_scheduled_classroom(memory_event_store):
 def test_create_classroom_with_attendees(memory_event_store):
     classroom_repository = MemoryClassroomRepository()
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
-    classroom_json = ClassroomJsonBuilderForTest().with_attendees(
-        [{"client_id": clients[0].id}, {"client_id": clients[1].id}]).build()
+    classroom_json = ClassroomJsonBuilderForTest().with_attendees([clients[0].id,clients[1].id]).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBus({ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(
