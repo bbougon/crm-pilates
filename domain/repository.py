@@ -17,3 +17,11 @@ class Repository():
     @abstractmethod
     def get_by_id(self, id: UUID):
         pass
+
+    @abstractmethod
+    def _get_entity_type(self) -> str:
+        pass
+
+    @property
+    def _entity_type(self) -> str:
+        return self._get_entity_type()

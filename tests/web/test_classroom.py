@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from fastapi import Response
 
 from domain.classroom.classroom import Classroom
+from domain.client.client import Client
 from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
@@ -71,7 +72,7 @@ def test_handle_business_exception(memory_event_store, mocker):
 
 def test_handle_aggregate_not_found_exception(memory_event_store, mocker):
     unknown_uuid = uuid.uuid4()
-    mocker.patch.object(MemoryClientRepository, "get_by_id", side_effect=AggregateNotFoundException(unknown_uuid))
+    mocker.patch.object(MemoryClientRepository, "get_by_id", side_effect=AggregateNotFoundException(unknown_uuid, Client.__name__))
     classroom_json = ClassroomJsonBuilderForTest().with_attendees([unknown_uuid]).build()
 
     try:
