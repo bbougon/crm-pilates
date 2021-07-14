@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 from event.event_store import StoreLocator
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
-from infrastructure.providers import repository_provider
+from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest
 
@@ -19,7 +19,7 @@ def test_post_classroom(database):
 
 def test_post_classroom_with_attendees(database):
     StoreLocator.store = SQLiteEventStore(database)
-    repository, clients = ClientContextBuilderForTest().with_one_client().persist(repository_provider().client).build()
+    repository, clients = ClientContextBuilderForTest().with_one_client().persist(RepositoryProvider.repositories.client).build()
 
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().with_attendees([clients[0].id]).build())
 

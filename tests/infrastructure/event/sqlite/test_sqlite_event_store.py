@@ -1,8 +1,11 @@
+from immobilus import immobilus
+
+from datetime import datetime
+
 import datetime
 import uuid
 from uuid import UUID
 
-from immobilus import immobilus
 
 from event.event_store import Event
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore

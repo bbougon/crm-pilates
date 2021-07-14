@@ -8,6 +8,7 @@ from uuid import UUID
 from mimesis import Person, Text, Numbers, Datetime
 
 from domain.client.client import Client
+from domain.repository import Repository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
 from web.schema.classroom_creation import TimeUnit
 
@@ -45,7 +46,7 @@ class ClientContextBuilderForTest(Builder):
             self.clients.append(ClientBuilderForTest().build())
         return self
 
-    def persist(self, repository = None) -> ClientContextBuilderForTest:
+    def persist(self, repository: Repository = None) -> ClientContextBuilderForTest:
         if repository:
             self.repository = repository
         for client in self.clients:

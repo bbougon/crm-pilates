@@ -8,7 +8,7 @@ from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule
 from domain.client.client import Client
 from domain.commands import ClassroomCreationCommand
 from event.event_store import Event, EventSourced
-from infrastructure.repositories import Repositories
+from infrastructure.repository_provider import RepositoryProvider
 
 
 @EventSourced
@@ -53,16 +53,15 @@ class Attendee:
 
 class ClassroomCreationCommandHandler(CommandHandler):
 
-    def __init__(self, repositories: Repositories) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.repositories = repositories
 
     def execute(self, command: ClassroomCreationCommand) -> ClassroomCreated:
         classroom = Classroom.create(command.name, command.start_date, command.position, stop_date=command.stop_date,
                                      duration=Duration(duration=command.duration.duration,
                                                        time_unit=TimeUnit(command.duration.unit.value)))
-        clients: List[Client] = list(map(lambda id: self.repositories.client.get_by_id(id), command.attendees))
+        clients: List[Client] = list(map(lambda id: RepositoryProvider.repositories.client.get_by_id(id), command.attendees))
         classroom.add_attendees(list(map(lambda client: Attendee.create(client.id), clients)))
-        self.repositories.classroom.persist(classroom)
+        RepositoryProvider.repositories.classroom.persist(classroom)
         return ClassroomCreated(id=classroom.id, name=classroom.name, position=classroom.position,
                                 duration=classroom.duration, schedule=classroom.schedule, attendees=clients)

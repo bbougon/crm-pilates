@@ -1,6 +1,6 @@
+import immobilus
 import sqlite3
 
-import immobilus
 import pytest
 
 from event.event_store import StoreLocator
