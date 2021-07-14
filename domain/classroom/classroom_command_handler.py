@@ -20,7 +20,7 @@ class ClassroomCreated(Event):
     schedule: Schedule
 
     def __init__(self, id: UUID, name: str, position: int, duration: Duration, schedule: Schedule,
-                 attendees: List[Client]) -> ClassroomCreated:
+                 attendees: List[Client]):
         super().__init__(id)
         self.__root_id = id
         self.name = name
@@ -38,7 +38,8 @@ class ClassroomCreated(Event):
             "name": self.name,
             "position": self.position,
             "duration": self.duration.__dict__,
-            "schedule": self.schedule.__dict__
+            "schedule": self.schedule.__dict__,
+            "attendees": self.attendees
         }
 
 

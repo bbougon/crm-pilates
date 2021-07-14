@@ -1,6 +1,7 @@
 import uuid
 from abc import abstractmethod
 from datetime import datetime
+from typing import List
 from uuid import UUID
 
 
@@ -26,6 +27,10 @@ class EventStore:
 
     @abstractmethod
     def persist(self, event: Event):
+        ...
+
+    @abstractmethod
+    def get_all(self) -> List[Event]:
         ...
 
 
