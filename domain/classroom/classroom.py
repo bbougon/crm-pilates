@@ -1,4 +1,5 @@
-import uuid
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -27,20 +28,24 @@ class Schedule:
 
 
 class Classroom(AggregateRoot):
-    name: str
-    position: int
-    schedule: Schedule
-    duration: Duration
 
-    def __init__(self):
-        self.id = uuid.uuid4()
+    def __init__(self, name: str, position: int, schedule: Schedule, duration: Duration):
+        super().__init__()
+        self.name = name
+        self.position = position
+        self.schedule = schedule
+        self.duration = duration
+        self.attendees = []
 
     @staticmethod
     def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
-               duration: Duration = Duration(duration=1, time_unit=TimeUnit.HOUR)):
-        classroom = Classroom()
+               duration: Duration = Duration(duration=1, time_unit=TimeUnit.HOUR)) -> Classroom:
+        classroom = Classroom(name, position, Schedule(start=start_date, stop=stop_date), duration)
         classroom.name = name
         classroom.position = position
         classroom.schedule = Schedule(start=start_date, stop=stop_date)
         classroom.duration = duration
         return classroom
+
+    def add_attendees(self, attendees):
+        self.attendees = attendees

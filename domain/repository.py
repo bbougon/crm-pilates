@@ -1,9 +1,11 @@
+import uuid
 from abc import abstractmethod
 from uuid import UUID
 
 
 class AggregateRoot:
-    pass
+    def __init__(self):
+        self.id = uuid.uuid4()
 
 
 class Repository():
