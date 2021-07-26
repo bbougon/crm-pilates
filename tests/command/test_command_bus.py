@@ -12,6 +12,9 @@ class SimpleCommand(Command):
 
 @dataclass
 class SimpleCommandExecuted(Event):
+    def _to_payload(self):
+        pass
+
     name: str
     id: int = 123
 

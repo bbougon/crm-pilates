@@ -15,3 +15,9 @@ class ClassroomCreationCommand(Command):
     start_date: datetime
     stop_date: datetime = None
     attendees: List[UUID] = field(default_factory=list)
+
+
+@dataclass
+class ClientCreationCommand(Command):
+    firstname: str
+    lastname: str

@@ -7,6 +7,7 @@ from uuid import UUID
 
 from mimesis import Person, Text, Numbers, Datetime
 
+from domain.classroom.classroom import Classroom, Duration
 from domain.client.client import Client
 from domain.repository import Repository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
@@ -57,11 +58,60 @@ class ClientContextBuilderForTest(Builder):
         return self.with_clients(1)
 
 
+class ClientJsonBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        person:Person = Person()
+        self.firstname = person.first_name()
+        self.lastname = person.last_name()
+
+    def build(self):
+        client = {"firstname": self.firstname, "lastname": self.lastname}
+        return client
+
+
+class ClassroomBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.name: str = Text().title()
+        self.position: int = Numbers().integer_number(1, 6)
+        self.start_date: datetime = Datetime().datetime()
+        self.stop_date: datetime = None
+        self.duration = Duration(TimeUnit.HOUR, 1)
+
+    def build(self) -> Classroom:
+        return Classroom.create(self.name, self.start_date, self.position, self.stop_date, self.duration)
+
+
+class ClassroomContextBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.repository = MemoryClientRepository()
+        self.classrooms: List[Classroom] = []
+
+    def build(self):
+        return self.repository, self.classrooms
+
+    def persist(self, repository: Repository = None) -> ClassroomContextBuilderForTest:
+        if repository:
+            self.repository = repository
+        for client in self.classrooms:
+            self.repository.persist(client)
+        return self
+
+    def with_one_classroom(self) -> ClassroomContextBuilderForTest:
+        self.classrooms.append(ClassroomBuilderForTest().build())
+        return self
+
+
 class ClassroomJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
         super().__init__()
-        self.classroom_name: str = Text().text(1)
+        self.classroom_name: str = Text().title()
         self.position: int = Numbers().integer_number(1, 6)
         self.start_date: datetime = Datetime().datetime()
         self.stop_date: datetime = None

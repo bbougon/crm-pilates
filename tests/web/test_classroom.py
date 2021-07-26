@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
-from fastapi import HTTPException
 
+from fastapi import HTTPException
 from fastapi import Response
 
 from domain.classroom.classroom import Classroom
@@ -9,6 +9,7 @@ from domain.client.client import Client
 from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
+from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest, RepositoryProviderForTest
 from web.api.classroom import create_classroom
@@ -48,8 +49,8 @@ def test_create_scheduled_classroom(memory_event_store):
 
 def test_create_classroom_with_attendees(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
-    classroom_json = ClassroomJsonBuilderForTest().with_attendees([clients[0].id, clients[1].id]).build()
     RepositoryProviderForTest().for_classroom().for_client(client_repository).provide()
+    classroom_json = ClassroomJsonBuilderForTest().with_attendees([clients[0].id,clients[1].id]).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().for_classroom().provide())

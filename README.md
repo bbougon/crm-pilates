@@ -47,3 +47,18 @@ ADR index is kept [here](./adr/README.md)
       }
     }
    ```
+
+##### Create a client
+1. Run the API (see above section)
+2. Use the `curl` command line as below
+   ```bash
+   curl http://localhost:8081/clients -X POST --data '{"firstname": "John", "lastname": "Doe"}' -H"Content-Type: application/json" -v | jq
+   ```
+   Expected result:
+   ```bash
+    {
+      "firstname": "John",
+      "lastname": "Doe",
+      "id": "33da6f12-efda-4c16-b8af-e5e822fc5459",
+    }
+   ```
