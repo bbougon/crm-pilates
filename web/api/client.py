@@ -56,5 +56,5 @@ def get_client(id: UUID):
             "firstname": client.firstname,
             "lastname": client.lastname
         }
-    except AggregateNotFoundException:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Client with id '{id}' not found")
+    except AggregateNotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Client with id '{e.unknown_id}' not found")
