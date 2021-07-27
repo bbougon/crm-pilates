@@ -51,8 +51,8 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
 
 @router.get("/classrooms/{id}",
             response_model=ClassroomReadResponse)
-def get_classroom(id: UUID, repository_provider: RepositoryProvider = Depends(RepositoryProvider)):
-    classroom: Classroom = repository_provider.repositories.classroom.get_by_id(id)
+def get_classroom(id: UUID):
+    classroom: Classroom = RepositoryProvider.repositories.classroom.get_by_id(id)
     return {
         "name": classroom.name,
         "id": classroom.id,

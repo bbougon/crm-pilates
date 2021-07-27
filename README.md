@@ -27,6 +27,11 @@ ADR index is kept [here](./adr/README.md)
 
 #### API
 
+The API documentation is available in 3 formats:
+- [openapi](http://localhost:8081/openapi.json)
+- [swagger](http://localhost:8081/docs)
+- [redoc](http://localhost:8081/redoc)
+
 ##### Create a classroom
 1. Run the API (see above section)
 2. Use the `curl` command line as below
