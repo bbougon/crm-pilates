@@ -18,4 +18,3 @@ def test_client_creation(command_bus):
     assert response["lastname"] == client["lastname"]
     assert response["id"]
     assert RepositoryProvider.repositories.client.get_by_id(response["id"])
-

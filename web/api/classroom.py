@@ -19,7 +19,13 @@ router = APIRouter()
              status_code=status.HTTP_201_CREATED,
              responses={
                  201: {
-                     "description": "Create a classroom"
+                     "description": "Create a classroom",
+                     "headers": {
+                         "location": {
+                             "description": "The absolute path URL location of the newly created classroom",
+                             "schema": {"type": "URL"},
+                         }
+                     }
                  }
              }
              )
