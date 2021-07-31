@@ -1,6 +1,7 @@
-import pytest
 import uuid
 from datetime import datetime
+
+import pytest
 
 from domain.classroom.classroom import Classroom, TimeUnit, Duration, Attendee
 from domain.exceptions import DomainException
@@ -15,7 +16,8 @@ def test_create_classroom():
 
 
 def test_classroom_has_a_duration_in_minutes():
-    classroom = Classroom.create("machine beginners", datetime(2021, 5, 3), 2, duration=Duration(duration=45, time_unit=TimeUnit.MINUTE))
+    classroom = Classroom.create("machine beginners", datetime(2021, 5, 3), 2,
+                                 duration=Duration(duration=45, time_unit=TimeUnit.MINUTE))
 
     assert classroom.duration == Duration(duration=45, time_unit=TimeUnit.MINUTE)
 

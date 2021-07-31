@@ -1,6 +1,6 @@
-import immobilus
 import sqlite3
 
+import immobilus  # noqa
 import pytest
 
 from command.command_bus import CommandBus

@@ -32,11 +32,11 @@ coverage:
 ## TESTS AND CHECKS ##
 ######################
 
-test:
+test: linter
 	./local.virtualenv/bin/pytest $(args)
 
 run:
 	./run.sh
 
 linter:
-	flake8 tests
+	flake8 --ignore E501 --exclude local.virtualenv

@@ -1,9 +1,10 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, Set
 from uuid import UUID
 
 from pydantic import BaseModel
+from pydantic.class_validators import validator
 
 
 class TimeUnit(Enum):
@@ -19,6 +20,18 @@ class Duration(BaseModel):
 class AttendeeSchema(BaseModel):
     client_id: UUID
 
+    def __hash__(self) -> int:
+        return hash(self.client_id)
+
+
+def check_unique_attendees(v):
+    unique_ids = set()
+    for item in v:
+        unique_ids.add(item["client_id"])
+    if len(v) != len(unique_ids):
+        raise ValueError("You provided the same attendee twice or more, please check the attendees and retry")
+    return v
+
 
 class ClassroomCreation(BaseModel):
     name: str
@@ -26,8 +39,16 @@ class ClassroomCreation(BaseModel):
     start_date: datetime
     stop_date: Optional[datetime]
     duration: Duration = Duration.parse_obj({"duration": 1, "unit": TimeUnit.HOUR})
-    attendees: Optional[List[AttendeeSchema]] = []
+    attendees: Optional[Set[AttendeeSchema]] = set()
+
+    @validator("attendees", pre=True)
+    def unique_attendees(cls, v):
+        return check_unique_attendees(v)
 
 
 class ClassroomPatch(BaseModel):
-    attendees: Optional[List[AttendeeSchema]] = []
+    attendees: Optional[Set[AttendeeSchema]] = set()
+
+    @validator("attendees", pre=True)
+    def unique_attendees(cls, v):
+        return check_unique_attendees(v)

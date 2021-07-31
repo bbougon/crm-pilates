@@ -61,7 +61,9 @@ class SQLiteEventStore(EventStore):
 
     def persist(self, event: Event):
         connect, cursor = self.__connect_and_get_cursor()
-        cursor.execute("INSERT INTO event VALUES (?, ?, ?, ?, ?)", (str(event.id), str(event.root_id), event.type, event.timestamp.isoformat(), json.dumps(event.payload, cls = MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder))))
+        cursor.execute("INSERT INTO event VALUES (?, ?, ?, ?, ?)", (
+            str(event.id), str(event.root_id), event.type, event.timestamp.isoformat(),
+            json.dumps(event.payload, cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder))))
         connect.commit()
         connect.close()
         pass

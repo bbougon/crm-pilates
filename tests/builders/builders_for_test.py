@@ -11,7 +11,7 @@ from domain.classroom.classroom import Classroom, Duration, Attendee
 from domain.client.client import Client
 from domain.repository import Repository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
-from web.schema.classroom_schemas import TimeUnit, AttendeeSchema, ClassroomPatch
+from web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 
 
 class Builder:
@@ -62,7 +62,7 @@ class ClientJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
         super().__init__()
-        person:Person = Person()
+        person: Person = Person()
         self.firstname = person.first_name()
         self.lastname = person.last_name()
 
@@ -137,7 +137,7 @@ class ClassroomJsonBuilderForTest(Builder):
     def build(self):
         classroom = {"name": self.classroom_name, "position": self.position, "start_date": self.start_date.isoformat()}
         if self.attendees:
-            classroom["attendees"] = list(map(lambda attendee: {"client_id": attendee.hex},self.attendees))
+            classroom["attendees"] = list(map(lambda attendee: {"client_id": attendee.hex}, self.attendees))
         if self.stop_date:
             classroom["stop_date"] = self.stop_date
         if self.duration:
@@ -178,6 +178,6 @@ class ClassroomPatchJsonBuilderForTest(Builder):
     def build(self):
         return ClassroomPatch.parse_obj({"attendees": self.attendees})
 
-    def with_attendee(self, client_id) -> ClassroomPatchJsonBuilderForTest:
-        self.attendees.append(AttendeeSchema.parse_obj({"client_id": client_id}))
+    def with_attendee(self, client_id: UUID) -> ClassroomPatchJsonBuilderForTest:
+        self.attendees.append({"client_id": client_id.hex})
         return self

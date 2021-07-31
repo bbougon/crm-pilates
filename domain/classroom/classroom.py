@@ -56,7 +56,6 @@ class Classroom(AggregateRoot):
         self.attendees = attendees
 
 
-
 class Attendee:
 
     def __init__(self, id: UUID) -> None:

@@ -50,13 +50,16 @@ def test_create_scheduled_classroom(memory_event_store):
 def test_create_classroom_with_attendees(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
     RepositoryProviderForTest().for_classroom().for_client(client_repository).provide()
-    classroom_json = ClassroomJsonBuilderForTest().with_position(2).with_attendees([clients[0].id, clients[1].id]).build()
+    classroom_json = ClassroomJsonBuilderForTest().with_position(2).with_attendees(
+        [clients[0].id, clients[1].id]).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().for_classroom_creation().provide())
 
     assert len(response["attendees"]) == 2
-    assert response["attendees"][1]["id"] == clients[1].id
+    attendees_ids = list(map(lambda attendee: attendee['id'], response["attendees"]))
+    assert clients[0].id in attendees_ids
+    assert clients[1].id in attendees_ids
 
 
 def test_handle_business_exception(memory_event_store, mocker):
@@ -88,11 +91,8 @@ def test_handle_aggregate_not_found_exception(memory_event_store, mocker):
 def test_add_attendee_to_classroom(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
     classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest()\
-            .with_position(2)\
-            .with_attendee(clients[0].id)\
-            .build())\
-        .persist()\
+        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0].id).build()) \
+        .persist() \
         .build()
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client(client_repository).provide()
 
@@ -101,5 +101,6 @@ def test_add_attendee_to_classroom(memory_event_store):
 
     patched_classroom: Classroom = classroom_repository.get_by_id(classrooms[0].id)
     assert len(patched_classroom.attendees) == 2
-    assert patched_classroom.attendees[0].id == clients[0].id
-    assert patched_classroom.attendees[1].id == clients[1].id
+    attendees_ids = list(map(lambda attendee: attendee.id, patched_classroom.attendees))
+    assert clients[0].id in attendees_ids
+    assert clients[1].id in attendees_ids

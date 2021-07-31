@@ -1,4 +1,4 @@
-from command.command_handler import CommandHandler, Command
+from command.command_handler import CommandHandler
 from domain.classroom.classroom import Classroom, Attendee
 from domain.commands import ClassroomPatchCommand
 from event.event_store import Event

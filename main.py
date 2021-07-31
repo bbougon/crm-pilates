@@ -13,6 +13,5 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-
 app.include_router(api_router)
 StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)

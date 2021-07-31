@@ -1,7 +1,6 @@
-from immobilus import immobilus
-
 from datetime import datetime
 
+from immobilus import immobilus
 
 from domain.classroom.classroom import TimeUnit
 from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
@@ -39,7 +38,8 @@ def test_classroom_creation_event_is_stored(memory_event_store):
 
 @immobilus("2019-05-07 08:24:15.230")
 def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
-    client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(RepositoryProvider.repositories.client).build()
+    client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
+        RepositoryProvider.repositories.client).build()
 
     classroom_created: ClassroomCreated = ClassroomCreationCommandHandler().execute(
         ClassroomCreationCommand(name="classroom", position=2, start_date=datetime(2019, 6, 7, 11, 0),

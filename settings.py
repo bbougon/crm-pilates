@@ -37,4 +37,4 @@ class Config:
 
 config = Config()
 
-EVENT_STORE_PATH=config("EVENT_STORE_PATH")
+EVENT_STORE_PATH = config("EVENT_STORE_PATH")
