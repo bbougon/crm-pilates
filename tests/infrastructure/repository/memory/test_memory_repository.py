@@ -1,7 +1,10 @@
+from uuid import UUID
+
+import pytest
 import uuid
 
 from domain.exceptions import AggregateNotFoundException
-from domain.repository import Repository
+from domain.repository import Repository, AggregateRoot
 from infrastructure.repository.memory.memory_repository import MemoryRepository
 
 
@@ -20,8 +23,8 @@ class CustomMemoryRepository(CustomRepository, MemoryRepository):
 
 def test_aggregate_not_found():
     unknown_id = uuid.uuid4()
-    try:
+    with pytest.raises(AggregateNotFoundException) as e:
         CustomMemoryRepository().get_by_id(unknown_id)
-    except AggregateNotFoundException as e:
-        assert e.unknown_id == unknown_id
-        assert e.message == f"Aggregate 'Custom' with id '{unknown_id}' not found"
+
+    assert e.value.unknown_id == unknown_id
+    assert e.value.message == f"Aggregate 'Custom' with id '{unknown_id}' not found"
