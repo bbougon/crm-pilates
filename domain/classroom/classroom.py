@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID
 
+from domain.exceptions import DomainException
 from domain.repository import AggregateRoot
 
 
@@ -49,6 +50,9 @@ class Classroom(AggregateRoot):
         return classroom
 
     def add_attendees(self, attendees: [Attendee]):
+        if self.position < len(attendees) or self.position == len(self.attendees):
+            raise DomainException(
+                f"Cannot add anymore attendees (position available: {self.position - len(self.attendees)} - attendee(s) you try to add: {len(attendees)})")
         self.attendees = attendees
 
 
