@@ -4,12 +4,12 @@ from datetime import datetime
 
 
 from domain.classroom.classroom import TimeUnit
-from domain.classroom.classroom_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
+from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
 from domain.commands import ClassroomCreationCommand
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClientContextBuilderForTest
-from web.schema.classroom_creation import Duration
+from web.schema.classroom_schemas import Duration
 
 
 @immobilus("2020-04-03 10:24:15.230")

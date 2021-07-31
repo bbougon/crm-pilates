@@ -16,7 +16,7 @@ class Duration(BaseModel):
     unit: TimeUnit
 
 
-class Attendee(BaseModel):
+class AttendeeSchema(BaseModel):
     client_id: UUID
 
 
@@ -26,4 +26,8 @@ class ClassroomCreation(BaseModel):
     start_date: datetime
     stop_date: Optional[datetime]
     duration: Duration = Duration.parse_obj({"duration": 1, "unit": TimeUnit.HOUR})
-    attendees: Optional[List[Attendee]] = []
+    attendees: Optional[List[AttendeeSchema]] = []
+
+
+class ClassroomPatch(BaseModel):
+    attendees: Optional[List[AttendeeSchema]] = []

@@ -49,11 +49,12 @@ class Classroom(AggregateRoot):
         classroom.duration = duration
         return classroom
 
-    def add_attendees(self, attendees: [Attendee]):
+    def set_attendees(self, attendees: [Attendee]):
         if self.position < len(attendees) or self.position == len(self.attendees):
             raise DomainException(
                 f"Cannot add anymore attendees (position available: {self.position - len(self.attendees)} - attendee(s) you try to add: {len(attendees)})")
         self.attendees = attendees
+
 
 
 class Attendee:

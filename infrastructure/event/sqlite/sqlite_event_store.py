@@ -1,4 +1,5 @@
 import json
+import os.path
 import sqlite3
 from datetime import datetime
 from enum import Enum
@@ -74,6 +75,7 @@ class SQLiteEventStore(EventStore):
         return event
 
     def __connect_and_get_cursor(self):
+        print(self.db_file, os.path.curdir)
         connect = sqlite3.connect(self.db_file)
         cursor = connect.cursor()
         return connect, cursor
