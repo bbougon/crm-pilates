@@ -95,7 +95,7 @@ def test_add_attendee_to_classroom(memory_event_store):
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client(client_repository).provide()
 
     update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(clients[0].id).with_attendee(
-        clients[1].id).build(), Response(), CommandBusProviderForTest().provide())
+        clients[1].id).build(), CommandBusProviderForTest().provide())
 
     patched_classroom: Classroom = classroom_repository.get_by_id(classrooms[0].id)
     assert len(patched_classroom.attendees) == 2

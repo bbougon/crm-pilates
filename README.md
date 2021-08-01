@@ -67,3 +67,15 @@ The API documentation is available in 3 formats:
       "id": "33da6f12-efda-4c16-b8af-e5e822fc5459",
     }
    ```
+
+#### Add attendees to a classroom
+1. Run the API (see above section)
+1. Create a classroom (see above section)
+1. Use the `curl` command line as below
+   ```bash
+   curl http://localhost:8081/classrooms -X PATCH --data '{"attendees": [{"client_id": "A_CLIENT_ID"}]}' -H"Content-Type: application/json" -v
+   ```
+   Expected result:
+   ```bash
+    HTTP/1.1 204 No Content
+   ```

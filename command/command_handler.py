@@ -11,4 +11,4 @@ class CommandHandler:
 
     @abstractmethod
     def execute(self, command: Command) -> Event:
-        ...
+        pass

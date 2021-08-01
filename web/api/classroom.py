@@ -69,9 +69,14 @@ def get_classroom(id: UUID):
     }
 
 
-@router.patch("/classrooms/{id}")
-def update_classroom(id: UUID, classroom_patch: ClassroomPatch, response: Response,
+@router.patch("/classrooms/{id}",
+              status_code=status.HTTP_204_NO_CONTENT,
+              description="Add attendees to a classroom. This resource works as a patch, "
+                          "you must provide all classroom attendees (i.e: you had Clara already added to the classroom,"
+                          " if you want John to join, you must provide both Clara and John "
+                          "otherwise Clara will be removed"
+              )
+def update_classroom(id: UUID, classroom_patch: ClassroomPatch,
                      command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     command_bus_provider.command_bus.send(
         ClassroomPatchCommand(id, list(map(lambda client: client.client_id, classroom_patch.attendees))))
-    response.status_code = status.HTTP_204_NO_CONTENT
