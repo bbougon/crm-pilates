@@ -9,7 +9,7 @@ from infrastructure.repository_provider import RepositoryProvider
 
 
 @EventSourced
-class AttendeesSet(Event):
+class AllAttendeesAdded(Event):
 
     def __init__(self, root_id: UUID, attendees: List[Attendee]) -> None:
         super().__init__(root_id)
@@ -23,12 +23,12 @@ class AttendeesSet(Event):
 
 class ClassroomPatchCommandHandler(CommandHandler):
 
-    def execute(self, command: ClassroomPatchCommand) -> AttendeesSet:
+    def execute(self, command: ClassroomPatchCommand) -> AllAttendeesAdded:
         self.__check_attendees_are_clients(command)
         classroom: Classroom = RepositoryProvider.repositories.classroom.get_by_id(command.classroom_id)
         attendees: List[Attendee] = list(map(lambda attendee: Attendee(attendee), command.attendees))
-        classroom.set_attendees(attendees)
-        return AttendeesSet(classroom.id, attendees)
+        classroom.all_attendees(attendees)
+        return AllAttendeesAdded(classroom.id, attendees)
 
     @classmethod
     def __check_attendees_are_clients(cls, command):

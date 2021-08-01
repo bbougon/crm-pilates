@@ -83,7 +83,7 @@ def get_classroom(id: UUID):
                           "otherwise Clara will be removed",
               responses={
                   404: {
-                       "description": "See body message details"
+                      "description": "See body message details"
                   },
                   409: {
                       "description": "See body message details"

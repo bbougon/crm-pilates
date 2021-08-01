@@ -85,7 +85,7 @@ class ClassroomBuilderForTest(Builder):
     def build(self) -> Classroom:
         classroom = Classroom.create(self.name, self.start_date, self.position, self.stop_date, self.duration)
         if self.attendees:
-            classroom.set_attendees(self.attendees)
+            classroom.all_attendees(self.attendees)
         return classroom
 
     def with_position(self, position: int) -> ClassroomBuilderForTest:

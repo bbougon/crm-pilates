@@ -32,15 +32,6 @@ def test_classroom_is_scheduled():
 def test_cannot_add_attendees_when_position_overflown():
     classroom = Classroom.create("machine", datetime(2020, 3, 19), 1, stop_date=datetime(2020, 6, 19))
     with pytest.raises(DomainException) as e:
-        classroom.set_attendees([Attendee.create(uuid.uuid4()), Attendee.create(uuid.uuid4())])
+        classroom.all_attendees([Attendee.create(uuid.uuid4()), Attendee.create(uuid.uuid4())])
 
     assert e.value.message == "Cannot add anymore attendees (position available: 1 - attendee(s) you try to add: 2)"
-
-
-def test_cannot_add_more_attendees_hence_position_is_full():
-    classroom = Classroom.create("machine", datetime(2020, 3, 19), 2, stop_date=datetime(2020, 6, 19))
-    classroom.set_attendees([Attendee.create(uuid.uuid4()), Attendee.create(uuid.uuid4())])
-    with pytest.raises(DomainException) as e:
-        classroom.set_attendees([Attendee.create(uuid.uuid4())])
-
-    assert e.value.message == "Cannot add anymore attendees (position available: 0 - attendee(s) you try to add: 1)"

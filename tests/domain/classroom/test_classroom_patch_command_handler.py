@@ -29,7 +29,7 @@ def test_classroom_patch_with_attendees(memory_event_store):
     assert len(classroom.attendees) == 2
     assert attendees_set
     assert len(events) == 1
-    assert events[0].type == "AttendeesSet"
+    assert events[0].type == "AllAttendeesAdded"
     assert events[0].timestamp == datetime(2019, 3, 19, 10, 24, 15, 100000)
     assert events[0].root_id == classroom.id
     assert events[0].payload == {

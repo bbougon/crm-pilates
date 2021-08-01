@@ -63,7 +63,7 @@ def test_create_classroom_with_attendees(memory_event_store):
 
 
 def test_handle_business_exception_on_classroom_creation(memory_event_store, mocker):
-    mocker.patch.object(Classroom, "set_attendees", side_effect=DomainException("something wrong occurred"))
+    mocker.patch.object(Classroom, "all_attendees", side_effect=DomainException("something wrong occurred"))
     classroom_json = ClassroomJsonBuilderForTest().build()
 
     try:
@@ -115,7 +115,8 @@ def test_handle_aggregate_not_found_on_classroom_patch(mocker):
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
 
     try:
-        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(), CommandBusProviderForTest().provide())
+        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
+                         CommandBusProviderForTest().provide())
     except HTTPException as e:
         assert e.status_code == 404
         assert e.detail == f"One of the attendees with id '{unknown_uuid}' has not been found"
@@ -131,7 +132,8 @@ def test_handle_business_exception_on_classroom_patch(mocker):
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
 
     try:
-        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(), CommandBusProviderForTest().provide())
+        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
+                         CommandBusProviderForTest().provide())
     except HTTPException as e:
         assert e.status_code == 409
         assert e.detail == "error occurred"

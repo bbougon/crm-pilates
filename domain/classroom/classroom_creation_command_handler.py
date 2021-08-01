@@ -51,7 +51,7 @@ class ClassroomCreationCommandHandler(CommandHandler):
                                                        time_unit=TimeUnit(command.duration.unit.value)))
         clients: List[Client] = list(
             map(lambda id: RepositoryProvider.repositories.client.get_by_id(id), command.attendees))
-        classroom.set_attendees(list(map(lambda client: Attendee.create(client.id), clients)))
+        classroom.all_attendees(list(map(lambda client: Attendee.create(client.id), clients)))
         RepositoryProvider.repositories.classroom.persist(classroom)
         return ClassroomCreated(id=classroom.id, name=classroom.name, position=classroom.position,
                                 duration=classroom.duration, schedule=classroom.schedule, attendees=clients)
