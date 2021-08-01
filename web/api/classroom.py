@@ -26,6 +26,12 @@ router = APIRouter()
                              "schema": {"type": "URL"},
                          }
                      }
+                 },
+                 404: {
+                     "description": "See body message details"
+                 },
+                 409: {
+                     "description": "See body message details"
                  }
              }
              )
@@ -74,9 +80,23 @@ def get_classroom(id: UUID):
               description="Add attendees to a classroom. This resource works as a patch, "
                           "you must provide all classroom attendees (i.e: you had Clara already added to the classroom,"
                           " if you want John to join, you must provide both Clara and John "
-                          "otherwise Clara will be removed"
+                          "otherwise Clara will be removed",
+              responses={
+                  404: {
+                       "description": "See body message details"
+                  },
+                  409: {
+                      "description": "See body message details"
+                  }
+              }
               )
 def update_classroom(id: UUID, classroom_patch: ClassroomPatch,
                      command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
-    command_bus_provider.command_bus.send(
-        ClassroomPatchCommand(id, list(map(lambda client: client.client_id, classroom_patch.attendees))))
+    try:
+        command_bus_provider.command_bus.send(
+            ClassroomPatchCommand(id, list(map(lambda client: client.client_id, classroom_patch.attendees))))
+    except AggregateNotFoundException as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND,
+                            detail=f"One of the attendees with id '{e.unknown_id}' has not been found")
+    except DomainException as e:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)

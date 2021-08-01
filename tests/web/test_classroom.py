@@ -62,7 +62,7 @@ def test_create_classroom_with_attendees(memory_event_store):
     assert clients[1].id in attendees_ids
 
 
-def test_handle_business_exception(memory_event_store, mocker):
+def test_handle_business_exception_on_classroom_creation(memory_event_store, mocker):
     mocker.patch.object(Classroom, "set_attendees", side_effect=DomainException("something wrong occurred"))
     classroom_json = ClassroomJsonBuilderForTest().build()
 
@@ -73,7 +73,7 @@ def test_handle_business_exception(memory_event_store, mocker):
         assert e.detail == "something wrong occurred"
 
 
-def test_handle_aggregate_not_found_exception(memory_event_store, mocker):
+def test_handle_aggregate_not_found_exception_on_classroom_creation(memory_event_store, mocker):
     unknown_uuid = uuid.uuid4()
     mocker.patch.object(MemoryClientRepository, "get_by_id",
                         side_effect=AggregateNotFoundException(unknown_uuid, Client.__name__))
@@ -102,3 +102,36 @@ def test_add_attendee_to_classroom(memory_event_store):
     attendees_ids = list(map(lambda attendee: attendee.id, patched_classroom.attendees))
     assert clients[0].id in attendees_ids
     assert clients[1].id in attendees_ids
+
+
+def test_handle_aggregate_not_found_on_classroom_patch(mocker):
+    unknown_uuid = uuid.uuid4()
+    mocker.patch.object(MemoryClientRepository, "get_by_id",
+                        side_effect=AggregateNotFoundException(unknown_uuid, Client.__name__))
+    classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().with_position(2).build()) \
+        .persist() \
+        .build()
+    RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
+
+    try:
+        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(), CommandBusProviderForTest().provide())
+    except HTTPException as e:
+        assert e.status_code == 404
+        assert e.detail == f"One of the attendees with id '{unknown_uuid}' has not been found"
+
+
+def test_handle_business_exception_on_classroom_patch(mocker):
+    unknown_uuid = uuid.uuid4()
+    mocker.patch.object(MemoryClientRepository, "get_by_id", side_effect=DomainException("error occurred"))
+    classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().with_position(2).build()) \
+        .persist() \
+        .build()
+    RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
+
+    try:
+        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(), CommandBusProviderForTest().provide())
+    except HTTPException as e:
+        assert e.status_code == 409
+        assert e.detail == "error occurred"
