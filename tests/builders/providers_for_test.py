@@ -3,12 +3,9 @@ from __future__ import annotations
 from abc import abstractmethod
 
 from command.command_bus import CommandBus
-from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler
-from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.client.client_repository import ClientRepository
-from domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
-from infrastructure.command_bus_provider import CommandBusProvider
+from infrastructure.command_bus_provider import CommandBusProvider, handlers
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
@@ -29,16 +26,8 @@ class CommandBusProviderForTest(ProviderForTest):
         self.handlers = {}
 
     def provide(self):
-        CommandBusProvider.command_bus = CommandBus(self.handlers)
+        CommandBusProvider.command_bus = CommandBus(handlers)
         return CommandBusProvider
-
-    def for_classroom_creation(self) -> CommandBusProviderForTest:
-        self.handlers[ClassroomCreationCommand.__name__] = ClassroomCreationCommandHandler()
-        return self
-
-    def for_classroom_patch(self) -> CommandBusProviderForTest:
-        self.handlers[ClassroomPatchCommand.__name__] = ClassroomPatchCommandHandler()
-        return self
 
 
 class RepositoryProviderForTest(ProviderForTest):
