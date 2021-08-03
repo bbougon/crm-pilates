@@ -1,4 +1,5 @@
 import json
+import os.path
 import sqlite3
 from datetime import datetime
 from enum import Enum
@@ -60,7 +61,9 @@ class SQLiteEventStore(EventStore):
 
     def persist(self, event: Event):
         connect, cursor = self.__connect_and_get_cursor()
-        cursor.execute("INSERT INTO event VALUES (?, ?, ?, ?, ?)", (str(event.id), str(event.root_id), event.type, event.timestamp.isoformat(), json.dumps(event.payload, cls = MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder))))
+        cursor.execute("INSERT INTO event VALUES (?, ?, ?, ?, ?)", (
+            str(event.id), str(event.root_id), event.type, event.timestamp.isoformat(),
+            json.dumps(event.payload, cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder))))
         connect.commit()
         connect.close()
         pass
@@ -74,6 +77,7 @@ class SQLiteEventStore(EventStore):
         return event
 
     def __connect_and_get_cursor(self):
+        print(self.db_file, os.path.curdir)
         connect = sqlite3.connect(self.db_file)
         cursor = connect.cursor()
         return connect, cursor

@@ -1,6 +1,6 @@
-from immobilus import immobilus
-
 from datetime import datetime
+
+from immobilus import immobilus
 
 from domain.client.client_command_handler import ClientCreated, ClientCreationCommandHandler
 from domain.commands import ClientCreationCommand

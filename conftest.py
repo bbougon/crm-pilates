@@ -1,12 +1,13 @@
-import immobilus
 import sqlite3
 
+import immobilus  # noqa
 import pytest
 
 from command.command_bus import CommandBus
-from domain.classroom.classroom_command_handler import ClassroomCreationCommandHandler
+from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler
+from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
 from domain.client.client_command_handler import ClientCreationCommandHandler
-from domain.commands import ClientCreationCommand, ClassroomCreationCommand
+from domain.commands import ClientCreationCommand, ClassroomCreationCommand, ClassroomPatchCommand
 from event.event_store import StoreLocator
 from infrastructure.command_bus_provider import CommandBusProvider
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
@@ -33,7 +34,8 @@ def command_bus():
     command_bus = CommandBus(
         {
             ClientCreationCommand.__name__: ClientCreationCommandHandler(),
-            ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler()
+            ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(),
+            ClassroomPatchCommand.__name__: ClassroomPatchCommandHandler()
         }
     )
     CommandBusProvider.command_bus = command_bus

@@ -7,12 +7,12 @@ from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest, \
-    ClassroomContextBuilderForTest
+    ClassroomContextBuilderForTest, ClassroomBuilderForTest
 
 client = TestClient(app)
 
 
-def test_post_classroom(database):
+def test_create_classroom(database):
     StoreLocator.store = SQLiteEventStore(database)
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().build())
 
@@ -20,9 +20,10 @@ def test_post_classroom(database):
     assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
 
 
-def test_post_classroom_with_attendees(database):
+def test_create_classroom_with_attendees(database):
     StoreLocator.store = SQLiteEventStore(database)
-    repository, clients = ClientContextBuilderForTest().with_one_client().persist(RepositoryProvider.repositories.client).build()
+    repository, clients = ClientContextBuilderForTest().with_one_client().persist(
+        RepositoryProvider.repositories.client).build()
 
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().with_attendees([clients[0].id]).build())
 
@@ -31,7 +32,8 @@ def test_post_classroom_with_attendees(database):
 
 
 def test_get_classroom():
-    repository, classrooms = ClassroomContextBuilderForTest().with_one_classroom().persist(RepositoryProvider.repositories.classroom).build()
+    repository, classrooms = ClassroomContextBuilderForTest().with_one_classroom().persist(
+        RepositoryProvider.repositories.classroom).build()
 
     response: Response = client.get(f"/classrooms/{classrooms[0].id}")
 
@@ -51,3 +53,16 @@ def test_get_classroom():
         },
         "attendees": []
     }
+
+
+def test_add_attendee_to_a_classroom():
+    repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
+        RepositoryProvider.repositories.client).build()
+    repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0].id).build()).persist(
+        RepositoryProvider.repositories.classroom).build()
+
+    response: Response = client.patch(f"/classrooms/{classrooms[0].id}",
+                                      json={"attendees": [{"client_id": clients[1].id.hex}]})
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT

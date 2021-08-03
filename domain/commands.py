@@ -4,7 +4,7 @@ from typing import List
 from uuid import UUID
 
 from command.command_handler import Command
-from web.schema.classroom_creation import Duration
+from web.schema.classroom_schemas import Duration
 
 
 @dataclass
@@ -21,3 +21,9 @@ class ClassroomCreationCommand(Command):
 class ClientCreationCommand(Command):
     firstname: str
     lastname: str
+
+
+@dataclass
+class ClassroomPatchCommand(Command):
+    classroom_id: UUID
+    attendees: List[UUID] = field(default_factory=list)

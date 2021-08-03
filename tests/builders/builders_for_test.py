@@ -7,11 +7,11 @@ from uuid import UUID
 
 from mimesis import Person, Text, Numbers, Datetime
 
-from domain.classroom.classroom import Classroom, Duration
+from domain.classroom.classroom import Classroom, Duration, Attendee
 from domain.client.client import Client
 from domain.repository import Repository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
-from web.schema.classroom_creation import TimeUnit
+from web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 
 
 class Builder:
@@ -62,7 +62,7 @@ class ClientJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
         super().__init__()
-        person:Person = Person()
+        person: Person = Person()
         self.firstname = person.first_name()
         self.lastname = person.last_name()
 
@@ -80,9 +80,21 @@ class ClassroomBuilderForTest(Builder):
         self.start_date: datetime = Datetime().datetime()
         self.stop_date: datetime = None
         self.duration = Duration(TimeUnit.HOUR, 1)
+        self.attendees = []
 
     def build(self) -> Classroom:
-        return Classroom.create(self.name, self.start_date, self.position, self.stop_date, self.duration)
+        classroom = Classroom.create(self.name, self.start_date, self.position, self.stop_date, self.duration)
+        if self.attendees:
+            classroom.all_attendees(self.attendees)
+        return classroom
+
+    def with_position(self, position: int) -> ClassroomBuilderForTest:
+        self.position = position
+        return self
+
+    def with_attendee(self, client_id: UUID) -> ClassroomBuilderForTest:
+        self.attendees.append(Attendee(client_id))
+        return self
 
 
 class ClassroomContextBuilderForTest(Builder):
@@ -106,6 +118,10 @@ class ClassroomContextBuilderForTest(Builder):
         self.classrooms.append(ClassroomBuilderForTest().build())
         return self
 
+    def with_classroom(self, classroom: Classroom) -> ClassroomContextBuilderForTest:
+        self.classrooms.append(classroom)
+        return self
+
 
 class ClassroomJsonBuilderForTest(Builder):
 
@@ -121,7 +137,7 @@ class ClassroomJsonBuilderForTest(Builder):
     def build(self):
         classroom = {"name": self.classroom_name, "position": self.position, "start_date": self.start_date.isoformat()}
         if self.attendees:
-            classroom["attendees"] = list(map(lambda attendee: {"client_id": attendee.hex},self.attendees))
+            classroom["attendees"] = list(map(lambda attendee: {"client_id": attendee.hex}, self.attendees))
         if self.stop_date:
             classroom["stop_date"] = self.stop_date
         if self.duration:
@@ -150,4 +166,18 @@ class ClassroomJsonBuilderForTest(Builder):
 
     def with_duration(self, duration: int, time_unit: TimeUnit) -> ClassroomJsonBuilderForTest:
         self.duration = {"duration": duration, "unit": time_unit.value}
+        return self
+
+
+class ClassroomPatchJsonBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.attendees = []
+
+    def build(self):
+        return ClassroomPatch.parse_obj({"attendees": self.attendees})
+
+    def with_attendee(self, client_id: UUID) -> ClassroomPatchJsonBuilderForTest:
+        self.attendees.append({"client_id": client_id.hex})
         return self

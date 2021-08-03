@@ -1,10 +1,9 @@
-from uuid import UUID
-
-import pytest
 import uuid
 
+import pytest
+
 from domain.exceptions import AggregateNotFoundException
-from domain.repository import Repository, AggregateRoot
+from domain.repository import Repository
 from infrastructure.repository.memory.memory_repository import MemoryRepository
 
 

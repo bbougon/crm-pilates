@@ -22,7 +22,7 @@ class SimpleCommandExecuted(Event):
 class SimpleCommandHandler(CommandHandler):
 
     def execute(self, command: SimpleCommand) -> SimpleCommandExecuted:
-        return SimpleCommandExecuted(name = command.name)
+        return SimpleCommandExecuted(name=command.name)
 
 
 def test_send_a_command_and_retrieve_response():

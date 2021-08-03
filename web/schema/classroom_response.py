@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic.main import BaseModel
 
-from web.schema.classroom_creation import TimeUnit
+from web.schema.classroom_schemas import TimeUnit
 
 
 class ScheduleReadResponse(BaseModel):
