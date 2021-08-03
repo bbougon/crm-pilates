@@ -37,7 +37,7 @@ class RepositoryProviderForTest(ProviderForTest):
         self.repositories = {}
 
     def provide(self):
-        RepositoryProvider.repositories = Repositories(self.repositories)
+        RepositoryProvider.write_repositories = Repositories(self.repositories)
         return RepositoryProvider
 
     def for_classroom(self, classroom_repository: ClassroomRepository = None) -> RepositoryProviderForTest:

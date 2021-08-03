@@ -10,6 +10,7 @@ from mimesis import Person, Text, Numbers, Datetime
 from domain.classroom.classroom import Classroom, Duration, Attendee
 from domain.client.client import Client
 from domain.repository import Repository
+from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
 from web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 
@@ -101,25 +102,21 @@ class ClassroomContextBuilderForTest(Builder):
 
     def __init__(self) -> None:
         super().__init__()
-        self.repository = MemoryClientRepository()
-        self.classrooms: List[Classroom] = []
+        self.repository = None
+        self.classroom_builder_for_test = ClassroomBuilderForTest()
 
     def build(self):
-        return self.repository, self.classrooms
+        classroom: Classroom = self.classroom_builder_for_test.build()
+        if self.repository:
+            self.repository.persist(classroom)
+        return self.repository, classroom
 
     def persist(self, repository: Repository = None) -> ClassroomContextBuilderForTest:
-        if repository:
-            self.repository = repository
-        for client in self.classrooms:
-            self.repository.persist(client)
+        self.repository = repository if repository else MemoryClassroomRepository()
         return self
 
-    def with_one_classroom(self) -> ClassroomContextBuilderForTest:
-        self.classrooms.append(ClassroomBuilderForTest().build())
-        return self
-
-    def with_classroom(self, classroom: Classroom) -> ClassroomContextBuilderForTest:
-        self.classrooms.append(classroom)
+    def with_classroom(self, classroom_builder: ClassroomBuilderForTest) -> ClassroomContextBuilderForTest:
+        self.classroom_builder_for_test = classroom_builder
         return self
 
 

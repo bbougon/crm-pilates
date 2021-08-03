@@ -25,11 +25,11 @@ class ClassroomPatchCommandHandler(CommandHandler):
 
     def execute(self, command: ClassroomPatchCommand) -> AllAttendeesAdded:
         self.__check_attendees_are_clients(command)
-        classroom: Classroom = RepositoryProvider.repositories.classroom.get_by_id(command.classroom_id)
+        classroom: Classroom = RepositoryProvider.write_repositories.classroom.get_by_id(command.classroom_id)
         attendees: List[Attendee] = list(map(lambda attendee: Attendee(attendee), command.attendees))
         classroom.all_attendees(attendees)
         return AllAttendeesAdded(classroom.id, attendees)
 
     @classmethod
     def __check_attendees_are_clients(cls, command):
-        list(map(lambda id: RepositoryProvider.repositories.client.get_by_id(id), command.attendees))
+        list(map(lambda id: RepositoryProvider.write_repositories.client.get_by_id(id), command.attendees))

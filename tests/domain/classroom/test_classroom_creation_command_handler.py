@@ -39,7 +39,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
 @immobilus("2019-05-07 08:24:15.230")
 def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
-        RepositoryProvider.repositories.client).build()
+        RepositoryProvider.write_repositories.client).build()
 
     classroom_created: ClassroomCreated = ClassroomCreationCommandHandler().execute(
         ClassroomCreationCommand(name="classroom", position=2, start_date=datetime(2019, 6, 7, 11, 0),

@@ -10,11 +10,11 @@ from web.schema.client_creation import ClientCreation
 
 def test_client_creation(command_bus):
     client = ClientJsonBuilderForTest().build()
-    RepositoryProvider.repositories.client = MemoryClientRepository()
+    RepositoryProvider.write_repositories.client = MemoryClientRepository()
 
     response = create_client(ClientCreation.parse_obj(client), Response(), CommandBusProvider)
 
     assert response["firstname"] == client["firstname"]
     assert response["lastname"] == client["lastname"]
     assert response["id"]
-    assert RepositoryProvider.repositories.client.get_by_id(response["id"])
+    assert RepositoryProvider.write_repositories.client.get_by_id(response["id"])

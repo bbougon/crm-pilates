@@ -88,16 +88,16 @@ def test_handle_aggregate_not_found_exception_on_classroom_creation(memory_event
 
 def test_add_attendee_to_classroom(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
-    classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0].id).build()) \
+    classroom_repository, classroom = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0].id)) \
         .persist() \
         .build()
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client(client_repository).provide()
 
-    update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(clients[0].id).with_attendee(
+    update_classroom(classroom.id, ClassroomPatchJsonBuilderForTest().with_attendee(clients[0].id).with_attendee(
         clients[1].id).build(), CommandBusProviderForTest().provide())
 
-    patched_classroom: Classroom = classroom_repository.get_by_id(classrooms[0].id)
+    patched_classroom: Classroom = classroom_repository.get_by_id(classroom.id)
     assert len(patched_classroom.attendees) == 2
     attendees_ids = list(map(lambda attendee: attendee.id, patched_classroom.attendees))
     assert clients[0].id in attendees_ids
@@ -108,14 +108,14 @@ def test_handle_aggregate_not_found_on_classroom_patch(mocker):
     unknown_uuid = uuid.uuid4()
     mocker.patch.object(MemoryClientRepository, "get_by_id",
                         side_effect=AggregateNotFoundException(unknown_uuid, Client.__name__))
-    classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().with_position(2).build()) \
+    classroom_repository, classroom = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().with_position(2)) \
         .persist() \
         .build()
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
 
     try:
-        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
+        update_classroom(classroom.id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
                          CommandBusProviderForTest().provide())
     except HTTPException as e:
         assert e.status_code == 404
@@ -125,14 +125,14 @@ def test_handle_aggregate_not_found_on_classroom_patch(mocker):
 def test_handle_business_exception_on_classroom_patch(mocker):
     unknown_uuid = uuid.uuid4()
     mocker.patch.object(MemoryClientRepository, "get_by_id", side_effect=DomainException("error occurred"))
-    classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().with_position(2).build()) \
+    classroom_repository, classroom = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().with_position(2)) \
         .persist() \
         .build()
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
 
     try:
-        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
+        update_classroom(classroom.id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
                          CommandBusProviderForTest().provide())
     except HTTPException as e:
         assert e.status_code == 409

@@ -24,7 +24,7 @@ def test_post_client(database):
 
 def test_get_client():
     repository, clients = ClientContextBuilderForTest().with_one_client().persist(
-        RepositoryProvider.repositories.client).build()
+        RepositoryProvider.write_repositories.client).build()
 
     response: Response = http_client.get(f"/clients/{clients[0].id}")
 

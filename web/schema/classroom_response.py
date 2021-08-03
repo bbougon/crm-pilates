@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic.main import BaseModel
 
-from web.schema.classroom_schemas import TimeUnit
+from web.schema.classroom_schemas import TimeUnit, AttendeeSchema
 
 
 class ScheduleReadResponse(BaseModel):
@@ -17,10 +17,15 @@ class DurationReadResponse(BaseModel):
     time_unit: TimeUnit
 
 
+class DetailedAttendee(AttendeeSchema):
+    firstname: str
+    lastname: str
+
+
 class ClassroomReadResponse(BaseModel):
     name: str
     id: UUID
     position: int
     schedule: ScheduleReadResponse
     duration: DurationReadResponse
-    attendees: List[UUID]
+    attendees: List[DetailedAttendee]

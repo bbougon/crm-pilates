@@ -50,7 +50,7 @@ def create_client(client_creation: ClientCreation, response: Response,
             )
 def get_client(id: UUID):
     try:
-        client = RepositoryProvider.repositories.client.get_by_id(id)
+        client = RepositoryProvider.write_repositories.client.get_by_id(id)
         return {
             "id": client.id,
             "firstname": client.firstname,

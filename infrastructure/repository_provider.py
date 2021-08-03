@@ -4,10 +4,13 @@ from infrastructure.repository.memory.memory_client_repository import MemoryClie
 
 
 class RepositoryProvider:
-    repositories: Repositories
+    write_repositories: Repositories
 
 
-RepositoryProvider.repositories = Repositories({
-    "classroom": MemoryClassroomRepository(),
-    "client": MemoryClientRepository()
+classroom_repository = MemoryClassroomRepository()
+client_repository = MemoryClientRepository()
+
+RepositoryProvider.write_repositories = Repositories({
+    "classroom": classroom_repository,
+    "client": client_repository
 })
