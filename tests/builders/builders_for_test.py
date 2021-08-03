@@ -10,8 +10,8 @@ from mimesis import Person, Text, Numbers, Datetime
 from domain.classroom.classroom import Classroom, Duration, Attendee
 from domain.client.client import Client
 from domain.repository import Repository
-from infrastructure.repository.memory.memory_classroom_repository import MemoryClassroomRepository
-from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
+from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
+from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 
 

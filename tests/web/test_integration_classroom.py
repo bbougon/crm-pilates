@@ -30,7 +30,7 @@ def test_create_classroom_with_attendees(database):
     assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
 
 
-def test_get_classroom():
+def test_get_classroom(memory_repositories):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
         RepositoryProvider.write_repositories.client).build()
     repository, classroom = ClassroomContextBuilderForTest()\

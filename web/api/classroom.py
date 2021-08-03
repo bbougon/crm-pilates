@@ -1,16 +1,14 @@
 from http import HTTPStatus
-from typing import List
 from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends, HTTPException
 
-from domain.classroom.classroom import Classroom
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
-from domain.client.client import Client
 from domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
-from infrastructure.repository_provider import RepositoryProvider
+from web.presentation.domain.detailed_classroom import DetailedClassroom
+from web.presentation.service.classroom_service import get_detailed_classroom
 from web.schema.classroom_response import ClassroomReadResponse
 from web.schema.classroom_schemas import ClassroomCreation, ClassroomPatch
 
@@ -66,25 +64,20 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
             }
             )
 def get_classroom(id: UUID):
-    classroom: Classroom = RepositoryProvider.write_repositories.classroom.get_by_id(id)
-    clients: List[Client] = list(
-        map(lambda attendee: RepositoryProvider.write_repositories.client.get_by_id(attendee.id), classroom.attendees))
-    attendees: List[dict] = list(
-        map(lambda client: {"client_id": client.id, "firstname": client.firstname, "lastname": client.lastname},
-            clients))
+    detailed_classroom: DetailedClassroom = get_detailed_classroom(id)
     return {
-        "name": classroom.name,
-        "id": classroom.id,
-        "position": classroom.position,
+        "name": detailed_classroom.name,
+        "id": detailed_classroom.id,
+        "position": detailed_classroom.position,
         "schedule": {
-            "start": classroom.schedule.start.isoformat(),
-            "stop": classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
+            "start": detailed_classroom.start,
+            "stop": detailed_classroom.stop
         },
         "duration": {
-            "duration": classroom.duration.duration,
-            "time_unit": classroom.duration.time_unit.value
+            "duration": detailed_classroom.duration.duration,
+            "time_unit": detailed_classroom.duration.time_unit
         },
-        "attendees": attendees
+        "attendees": detailed_classroom.attendees
     }
 
 

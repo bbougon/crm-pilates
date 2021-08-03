@@ -73,7 +73,7 @@ The API documentation is available in 3 formats:
 1. Create a classroom (see above section)
 1. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8081/classrooms -X PATCH --data '{"attendees": [{"client_id": "A_CLIENT_ID"}]}' -H"Content-Type: application/json" -v
+   curl http://localhost:8081/classrooms/{id} -X PATCH --data '{"attendees": [{"client_id": "A_CLIENT_ID"}]}' -H"Content-Type: application/json" -v
    ```
    Expected result:
    ```bash

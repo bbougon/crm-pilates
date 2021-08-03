@@ -10,6 +10,12 @@ from domain.client.client_command_handler import ClientCreationCommandHandler
 from domain.commands import ClientCreationCommand, ClassroomCreationCommand, ClassroomPatchCommand
 from event.event_store import StoreLocator
 from infrastructure.command_bus_provider import CommandBusProvider
+from infrastructure.repositories import Repositories
+from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
+    MemoryClassRoomReadRepository
+from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository, \
+    MemoryClientReadRepository
+from infrastructure.repository_provider import RepositoryProvider
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
 
@@ -39,3 +45,17 @@ def command_bus():
         }
     )
     CommandBusProvider.command_bus = command_bus
+
+
+@pytest.fixture
+def memory_repositories():
+    classroom_repository = MemoryClassroomRepository()
+    client_repository = MemoryClientRepository()
+    RepositoryProvider.write_repositories = Repositories({
+        "classroom": classroom_repository,
+        "client": client_repository
+    })
+    RepositoryProvider.read_repositories = Repositories({
+        "classroom": MemoryClassRoomReadRepository(classroom_repository),
+        "client": MemoryClientReadRepository(client_repository),
+    })

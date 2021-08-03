@@ -1,7 +1,7 @@
 from fastapi import Response
 
 from infrastructure.command_bus_provider import CommandBusProvider
-from infrastructure.repository.memory.memory_client_repository import MemoryClientRepository
+from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClientJsonBuilderForTest
 from web.api.client import create_client
