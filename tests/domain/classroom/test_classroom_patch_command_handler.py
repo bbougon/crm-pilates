@@ -4,6 +4,7 @@ from datetime import datetime
 import pytest
 from immobilus import immobilus
 
+from domain.classroom.classroom import Classroom
 from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
 from domain.commands import ClassroomPatchCommand
 from domain.exceptions import AggregateNotFoundException
@@ -16,9 +17,10 @@ from tests.builders.providers_for_test import RepositoryProviderForTest
 @immobilus("2019-03-19 10:24:15.100")
 def test_classroom_patch_with_attendees(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
-    classroom_repository, classroom = ClassroomContextBuilderForTest().with_classroom(
+    classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
         ClassroomBuilderForTest().with_position(2)).persist().build()
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client(client_repository).provide()
+    classroom: Classroom = classrooms[0]
 
     attendees_set = ClassroomPatchCommandHandler().execute(
         ClassroomPatchCommand(classroom.id, [clients[0].id, clients[1].id]))
@@ -39,11 +41,11 @@ def test_classroom_patch_with_attendees(memory_event_store):
 
 
 def test_cannot_patch_classroom_with_attendees_for_unknown_clients(memory_event_store):
-    classroom_repository, classroom = ClassroomContextBuilderForTest().persist().build()
+    classroom_repository, classrooms = ClassroomContextBuilderForTest().persist().build()
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
     unknown_client_id = uuid.uuid4()
 
     with pytest.raises(AggregateNotFoundException) as e:
-        ClassroomPatchCommandHandler().execute(ClassroomPatchCommand(classroom.id, [unknown_client_id]))
+        ClassroomPatchCommandHandler().execute(ClassroomPatchCommand(classrooms[0].id, [unknown_client_id]))
 
     assert e.value.message == f"Aggregate 'Client' with id '{unknown_client_id}' not found"

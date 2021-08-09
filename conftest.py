@@ -7,7 +7,9 @@ from command.command_bus import CommandBus
 from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler
 from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
 from domain.client.client_command_handler import ClientCreationCommandHandler
-from domain.commands import ClientCreationCommand, ClassroomCreationCommand, ClassroomPatchCommand
+from domain.commands import ClientCreationCommand, ClassroomCreationCommand, ClassroomPatchCommand, \
+    GetNextSessionsCommand
+from domain.session.next_sessions_command_handler import NextSessionsCommandHandler
 from event.event_store import StoreLocator
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repositories import Repositories
@@ -41,7 +43,8 @@ def command_bus():
         {
             ClientCreationCommand.__name__: ClientCreationCommandHandler(),
             ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(),
-            ClassroomPatchCommand.__name__: ClassroomPatchCommandHandler()
+            ClassroomPatchCommand.__name__: ClassroomPatchCommandHandler(),
+            GetNextSessionsCommand.__name__: NextSessionsCommandHandler()
         }
     )
     CommandBusProvider.command_bus = command_bus

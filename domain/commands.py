@@ -27,3 +27,8 @@ class ClientCreationCommand(Command):
 class ClassroomPatchCommand(Command):
     classroom_id: UUID
     attendees: List[UUID] = field(default_factory=list)
+
+
+@dataclass()
+class GetNextSessionsCommand(Command):
+    current_time: datetime

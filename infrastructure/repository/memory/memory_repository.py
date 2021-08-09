@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 
 from domain.exceptions import AggregateNotFoundException
@@ -12,6 +13,9 @@ class MemoryRepository(Repository):
 
     def persist(self, entity: AggregateRoot):
         self.entities.append(entity)
+
+    def get_all(self) -> List:
+        yield self.entities
 
     def get_by_id(self, id: UUID):
         retrieved_entity = [entity for entity in self.entities if entity.id == id]

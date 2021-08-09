@@ -1,5 +1,6 @@
 import uuid
 from abc import abstractmethod
+from typing import List
 from uuid import UUID
 
 
@@ -12,6 +13,10 @@ class Repository():
 
     @abstractmethod
     def persist(self, entity: AggregateRoot):
+        pass
+
+    @abstractmethod
+    def get_all(self) -> List:
         pass
 
     @abstractmethod

@@ -1,3 +1,5 @@
+from datetime import datetime
+from typing import Iterator, List
 from uuid import UUID
 
 from domain.classroom.classroom import Classroom
@@ -22,3 +24,7 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
     def get_by_id(self, id: UUID):
         classroom: Classroom = self.__repository.get_by_id(id)
         return classroom
+
+    def get_next_sessions_from(self, at_date: datetime) -> Iterator[Classroom]:
+        classrooms: List[Classroom] = next(self.__repository.get_all())
+        yield [classroom for classroom in classrooms if classroom.schedule.start.date() == at_date.date()]

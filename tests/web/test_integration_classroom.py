@@ -1,6 +1,7 @@
 from fastapi import status, Response
 from fastapi.testclient import TestClient
 
+from domain.classroom.classroom import Classroom
 from event.event_store import StoreLocator
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.repository_provider import RepositoryProvider
@@ -33,13 +34,14 @@ def test_create_classroom_with_attendees(database):
 def test_get_classroom(memory_repositories):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
         RepositoryProvider.write_repositories.client).build()
-    repository, classroom = ClassroomContextBuilderForTest()\
+    repository, classrooms = ClassroomContextBuilderForTest()\
         .with_classroom(ClassroomBuilderForTest()
                         .with_attendee(clients[0].id)
                         .with_attendee(clients[1].id)
                         .with_position(2))\
         .persist(RepositoryProvider.write_repositories.classroom)\
         .build()
+    classroom: Classroom = classrooms[0]
 
     response: Response = client.get(f"/classrooms/{classroom.id}")
 
@@ -66,11 +68,11 @@ def test_get_classroom(memory_repositories):
 def test_add_attendee_to_a_classroom():
     repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
         RepositoryProvider.write_repositories.client).build()
-    repository, classroom = ClassroomContextBuilderForTest().with_classroom(
+    repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
         ClassroomBuilderForTest().with_position(2).with_attendee(clients[0].id)).persist(
         RepositoryProvider.write_repositories.classroom).build()
 
-    response: Response = client.patch(f"/classrooms/{classroom.id}",
+    response: Response = client.patch(f"/classrooms/{classrooms[0].id}",
                                       json={"attendees": [{"client_id": clients[1].id.hex}]})
 
     assert response.status_code == status.HTTP_204_NO_CONTENT

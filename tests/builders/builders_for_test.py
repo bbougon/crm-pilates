@@ -84,6 +84,8 @@ class ClassroomBuilderForTest(Builder):
         self.attendees = []
 
     def build(self) -> Classroom:
+        if self.position < len(self.attendees):
+            self.position = len(self.attendees)
         classroom = Classroom.create(self.name, self.start_date, self.position, self.stop_date, self.duration)
         if self.attendees:
             classroom.all_attendees(self.attendees)
@@ -97,26 +99,38 @@ class ClassroomBuilderForTest(Builder):
         self.attendees.append(Attendee(client_id))
         return self
 
+    def starting_at(self, start_at: datetime) -> ClassroomBuilderForTest:
+        self.start_date = start_at
+        return self
+
 
 class ClassroomContextBuilderForTest(Builder):
 
     def __init__(self) -> None:
         super().__init__()
         self.repository = None
-        self.classroom_builder_for_test = ClassroomBuilderForTest()
+        self.classroom_builders_for_test = []
 
     def build(self):
-        classroom: Classroom = self.classroom_builder_for_test.build()
+        if not self.classroom_builders_for_test:
+            self.classroom_builders_for_test.append(ClassroomBuilderForTest())
+        classrooms: List[Classroom] = list(map(lambda builder: builder.build(), self.classroom_builders_for_test))
         if self.repository:
-            self.repository.persist(classroom)
-        return self.repository, classroom
+            for classroom in classrooms:
+                self.repository.persist(classroom)
+        return self.repository, classrooms
 
     def persist(self, repository: Repository = None) -> ClassroomContextBuilderForTest:
         self.repository = repository if repository else MemoryClassroomRepository()
         return self
 
     def with_classroom(self, classroom_builder: ClassroomBuilderForTest) -> ClassroomContextBuilderForTest:
-        self.classroom_builder_for_test = classroom_builder
+        self.classroom_builders_for_test.append(classroom_builder)
+        return self
+
+    def with_classrooms(self, *classroom_builders: ClassroomBuilderForTest) -> ClassroomContextBuilderForTest:
+        for builder in classroom_builders:
+            self.classroom_builders_for_test.append(builder)
         return self
 
 
