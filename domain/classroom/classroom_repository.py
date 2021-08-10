@@ -10,5 +10,5 @@ class ClassroomRepository(Repository):
         return Classroom.__name__
 
     @abstractmethod
-    def get_next_sessions_from(self, at_date: datetime):
+    def get_next_classrooms_from(self, at_date: datetime):
         pass

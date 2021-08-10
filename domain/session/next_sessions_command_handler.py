@@ -23,7 +23,7 @@ class NextScheduledSessions(Event):
 class NextSessionsCommandHandler(CommandHandler):
 
     def execute(self, command: GetNextSessionsCommand) -> Event:
-        classrooms: List[Classroom] = next(RepositoryProvider.read_repositories.classroom.get_next_sessions_from(command.current_time))
+        classrooms: List[Classroom] = next(RepositoryProvider.read_repositories.classroom.get_next_classrooms_from(command.current_time))
         next_sessions = []
         for classroom in classrooms:
             attendees: List[Client] = []

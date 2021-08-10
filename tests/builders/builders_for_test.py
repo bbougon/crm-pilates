@@ -103,6 +103,10 @@ class ClassroomBuilderForTest(Builder):
         self.start_date = start_at
         return self
 
+    def ending_at(self, ends_at: datetime) -> ClassroomBuilderForTest:
+        self.stop_date = ends_at
+        return self
+
 
 class ClassroomContextBuilderForTest(Builder):
 

@@ -25,6 +25,11 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
         classroom: Classroom = self.__repository.get_by_id(id)
         return classroom
 
-    def get_next_sessions_from(self, at_date: datetime) -> Iterator[Classroom]:
+    def get_next_classrooms_from(self, at_date: datetime) -> Iterator[Classroom]:
         classrooms: List[Classroom] = next(self.__repository.get_all())
-        yield [classroom for classroom in classrooms if classroom.schedule.start.date() == at_date.date()]
+        yield [classroom for classroom in classrooms if self.__in_between_dates(classroom, at_date)]
+
+    def __in_between_dates(self, classroom, at_date):
+        if classroom.schedule.stop:
+            return classroom.schedule.start > at_date < classroom.schedule.stop
+        return classroom.schedule.start.date() == at_date.date() and classroom.schedule.start.time() >= at_date.time()
