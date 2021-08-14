@@ -4,7 +4,8 @@ from typing import List
 from uuid import UUID
 
 from command.command_handler import CommandHandler
-from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule, Attendee
+from domain.classroom.classroom import Classroom, Schedule, Attendee
+from domain.classroom.duration import TimeUnit, Duration
 from domain.client.client import Client
 from domain.commands import ClassroomCreationCommand
 from event.event_store import Event, EventSourced

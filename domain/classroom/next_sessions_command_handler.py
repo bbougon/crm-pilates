@@ -2,10 +2,9 @@ from typing import List
 from uuid import UUID
 
 from command.command_handler import CommandHandler
-from domain.classroom.classroom import Classroom
+from domain.classroom.classroom import Classroom, Session
 from domain.client.client import Client
 from domain.commands import GetNextSessionsCommand
-from domain.session.session import Session
 from event.event_store import Event
 from infrastructure.repository_provider import RepositoryProvider
 
@@ -29,5 +28,5 @@ class NextSessionsCommandHandler(CommandHandler):
             attendees: List[Client] = []
             for attendee in classroom.attendees:
                 attendees.append(RepositoryProvider.read_repositories.client.get_by_id(attendee.id))
-            next_sessions.append(Session(classroom, attendees))
+            next_sessions.append(classroom.next_session())
         return NextScheduledSessions(next_sessions)

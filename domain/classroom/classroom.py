@@ -1,26 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
+from datetime import datetime, timedelta, date
 from uuid import UUID
 
+from domain.classroom.duration import TimeUnit, Duration
 from domain.exceptions import DomainException
 from domain.repository import AggregateRoot
-
-
-class TimeUnit(Enum):
-    HOUR = "HOUR"
-    MINUTE = "MINUTE"
-
-
-@dataclass
-class Duration:
-    time_unit: TimeUnit
-    duration: int
-
-    def __eq__(self, o: object) -> bool:
-        return isinstance(o, Duration) and self.duration == o.duration and self.time_unit == o.time_unit
 
 
 @dataclass
@@ -55,6 +41,22 @@ class Classroom(AggregateRoot):
                 f"Cannot add anymore attendees (position available: {self.position - len(self.attendees)} - attendee(s) you try to add: {len(attendees)})")
         self.attendees = attendees
 
+    def next_session(self) -> Session:
+        if self.schedule.stop and (self.__has_session_today() or (self.__today_is_sunday() and self.__next_session_on_monday())):
+            start: datetime = datetime.now().replace(hour=self.schedule.start.hour, minute=self.schedule.start.minute, second=0, microsecond=0)
+            stop: datetime = start + timedelta(minutes=self.duration.to_minutes())
+            return Session(self, start, stop)
+
+    def __has_session_today(self) -> bool:
+        return (datetime.now().date() - self.schedule.start.date()).days % 7 == 0
+
+    def __today_is_sunday(self):
+        return datetime.now().today().isoweekday() == 7
+
+    def __next_session_on_monday(self):
+        monday:datetime = datetime.now() + timedelta(days=1)
+        pass
+
 
 class Attendee:
 
@@ -65,3 +67,41 @@ class Attendee:
     @staticmethod
     def create(id: UUID) -> Attendee:
         return Attendee(id)
+
+
+class Session:
+
+    def __init__(self, classroom: Classroom, start: datetime, stop: datetime) -> None:
+        super().__init__()
+        self.__classroom = classroom
+        self.__attendees = classroom.attendees
+        self.__start = start
+        self.__stop = stop
+
+    @property
+    def attendees(self):
+        return self.__attendees
+
+    @property
+    def name(self):
+        return self.__classroom.name
+
+    @property
+    def id(self):
+        return self.__classroom.id
+
+    @property
+    def position(self):
+        return self.__classroom.position
+
+    @property
+    def duration(self):
+        return self.__classroom.duration
+
+    @property
+    def start(self):
+        return self.__start
+
+    @property
+    def stop(self):
+        return self.__stop

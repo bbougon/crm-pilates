@@ -3,7 +3,7 @@ import datetime
 from fastapi import APIRouter, Response, Depends
 
 from domain.commands import GetNextSessionsCommand
-from domain.session.next_sessions_command_handler import NextScheduledSessions
+from domain.classroom.next_sessions_command_handler import NextScheduledSessions
 from infrastructure.command_bus_provider import CommandBusProvider
 
 router = APIRouter()

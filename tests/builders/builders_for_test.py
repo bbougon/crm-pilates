@@ -7,7 +7,8 @@ from uuid import UUID
 
 from mimesis import Person, Text, Numbers, Datetime
 
-from domain.classroom.classroom import Classroom, Duration, Attendee
+from domain.classroom.classroom import Classroom, Attendee
+from domain.classroom.duration import Duration
 from domain.client.client import Client
 from domain.repository import Repository
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository

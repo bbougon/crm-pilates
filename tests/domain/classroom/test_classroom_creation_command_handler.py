@@ -2,7 +2,7 @@ from datetime import datetime
 
 from immobilus import immobilus
 
-from domain.classroom.classroom import TimeUnit
+from domain.classroom.duration import TimeUnit
 from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
 from domain.commands import ClassroomCreationCommand
 from event.event_store import StoreLocator
