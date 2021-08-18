@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 from domain.classroom.duration import TimeUnit, Duration
+from domain.datetimes import Weekdays
 from domain.exceptions import DomainException
 from domain.repository import AggregateRoot
 
@@ -49,15 +50,14 @@ class Classroom(AggregateRoot):
             return Session(self, start, stop)
 
     def __has_session_today(self) -> bool:
-        return self.schedule.start.date() == datetime.now().date() or (
-                    self.schedule.stop and (datetime.now().date() - self.schedule.start.date()).days % 7 == 0)
+        return self.schedule.start.date() == datetime.now().date() or (self.schedule.stop and (datetime.now().date() - self.schedule.start.date()).days % 7 == 0)
 
     def __today_is_sunday(self):
-        return datetime.now().today().isoweekday() == 7
+        return datetime.now().today().isoweekday() == Weekdays.SUNDAY
 
     def __next_session_on_monday(self):
         monday: datetime = datetime.now() + timedelta(days=1)
-        return monday.isoweekday() == 1
+        return monday.isoweekday() == Weekdays.MONDAY
 
 
 class Attendee:
