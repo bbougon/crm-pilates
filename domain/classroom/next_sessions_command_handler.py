@@ -49,7 +49,7 @@ class NextSessionsCommandHandler(CommandHandler):
         next_sessions = []
         for classroom in classrooms:
             attendees: List[Client] = []
-            for attendee in classroom._attendees:
+            for attendee in classroom.attendees:
                 attendees.append(RepositoryProvider.read_repositories.client.get_by_id(attendee._id))
             session: ScheduledSession = classroom.next_session()
             next_sessions.append(NextScheduledSession(session, attendees))

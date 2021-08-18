@@ -47,20 +47,20 @@ def test_get_classroom(memory_repositories):
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
-        "name": classroom._name,
-        "id": str(classroom._id),
-        "position": classroom._position,
+        "name": classroom.name,
+        "id": str(classroom.id),
+        "position": classroom.position,
         "schedule": {
-            "start": classroom._schedule.start.isoformat(),
-            "stop": classroom._schedule.stop.isoformat() if classroom._schedule.stop else None
+            "start": classroom.schedule.start.isoformat(),
+            "stop": classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
         },
         "duration": {
-            "time_unit": classroom._duration.time_unit.value,
-            "duration": classroom._duration.duration
+            "time_unit": classroom.duration.time_unit.value,
+            "duration": classroom.duration.duration
         },
         "attendees": [
-            {"client_id": str(clients[0]._id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
-            {"client_id": str(clients[1]._id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
+            {"client_id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
+            {"client_id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
         ]
     }
 

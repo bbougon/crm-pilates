@@ -8,6 +8,10 @@ class AggregateRoot:
     def __init__(self):
         self._id = uuid.uuid4()
 
+    @property
+    def id(self) -> UUID:
+        return self._id
+
 
 class Repository():
 

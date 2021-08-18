@@ -26,7 +26,7 @@ def test_classroom_patch_with_attendees(memory_event_store):
         ClassroomPatchCommand(classroom._id, [clients[0]._id, clients[1]._id]))
 
     events = StoreLocator.store.get_all()
-    assert len(classroom._attendees) == 2
+    assert len(classroom.attendees) == 2
     assert attendees_set
     assert len(events) == 1
     assert events[0].type == "AllAttendeesAdded"

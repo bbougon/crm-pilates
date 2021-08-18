@@ -35,36 +35,36 @@ def test_get_next_sessions(memory_repositories):
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
         {
-            "name": first_classroom._name,
+            "name": first_classroom.name,
             "id": ANY,
-            "position": first_classroom._position,
+            "position": first_classroom.position,
             "schedule": {
                 "start": "2019-05-07T10:00:00",
                 "stop": "2019-05-07T11:00:00"
             },
             "duration": {
-                "time_unit": first_classroom._duration.time_unit.value,
-                "duration": first_classroom._duration.duration
+                "time_unit": first_classroom.duration.time_unit.value,
+                "duration": first_classroom.duration.duration
             },
             "attendees": [
-                {"client_id": str(clients[0]._id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
-                {"client_id": str(clients[1]._id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
+                {"client_id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
+                {"client_id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
             ]
         },
         {
-            "name": second_classroom._name,
+            "name": second_classroom.name,
             "id": ANY,
-            "position": second_classroom._position,
+            "position": second_classroom.position,
             "schedule": {
                 "start": "2019-05-07T11:00:00",
                 "stop": "2019-05-07T12:00:00"
             },
             "duration": {
-                "time_unit": second_classroom._duration.time_unit.value,
-                "duration": second_classroom._duration.duration
+                "time_unit": second_classroom.duration.time_unit.value,
+                "duration": second_classroom.duration.duration
             },
             "attendees": [
-                {"client_id": str(clients[2]._id), "firstname": clients[2].firstname, "lastname": clients[2].lastname},
+                {"client_id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname},
             ]
         }
     ]

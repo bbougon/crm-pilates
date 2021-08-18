@@ -99,8 +99,8 @@ def test_add_attendee_to_classroom(memory_event_store):
         clients[1]._id).build(), CommandBusProviderForTest().provide())
 
     patched_classroom: Classroom = classroom_repository.get_by_id(classroom._id)
-    assert len(patched_classroom._attendees) == 2
-    attendees_ids = list(map(lambda attendee: attendee._id, patched_classroom._attendees))
+    assert len(patched_classroom.attendees) == 2
+    attendees_ids = list(map(lambda attendee: attendee._id, patched_classroom.attendees))
     assert clients[0]._id in attendees_ids
     assert clients[1]._id in attendees_ids
 

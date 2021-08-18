@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import List
 from uuid import UUID
 
 from domain.classroom.duration import TimeUnit, Duration
@@ -25,6 +26,26 @@ class Classroom(AggregateRoot):
         self._schedule = schedule
         self._duration = duration
         self._attendees: [Attendee] = []
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def position(self) -> int:
+        return self._position
+
+    @property
+    def schedule(self) -> Schedule:
+        return self._schedule
+
+    @property
+    def duration(self) -> Duration:
+        return self._duration
+
+    @property
+    def attendees(self) -> List[Attendee]:
+        return self._attendees
 
     @staticmethod
     def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
@@ -62,6 +83,10 @@ class Attendee:
     def __init__(self, id: UUID) -> None:
         super().__init__()
         self._id = id
+
+    @property
+    def id(self) -> UUID:
+        return self._id
 
     @staticmethod
     def create(id: UUID) -> Attendee:

@@ -54,5 +54,5 @@ class ClassroomCreationCommandHandler(CommandHandler):
             map(lambda id: RepositoryProvider.write_repositories.client.get_by_id(id), command.attendees))
         classroom.all_attendees(list(map(lambda client: Attendee.create(client._id), clients)))
         RepositoryProvider.write_repositories.classroom.persist(classroom)
-        return ClassroomCreated(id=classroom._id, name=classroom._name, position=classroom._position,
-                                duration=classroom._duration, schedule=classroom._schedule, attendees=clients)
+        return ClassroomCreated(id=classroom.id, name=classroom.name, position=classroom.position,
+                                duration=classroom.duration, schedule=classroom.schedule, attendees=clients)
