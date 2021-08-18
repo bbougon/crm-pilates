@@ -44,7 +44,7 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
     classroom_created: ClassroomCreated = ClassroomCreationCommandHandler().execute(
         ClassroomCreationCommand(name="classroom", position=2, start_date=datetime(2019, 6, 7, 11, 0),
                                  duration=Duration.parse_obj({"duration": 1, "unit": "HOUR"}),
-                                 attendees=[clients[0].id, clients[1].id]))
+                                 attendees=[clients[0]._id, clients[1]._id]))
 
     events = StoreLocator.store.get_all()
     assert len(events) == 1
@@ -62,7 +62,7 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
             "stop": None
         },
         "attendees": [
-            {"id": clients[0].id},
-            {"id": clients[1].id}
+            {"id": clients[0]._id},
+            {"id": clients[1]._id}
         ]
     }

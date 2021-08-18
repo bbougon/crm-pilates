@@ -52,7 +52,7 @@ def get_client(id: UUID):
     try:
         client = RepositoryProvider.write_repositories.client.get_by_id(id)
         return {
-            "id": client.id,
+            "id": client._id,
             "firstname": client.firstname,
             "lastname": client.lastname
         }

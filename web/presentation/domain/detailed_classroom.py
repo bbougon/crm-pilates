@@ -13,10 +13,10 @@ class DetailedClassroom:
 
     def __init__(self, classroom: Classroom, attendees: List[dict]) -> None:
         super().__init__()
-        self.id = classroom.id
-        self.name = classroom.name
-        self.position = classroom.position
-        self.start = classroom.schedule.start.isoformat()
-        self.stop = classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
-        self.duration = self.Duration(classroom.duration.duration, classroom.duration.time_unit.value)
+        self.id = classroom._id
+        self.name = classroom._name
+        self.position = classroom._position
+        self.start = classroom._schedule.start.isoformat()
+        self.stop = classroom._schedule.stop.isoformat() if classroom._schedule.stop else None
+        self.duration = self.Duration(classroom._duration.duration, classroom._duration.time_unit.value)
         self.attendees = attendees

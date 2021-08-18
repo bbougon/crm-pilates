@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from domain.classroom.classroom import Classroom, Attendee, Session
+from domain.classroom.classroom import Classroom, Attendee, ScheduledSession
 from domain.classroom.duration import TimeUnit, Duration
 from domain.exceptions import DomainException
 
@@ -12,23 +12,23 @@ from domain.exceptions import DomainException
 def test_create_classroom():
     classroom = Classroom.create("mat class room", datetime(2020, 1, 2, 10, 0), 2)
 
-    assert classroom.schedule.start == datetime(2020, 1, 2, 10, 0)
-    assert not classroom.schedule.stop
-    assert classroom.duration == Duration(duration=1, time_unit=TimeUnit.HOUR)
+    assert classroom._schedule.start == datetime(2020, 1, 2, 10, 0)
+    assert not classroom._schedule.stop
+    assert classroom._duration == Duration(duration=1, time_unit=TimeUnit.HOUR)
 
 
 def test_classroom_has_a_duration_in_minutes():
     classroom = Classroom.create("machine beginners", datetime(2021, 5, 3), 2,
                                  duration=Duration(duration=45, time_unit=TimeUnit.MINUTE))
 
-    assert classroom.duration == Duration(duration=45, time_unit=TimeUnit.MINUTE)
+    assert classroom._duration == Duration(duration=45, time_unit=TimeUnit.MINUTE)
 
 
 def test_classroom_is_scheduled():
     classroom = Classroom.create("machine", datetime(2020, 3, 19), 4, stop_date=datetime(2020, 6, 19))
 
-    assert classroom.schedule.start == datetime(2020, 3, 19)
-    assert classroom.schedule.stop == datetime(2020, 6, 19)
+    assert classroom._schedule.start == datetime(2020, 3, 19)
+    assert classroom._schedule.stop == datetime(2020, 6, 19)
 
 
 def test_cannot_add_attendees_when_position_overflown():
@@ -43,7 +43,7 @@ def test_cannot_add_attendees_when_position_overflown():
 def test_retrieve_next_session():
     classroom = Classroom.create("next session", datetime(2020, 9, 10, 10), 2, stop_date=datetime(2021, 6, 10, 11))
 
-    session: Session = classroom.next_session()
+    session: ScheduledSession = classroom.next_session()
 
     assert session
     assert session.name == "next session"
@@ -58,7 +58,7 @@ def test_retrieve_next_session_for_duration():
     classroom = Classroom.create("next session", datetime(2020, 9, 10, 10), 2, stop_date=datetime(2021, 6, 10, 10),
                                  duration=Duration(TimeUnit.MINUTE, 45))
 
-    session: Session = classroom.next_session()
+    session: ScheduledSession = classroom.next_session()
 
     assert session.stop == datetime(2020, 9, 24, 10, 45)
 

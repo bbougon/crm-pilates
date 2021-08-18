@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from command.command_handler import CommandHandler
-from domain.classroom.classroom import Classroom, Session
+from domain.classroom.classroom import Classroom, ScheduledSession
 from domain.client.client import Client
 from domain.commands import GetNextSessionsCommand
 from event.event_store import Event
@@ -11,7 +11,7 @@ from infrastructure.repository_provider import RepositoryProvider
 
 class NextScheduledSession(Event):
 
-    def __init__(self, session: Session, attendees: List[Client], root_id: UUID = None) -> None:
+    def __init__(self, session: ScheduledSession, attendees: List[Client], root_id: UUID = None) -> None:
         super().__init__(root_id)
         self.name = session.name
         self.id = session.id
@@ -23,7 +23,7 @@ class NextScheduledSession(Event):
             "duration": session.duration.duration
         }
         self.attendees = list(map(lambda client: {
-            "client_id": str(client.id),
+            "client_id": str(client._id),
             "firstname": client.firstname,
             "lastname": client.lastname}, attendees))
 
@@ -49,8 +49,8 @@ class NextSessionsCommandHandler(CommandHandler):
         next_sessions = []
         for classroom in classrooms:
             attendees: List[Client] = []
-            for attendee in classroom.attendees:
-                attendees.append(RepositoryProvider.read_repositories.client.get_by_id(attendee.id))
-            session: Session = classroom.next_session()
+            for attendee in classroom._attendees:
+                attendees.append(RepositoryProvider.read_repositories.client.get_by_id(attendee._id))
+            session: ScheduledSession = classroom.next_session()
             next_sessions.append(NextScheduledSession(session, attendees))
         return NextScheduledSessions(next_sessions)

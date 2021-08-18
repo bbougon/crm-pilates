@@ -30,6 +30,6 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
         yield [classroom for classroom in classrooms if self.__in_between_dates(classroom, at_date)]
 
     def __in_between_dates(self, classroom, at_date):
-        if classroom.schedule.stop:
-            return classroom.schedule.start > at_date < classroom.schedule.stop
-        return classroom.schedule.start.date() == at_date.date() and classroom.schedule.start.time() >= at_date.time()
+        if classroom._schedule.stop:
+            return classroom._schedule.start > at_date < classroom._schedule.stop
+        return classroom._schedule.start.date() == at_date.date() and classroom._schedule.start.time() >= at_date.time()

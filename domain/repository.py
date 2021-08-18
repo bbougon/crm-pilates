@@ -6,7 +6,7 @@ from uuid import UUID
 
 class AggregateRoot:
     def __init__(self):
-        self.id = uuid.uuid4()
+        self._id = uuid.uuid4()
 
 
 class Repository():

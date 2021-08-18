@@ -20,37 +20,34 @@ class Classroom(AggregateRoot):
 
     def __init__(self, name: str, position: int, schedule: Schedule, duration: Duration):
         super().__init__()
-        self.name = name
-        self.position = position
-        self.schedule = schedule
-        self.duration = duration
-        self.attendees: [Attendee] = []
+        self._name = name
+        self._position = position
+        self._schedule = schedule
+        self._duration = duration
+        self._attendees: [Attendee] = []
 
     @staticmethod
     def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
                duration: Duration = Duration(duration=1, time_unit=TimeUnit.HOUR)) -> Classroom:
         classroom = Classroom(name, position, Schedule(start=start_date, stop=stop_date), duration)
-        classroom.name = name
-        classroom.position = position
-        classroom.schedule = Schedule(start=start_date, stop=stop_date)
-        classroom.duration = duration
+        classroom._duration = duration
         return classroom
 
     def all_attendees(self, attendees: [Attendee]):
-        if self.position < len(attendees):
+        if self._position < len(attendees):
             raise DomainException(
-                f"Cannot add anymore attendees (position available: {self.position - len(self.attendees)} - attendee(s) you try to add: {len(attendees)})")
-        self.attendees = attendees
+                f"Cannot add anymore attendees (position available: {self._position - len(self._attendees)} - attendee(s) you try to add: {len(attendees)})")
+        self._attendees = attendees
 
-    def next_session(self) -> Session:
+    def next_session(self) -> ScheduledSession:
         if self.__has_session_today() or (self.__today_is_sunday() and self.__next_session_on_monday()):
-            start: datetime = datetime.now().replace(hour=self.schedule.start.hour, minute=self.schedule.start.minute,
+            start: datetime = datetime.now().replace(hour=self._schedule.start.hour, minute=self._schedule.start.minute,
                                                      second=0, microsecond=0)
-            stop: datetime = start + timedelta(minutes=self.duration.to_minutes())
-            return Session(self, start, stop)
+            stop: datetime = start + timedelta(minutes=self._duration.to_minutes())
+            return ScheduledSession(self, start, stop)
 
     def __has_session_today(self) -> bool:
-        return self.schedule.start.date() == datetime.now().date() or (self.schedule.stop and (datetime.now().date() - self.schedule.start.date()).days % 7 == 0)
+        return self._schedule.start.date() == datetime.now().date() or (self._schedule.stop and (datetime.now().date() - self._schedule.start.date()).days % 7 == 0)
 
     def __today_is_sunday(self):
         return datetime.now().today().isoweekday() == Weekdays.SUNDAY
@@ -64,19 +61,18 @@ class Attendee:
 
     def __init__(self, id: UUID) -> None:
         super().__init__()
-        self.id = id
+        self._id = id
 
     @staticmethod
     def create(id: UUID) -> Attendee:
         return Attendee(id)
 
 
-class Session:
+class ScheduledSession(Classroom):
 
     def __init__(self, classroom: Classroom, start: datetime, stop: datetime) -> None:
-        super().__init__()
-        self.__classroom = classroom
-        self.__attendees = classroom.attendees
+        super().__init__(classroom._name, classroom._position, classroom._schedule, classroom._duration)
+        self.__attendees = classroom._attendees
         self.__start = start
         self.__stop = stop
 
@@ -86,19 +82,19 @@ class Session:
 
     @property
     def name(self):
-        return self.__classroom.name
+        return self._name
 
     @property
     def id(self):
-        return self.__classroom.id
+        return self._id
 
     @property
     def position(self):
-        return self.__classroom.position
+        return self._position
 
     @property
     def duration(self):
-        return self.__classroom.duration
+        return self._duration
 
     @property
     def start(self):

@@ -23,19 +23,19 @@ def test_classroom_patch_with_attendees(memory_event_store):
     classroom: Classroom = classrooms[0]
 
     attendees_set = ClassroomPatchCommandHandler().execute(
-        ClassroomPatchCommand(classroom.id, [clients[0].id, clients[1].id]))
+        ClassroomPatchCommand(classroom._id, [clients[0]._id, clients[1]._id]))
 
     events = StoreLocator.store.get_all()
-    assert len(classroom.attendees) == 2
+    assert len(classroom._attendees) == 2
     assert attendees_set
     assert len(events) == 1
     assert events[0].type == "AllAttendeesAdded"
     assert events[0].timestamp == datetime(2019, 3, 19, 10, 24, 15, 100000)
-    assert events[0].root_id == classroom.id
+    assert events[0].root_id == classroom._id
     assert events[0].payload == {
         "attendees": [
-            {"id": clients[0].id},
-            {"id": clients[1].id}
+            {"id": clients[0]._id},
+            {"id": clients[1]._id}
         ]
     }
 
@@ -46,6 +46,6 @@ def test_cannot_patch_classroom_with_attendees_for_unknown_clients(memory_event_
     unknown_client_id = uuid.uuid4()
 
     with pytest.raises(AggregateNotFoundException) as e:
-        ClassroomPatchCommandHandler().execute(ClassroomPatchCommand(classrooms[0].id, [unknown_client_id]))
+        ClassroomPatchCommandHandler().execute(ClassroomPatchCommand(classrooms[0]._id, [unknown_client_id]))
 
     assert e.value.message == f"Aggregate 'Client' with id '{unknown_client_id}' not found"

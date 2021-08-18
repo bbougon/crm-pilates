@@ -28,7 +28,7 @@ class ClassroomCreated(Event):
         self.position = position
         self.duration = duration
         self.schedule = schedule
-        self.attendees = list(map(lambda attendee: {"id": attendee.id}, attendees))
+        self.attendees = list(map(lambda attendee: {"id": attendee._id}, attendees))
 
     def _to_payload(self):
         return {
@@ -52,7 +52,7 @@ class ClassroomCreationCommandHandler(CommandHandler):
                                                        time_unit=TimeUnit(command.duration.unit.value)))
         clients: List[Client] = list(
             map(lambda id: RepositoryProvider.write_repositories.client.get_by_id(id), command.attendees))
-        classroom.all_attendees(list(map(lambda client: Attendee.create(client.id), clients)))
+        classroom.all_attendees(list(map(lambda client: Attendee.create(client._id), clients)))
         RepositoryProvider.write_repositories.classroom.persist(classroom)
-        return ClassroomCreated(id=classroom.id, name=classroom.name, position=classroom.position,
-                                duration=classroom.duration, schedule=classroom.schedule, attendees=clients)
+        return ClassroomCreated(id=classroom._id, name=classroom._name, position=classroom._position,
+                                duration=classroom._duration, schedule=classroom._schedule, attendees=clients)
