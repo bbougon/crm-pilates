@@ -75,5 +75,3 @@ def test_retrieve_next_session_if_today_is_sunday_and_next_session_on_monday():
     classroom = Classroom.create("next session", datetime(2020, 9, 7, 10), 2, stop_date=datetime(2021, 6, 10, 10))
 
     assert classroom.next_session()
-
-

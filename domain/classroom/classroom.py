@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from domain.classroom.duration import TimeUnit, Duration
@@ -42,20 +42,22 @@ class Classroom(AggregateRoot):
         self.attendees = attendees
 
     def next_session(self) -> Session:
-        if self.schedule.stop and (self.__has_session_today() or (self.__today_is_sunday() and self.__next_session_on_monday())):
-            start: datetime = datetime.now().replace(hour=self.schedule.start.hour, minute=self.schedule.start.minute, second=0, microsecond=0)
+        if self.__has_session_today() or (self.__today_is_sunday() and self.__next_session_on_monday()):
+            start: datetime = datetime.now().replace(hour=self.schedule.start.hour, minute=self.schedule.start.minute,
+                                                     second=0, microsecond=0)
             stop: datetime = start + timedelta(minutes=self.duration.to_minutes())
             return Session(self, start, stop)
 
     def __has_session_today(self) -> bool:
-        return (datetime.now().date() - self.schedule.start.date()).days % 7 == 0
+        return self.schedule.start.date() == datetime.now().date() or (
+                    self.schedule.stop and (datetime.now().date() - self.schedule.start.date()).days % 7 == 0)
 
     def __today_is_sunday(self):
         return datetime.now().today().isoweekday() == 7
 
     def __next_session_on_monday(self):
-        monday:datetime = datetime.now() + timedelta(days=1)
-        pass
+        monday: datetime = datetime.now() + timedelta(days=1)
+        return monday.isoweekday() == 1
 
 
 class Attendee:

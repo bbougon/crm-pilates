@@ -38,8 +38,8 @@ def test_get_next_sessions(memory_repositories):
             "id": str(first_classroom.id),
             "position": first_classroom.position,
             "schedule": {
-                "start": first_classroom.schedule.start.isoformat(),
-                "stop": first_classroom.schedule.stop.isoformat() if first_classroom.schedule.stop else None
+                "start": "2019-05-07T10:00:00",
+                "stop": "2019-05-07T11:00:00"
             },
             "duration": {
                 "time_unit": first_classroom.duration.time_unit.value,
@@ -55,8 +55,8 @@ def test_get_next_sessions(memory_repositories):
             "id": str(second_classroom.id),
             "position": second_classroom.position,
             "schedule": {
-                "start": second_classroom.schedule.start.isoformat(),
-                "stop": second_classroom.schedule.stop.isoformat() if second_classroom.schedule.stop else None
+                "start": "2019-05-07T11:00:00",
+                "stop": "2019-05-07T12:00:00"
             },
             "duration": {
                 "time_unit": second_classroom.duration.time_unit.value,
