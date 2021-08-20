@@ -28,7 +28,7 @@ class ClassroomCreated(Event):
         self.position = position
         self.duration = duration
         self.schedule = schedule
-        self.attendees = list(map(lambda attendee: {"id": attendee._id}, attendees))
+        self.attendees = list(map(lambda attendee: {"id": attendee.id}, attendees))
 
     def _to_payload(self):
         return {
