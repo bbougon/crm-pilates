@@ -1,53 +1,61 @@
-import math
+from __future__ import annotations
+
+from abc import abstractmethod
 from dataclasses import dataclass
-from enum import Enum
+from typing import Type
 
 
-class TimeUnit(Enum):
-    HOUR = "HOUR"
-    MINUTE = "MINUTE"
+class TimeUnit:
 
-
-class TimeUnitConvertor:
-
-    def __init__(self, conversion_ratio: dict) -> None:
+    def __init__(self, value: int) -> None:
         super().__init__()
-        self.conversion_ratio = conversion_ratio
+        self._value = value
 
-    def convert(self, from_time_unit: TimeUnit, duration: int) -> int:
-        return math.ceil(self.conversion_ratio[from_time_unit.value] * duration)
+    @abstractmethod
+    def to_unit(self, to_unit: Type[TimeUnit]):
+        pass
 
-
-class HourConvertor(TimeUnitConvertor):
-
-    def __init__(self) -> None:
-        super().__init__({TimeUnit.HOUR.value: 1})
-
-
-class MinuteConvertor(TimeUnitConvertor):
-
-    def __init__(self) -> None:
-        super().__init__({TimeUnit.MINUTE.value: 1, TimeUnit.HOUR.value: 60})
+    @property
+    def value(self) -> int:
+        return self._value
 
 
-class TimeUnitConvertors:
-    __time_unit_convertors: dict = {
-        TimeUnit.HOUR: HourConvertor(),
-        TimeUnit.MINUTE: MinuteConvertor()
+class HourTimeUnit(TimeUnit):
+    units: dict = {
+        "MinuteTimeUnit": 60,
+        "HourTimeUnit": 1
+    }
+
+    def to_unit(self, to_unit: Type[TimeUnit]) -> TimeUnit:
+        return to_unit(self._value * self.units[to_unit.__name__])
+
+
+class MinuteTimeUnit(TimeUnit):
+    units: dict = {
+        "MinuteTimeUnit": 1,
+        "HourTimeUnit": 1 / 60
+    }
+
+    def to_unit(self, to_unit: Type[TimeUnit]) -> TimeUnit:
+        return to_unit(self._value * self.units[to_unit.__name__])
+
+
+class TimeUnits:
+
+    time_units: dict = {
+        "HOUR": HourTimeUnit,
+        "MINUTE": MinuteTimeUnit
     }
 
     @classmethod
-    def to_time_unit(cls, to_time_unit: TimeUnit, from_time_unit: TimeUnit, duration):
-        return TimeUnitConvertors.__time_unit_convertors[to_time_unit].convert(from_time_unit, duration)
+    def from_duration(cls, unit, duration) -> TimeUnit:
+        return cls.time_units[unit](duration)
 
 
 @dataclass
 class Duration:
     time_unit: TimeUnit
-    duration: int
-
-    def to_minutes(self):
-        return TimeUnitConvertors.to_time_unit(TimeUnit.MINUTE, self.time_unit, self.duration)
 
     def __eq__(self, o: object) -> bool:
-        return isinstance(o, Duration) and self.duration == o.duration and self.time_unit == o.time_unit
+        return isinstance(o, Duration) and isinstance(o.time_unit,
+                                                      self.time_unit.__class__) and self.time_unit.value == o.time_unit.value

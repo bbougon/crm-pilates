@@ -26,10 +26,10 @@ def test_create_classroom(memory_event_store):
                                 CommandBusProviderForTest().provide())
 
     assert response["name"] == "advanced classroom"
-    assert response["start_date"] == datetime(2020, 2, 11, 10, 0)
+    assert response["schedule"]["start"] == datetime(2020, 2, 11, 10, 0)
     assert response["position"] == 3
     assert response["duration"]["duration"] == 45
-    assert response["duration"]["unit"] == "MINUTE"
+    assert response["duration"]["time_unit"] == "MINUTE"
     assert response["id"]
     assert repository.get_by_id(response["id"])
 
@@ -43,8 +43,8 @@ def test_create_scheduled_classroom(memory_event_store):
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert response["start_date"] == start_date
-    assert response["stop_date"] == stop_date
+    assert response["schedule"]["start"] == start_date
+    assert response["schedule"]["stop"] == stop_date
 
 
 def test_create_classroom_with_attendees(memory_event_store):
@@ -57,7 +57,7 @@ def test_create_classroom_with_attendees(memory_event_store):
                                 CommandBusProviderForTest().provide())
 
     assert len(response["attendees"]) == 2
-    attendees_ids = list(map(lambda attendee: attendee['id'], response["attendees"]))
+    attendees_ids = list(map(lambda attendee: attendee['client_id'], response["attendees"]))
     assert clients[0]._id in attendees_ids
     assert clients[1]._id in attendees_ids
 

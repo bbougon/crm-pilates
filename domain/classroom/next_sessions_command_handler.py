@@ -3,6 +3,7 @@ from uuid import UUID
 
 from command.command_handler import CommandHandler
 from domain.classroom.classroom import Classroom, ScheduledSession
+from domain.classroom.duration import MinuteTimeUnit
 from domain.client.client import Client
 from domain.commands import GetNextSessionsCommand
 from event.event_store import Event
@@ -19,8 +20,8 @@ class NextScheduledSession(Event):
         self.start = session.start
         self.stop = session.stop
         self.duration = {
-            "time_unit": session.duration.time_unit.value,
-            "duration": session.duration.duration
+            "time_unit": "MINUTE",
+            "duration": session.duration.time_unit.to_unit(MinuteTimeUnit).value
         }
         self.attendees = list(map(lambda client: {
             "client_id": str(client._id),

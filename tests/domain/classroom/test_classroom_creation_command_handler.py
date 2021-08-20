@@ -2,7 +2,6 @@ from datetime import datetime
 
 from immobilus import immobilus
 
-from domain.classroom.duration import TimeUnit
 from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
 from domain.commands import ClassroomCreationCommand
 from event.event_store import StoreLocator
@@ -25,8 +24,8 @@ def test_classroom_creation_event_is_stored(memory_event_store):
         "id": classroom_created.root_id,
         "name": "classroom", "position": 2,
         "duration": {
-            "duration": 1,
-            "time_unit": TimeUnit.HOUR
+            "duration": 60,
+            "time_unit": "MINUTE"
         },
         "schedule": {
             "start": datetime(2020, 5, 7, 11, 0),
@@ -54,8 +53,8 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
         "id": classroom_created.root_id,
         "name": "classroom", "position": 2,
         "duration": {
-            "duration": 1,
-            "time_unit": TimeUnit.HOUR
+            "duration": 60,
+            "time_unit": "MINUTE"
         },
         "schedule": {
             "start": datetime(2019, 6, 7, 11, 0),

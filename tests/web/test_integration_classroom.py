@@ -55,8 +55,8 @@ def test_get_classroom(memory_repositories):
             "stop": classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
         },
         "duration": {
-            "time_unit": classroom.duration.time_unit.value,
-            "duration": classroom.duration.duration
+            "time_unit": "HOUR",
+            "duration": classroom.duration.time_unit.value
         },
         "attendees": [
             {"client_id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},

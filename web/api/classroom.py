@@ -9,13 +9,14 @@ from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from web.presentation.domain.detailed_classroom import DetailedClassroom
 from web.presentation.service.classroom_service import get_detailed_classroom
-from web.schema.classroom_response import ClassroomReadResponse
+from web.schema.classroom_response import ClassroomReadResponse, ClassroomCreatedResponse
 from web.schema.classroom_schemas import ClassroomCreation, ClassroomPatch
 
 router = APIRouter()
 
 
 @router.post("/classrooms",
+             response_model=ClassroomCreatedResponse,
              status_code=status.HTTP_201_CREATED,
              responses={
                  201: {
@@ -44,10 +45,17 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
                                            list(map(lambda client: client.client_id, classroom_creation.attendees)))
         event: ClassroomCreated = command_bus_provider.command_bus.send(command).event
         response.headers["location"] = f"/classrooms/{event.root_id}"
-        return {"name": event.name, "id": event.root_id, "position": event.position, "start_date": event.schedule.start,
-                "stop_date": event.schedule.stop,
-                "duration": {"duration": event.duration.duration, "unit": event.duration.time_unit.value},
-                "attendees": event.attendees}
+        return {
+            "name": event.name,
+            "id": event.root_id,
+            "position": event.position,
+            "schedule": {
+                "start": event.schedule.start,
+                "stop": event.schedule.stop
+            },
+            "duration": ClassroomReadResponse.to_duration(event.duration),
+            "attendees": list(map(lambda attendee: {"client_id": attendee["id"]}, event.attendees))
+        }
     except AggregateNotFoundException as e:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND,
                             detail=f"One of the attendees with id '{e.unknown_id}' has not been found")

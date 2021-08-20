@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic.main import BaseModel
 
+from domain.classroom.duration import Duration
+from web.presentation.domain.units import Units
 from web.schema.classroom_schemas import TimeUnit, AttendeeSchema
 
 
@@ -22,6 +24,19 @@ class DetailedAttendee(AttendeeSchema):
     lastname: str
 
 
+class ClassroomCreatedResponse(BaseModel):
+    name: str
+    id: UUID
+    position: int
+    schedule: ScheduleReadResponse
+    duration: DurationReadResponse
+    attendees: List[AttendeeSchema]
+
+    @classmethod
+    def to_duration(cls, duration: Duration):
+        return {"duration": duration.time_unit.value, "time_unit": Units.units()[duration.time_unit.__class__.__name__]}
+
+
 class ClassroomReadResponse(BaseModel):
     name: str
     id: UUID
@@ -29,3 +44,7 @@ class ClassroomReadResponse(BaseModel):
     schedule: ScheduleReadResponse
     duration: DurationReadResponse
     attendees: List[DetailedAttendee]
+
+    @classmethod
+    def to_duration(cls, duration: Duration):
+        return {"duration": duration.time_unit.value, "time_unit": Units.units()[duration.time_unit.__class__.__name__]}

@@ -43,8 +43,8 @@ def test_get_next_sessions(memory_repositories):
                 "stop": "2019-05-07T11:00:00"
             },
             "duration": {
-                "time_unit": first_classroom.duration.time_unit.value,
-                "duration": first_classroom.duration.duration
+                "time_unit": "MINUTE",
+                "duration": 60
             },
             "attendees": [
                 {"client_id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
@@ -60,8 +60,8 @@ def test_get_next_sessions(memory_repositories):
                 "stop": "2019-05-07T12:00:00"
             },
             "duration": {
-                "time_unit": second_classroom.duration.time_unit.value,
-                "duration": second_classroom.duration.duration
+                "time_unit": "MINUTE",
+                "duration": 60
             },
             "attendees": [
                 {"client_id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname},

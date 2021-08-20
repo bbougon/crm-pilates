@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import List
 from uuid import UUID
 
-from domain.classroom.duration import TimeUnit, Duration
+from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit
 from domain.datetimes import Weekdays
 from domain.exceptions import DomainException
 from domain.repository import AggregateRoot
@@ -49,7 +49,7 @@ class Classroom(AggregateRoot):
 
     @staticmethod
     def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
-               duration: Duration = Duration(duration=1, time_unit=TimeUnit.HOUR)) -> Classroom:
+               duration: Duration = Duration(HourTimeUnit(1))) -> Classroom:
         classroom = Classroom(name, position, Schedule(start=start_date, stop=stop_date), duration)
         classroom._duration = duration
         return classroom
@@ -64,7 +64,7 @@ class Classroom(AggregateRoot):
         if self.__has_session_today() or (self.__today_is_sunday() and self.__next_session_on_monday()):
             start: datetime = datetime.now().replace(hour=self._schedule.start.hour, minute=self._schedule.start.minute,
                                                      second=0, microsecond=0)
-            stop: datetime = start + timedelta(minutes=self._duration.to_minutes())
+            stop: datetime = start + timedelta(minutes=self._duration.time_unit.to_unit(MinuteTimeUnit).value)
             return ScheduledSession(self, start, stop)
 
     def __has_session_today(self) -> bool:
