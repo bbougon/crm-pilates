@@ -7,7 +7,8 @@ from uuid import UUID
 
 from mimesis import Person, Text, Numbers, Datetime
 
-from domain.classroom.classroom import Classroom, Duration, Attendee
+from domain.classroom.classroom import Classroom, Attendee
+from domain.classroom.duration import Duration, HourTimeUnit
 from domain.client.client import Client
 from domain.repository import Repository
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
@@ -80,7 +81,7 @@ class ClassroomBuilderForTest(Builder):
         self.position: int = Numbers().integer_number(1, 6)
         self.start_date: datetime = Datetime().datetime()
         self.stop_date: datetime = None
-        self.duration = Duration(TimeUnit.HOUR, 1)
+        self.duration = Duration(HourTimeUnit(1))
         self.attendees = []
 
     def build(self) -> Classroom:

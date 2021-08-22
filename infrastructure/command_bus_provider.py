@@ -4,7 +4,7 @@ from domain.classroom.classroom_patch_command_handler import ClassroomPatchComma
 from domain.client.client_command_handler import ClientCreationCommandHandler
 from domain.commands import ClassroomCreationCommand, ClientCreationCommand, ClassroomPatchCommand, \
     GetNextSessionsCommand
-from domain.session.next_sessions_command_handler import NextSessionsCommandHandler
+from domain.classroom.next_sessions_command_handler import NextSessionsCommandHandler
 
 
 class CommandBusProvider:

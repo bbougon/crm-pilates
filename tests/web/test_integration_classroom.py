@@ -25,7 +25,7 @@ def test_create_classroom_with_attendees(database):
     repository, clients = ClientContextBuilderForTest().with_one_client().persist(
         RepositoryProvider.write_repositories.client).build()
 
-    response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().with_attendees([clients[0].id]).build())
+    response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().with_attendees([clients[0]._id]).build())
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
@@ -36,14 +36,14 @@ def test_get_classroom(memory_repositories):
         RepositoryProvider.write_repositories.client).build()
     repository, classrooms = ClassroomContextBuilderForTest()\
         .with_classroom(ClassroomBuilderForTest()
-                        .with_attendee(clients[0].id)
-                        .with_attendee(clients[1].id)
+                        .with_attendee(clients[0]._id)
+                        .with_attendee(clients[1]._id)
                         .with_position(2))\
         .persist(RepositoryProvider.write_repositories.classroom)\
         .build()
     classroom: Classroom = classrooms[0]
 
-    response: Response = client.get(f"/classrooms/{classroom.id}")
+    response: Response = client.get(f"/classrooms/{classroom._id}")
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -55,8 +55,8 @@ def test_get_classroom(memory_repositories):
             "stop": classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
         },
         "duration": {
-            "time_unit": classroom.duration.time_unit.value,
-            "duration": classroom.duration.duration
+            "time_unit": "HOUR",
+            "duration": classroom.duration.time_unit.value
         },
         "attendees": [
             {"client_id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
@@ -69,10 +69,10 @@ def test_add_attendee_to_a_classroom():
     repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
         RepositoryProvider.write_repositories.client).build()
     repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0].id)).persist(
+        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0]._id)).persist(
         RepositoryProvider.write_repositories.classroom).build()
 
-    response: Response = client.patch(f"/classrooms/{classrooms[0].id}",
-                                      json={"attendees": [{"client_id": clients[1].id.hex}]})
+    response: Response = client.patch(f"/classrooms/{classrooms[0]._id}",
+                                      json={"attendees": [{"client_id": clients[1]._id.hex}]})
 
     assert response.status_code == status.HTTP_204_NO_CONTENT

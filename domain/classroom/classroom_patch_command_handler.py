@@ -13,7 +13,7 @@ class AllAttendeesAdded(Event):
 
     def __init__(self, root_id: UUID, attendees: List[Attendee]) -> None:
         super().__init__(root_id)
-        self.attendees = list(map(lambda attendee: {"id": attendee.id}, attendees))
+        self.attendees = list(map(lambda attendee: {"id": attendee._id}, attendees))
 
     def _to_payload(self):
         return {
@@ -28,7 +28,7 @@ class ClassroomPatchCommandHandler(CommandHandler):
         classroom: Classroom = RepositoryProvider.write_repositories.classroom.get_by_id(command.classroom_id)
         attendees: List[Attendee] = list(map(lambda attendee: Attendee(attendee), command.attendees))
         classroom.all_attendees(attendees)
-        return AllAttendeesAdded(classroom.id, attendees)
+        return AllAttendeesAdded(classroom._id, attendees)
 
     @classmethod
     def __check_attendees_are_clients(cls, command):

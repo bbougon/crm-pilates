@@ -2,7 +2,6 @@ from datetime import datetime
 
 from immobilus import immobilus
 
-from domain.classroom.classroom import TimeUnit
 from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
 from domain.commands import ClassroomCreationCommand
 from event.event_store import StoreLocator
@@ -25,8 +24,8 @@ def test_classroom_creation_event_is_stored(memory_event_store):
         "id": classroom_created.root_id,
         "name": "classroom", "position": 2,
         "duration": {
-            "duration": 1,
-            "time_unit": TimeUnit.HOUR
+            "duration": 60,
+            "time_unit": "MINUTE"
         },
         "schedule": {
             "start": datetime(2020, 5, 7, 11, 0),
@@ -44,7 +43,7 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
     classroom_created: ClassroomCreated = ClassroomCreationCommandHandler().execute(
         ClassroomCreationCommand(name="classroom", position=2, start_date=datetime(2019, 6, 7, 11, 0),
                                  duration=Duration.parse_obj({"duration": 1, "unit": "HOUR"}),
-                                 attendees=[clients[0].id, clients[1].id]))
+                                 attendees=[clients[0]._id, clients[1]._id]))
 
     events = StoreLocator.store.get_all()
     assert len(events) == 1
@@ -54,15 +53,15 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
         "id": classroom_created.root_id,
         "name": "classroom", "position": 2,
         "duration": {
-            "duration": 1,
-            "time_unit": TimeUnit.HOUR
+            "duration": 60,
+            "time_unit": "MINUTE"
         },
         "schedule": {
             "start": datetime(2019, 6, 7, 11, 0),
             "stop": None
         },
         "attendees": [
-            {"id": clients[0].id},
-            {"id": clients[1].id}
+            {"id": clients[0]._id},
+            {"id": clients[1]._id}
         ]
     }

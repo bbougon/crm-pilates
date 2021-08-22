@@ -27,4 +27,4 @@ class ClientCreationCommandHandler(CommandHandler):
     def execute(self, command: ClientCreationCommand) -> Event:
         client = Client.create(command.firstname, command.lastname)
         RepositoryProvider.write_repositories.client.persist(client)
-        return ClientCreated(client.id, client.firstname, client.lastname)
+        return ClientCreated(client._id, client.firstname, client.lastname)

@@ -26,12 +26,12 @@ def test_get_client():
     repository, clients = ClientContextBuilderForTest().with_one_client().persist(
         RepositoryProvider.write_repositories.client).build()
 
-    response: Response = http_client.get(f"/clients/{clients[0].id}")
+    response: Response = http_client.get(f"/clients/{clients[0]._id}")
 
     client: Client = clients[0]
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
-        "id": str(client.id),
+        "id": str(client._id),
         "firstname": client.firstname,
         "lastname": client.lastname
     }

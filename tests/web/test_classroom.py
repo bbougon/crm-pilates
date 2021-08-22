@@ -26,10 +26,10 @@ def test_create_classroom(memory_event_store):
                                 CommandBusProviderForTest().provide())
 
     assert response["name"] == "advanced classroom"
-    assert response["start_date"] == datetime(2020, 2, 11, 10, 0)
+    assert response["schedule"]["start"] == datetime(2020, 2, 11, 10, 0)
     assert response["position"] == 3
     assert response["duration"]["duration"] == 45
-    assert response["duration"]["unit"] == "MINUTE"
+    assert response["duration"]["time_unit"] == "MINUTE"
     assert response["id"]
     assert repository.get_by_id(response["id"])
 
@@ -43,23 +43,23 @@ def test_create_scheduled_classroom(memory_event_store):
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert response["start_date"] == start_date
-    assert response["stop_date"] == stop_date
+    assert response["schedule"]["start"] == start_date
+    assert response["schedule"]["stop"] == stop_date
 
 
 def test_create_classroom_with_attendees(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
     RepositoryProviderForTest().for_classroom().for_client(client_repository).provide()
     classroom_json = ClassroomJsonBuilderForTest().with_position(2).with_attendees(
-        [clients[0].id, clients[1].id]).build()
+        [clients[0]._id, clients[1]._id]).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
     assert len(response["attendees"]) == 2
-    attendees_ids = list(map(lambda attendee: attendee['id'], response["attendees"]))
-    assert clients[0].id in attendees_ids
-    assert clients[1].id in attendees_ids
+    attendees_ids = list(map(lambda attendee: attendee['client_id'], response["attendees"]))
+    assert clients[0]._id in attendees_ids
+    assert clients[1]._id in attendees_ids
 
 
 def test_handle_business_exception_on_classroom_creation(memory_event_store, mocker):
@@ -89,20 +89,20 @@ def test_handle_aggregate_not_found_exception_on_classroom_creation(memory_event
 def test_add_attendee_to_classroom(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
     classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0].id)) \
+        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0]._id)) \
         .persist() \
         .build()
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client(client_repository).provide()
     classroom: Classroom = classrooms[0]
 
-    update_classroom(classroom.id, ClassroomPatchJsonBuilderForTest().with_attendee(clients[0].id).with_attendee(
-        clients[1].id).build(), CommandBusProviderForTest().provide())
+    update_classroom(classroom._id, ClassroomPatchJsonBuilderForTest().with_attendee(clients[0]._id).with_attendee(
+        clients[1]._id).build(), CommandBusProviderForTest().provide())
 
-    patched_classroom: Classroom = classroom_repository.get_by_id(classroom.id)
+    patched_classroom: Classroom = classroom_repository.get_by_id(classroom._id)
     assert len(patched_classroom.attendees) == 2
-    attendees_ids = list(map(lambda attendee: attendee.id, patched_classroom.attendees))
-    assert clients[0].id in attendees_ids
-    assert clients[1].id in attendees_ids
+    attendees_ids = list(map(lambda attendee: attendee._id, patched_classroom.attendees))
+    assert clients[0]._id in attendees_ids
+    assert clients[1]._id in attendees_ids
 
 
 def test_handle_aggregate_not_found_on_classroom_patch(mocker):
@@ -116,7 +116,7 @@ def test_handle_aggregate_not_found_on_classroom_patch(mocker):
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
 
     try:
-        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
+        update_classroom(classrooms[0]._id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
                          CommandBusProviderForTest().provide())
     except HTTPException as e:
         assert e.status_code == 404
@@ -133,7 +133,7 @@ def test_handle_business_exception_on_classroom_patch(mocker):
     RepositoryProviderForTest().for_classroom(classroom_repository).for_client().provide()
 
     try:
-        update_classroom(classrooms[0].id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
+        update_classroom(classrooms[0]._id, ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
                          CommandBusProviderForTest().provide())
     except HTTPException as e:
         assert e.status_code == 409

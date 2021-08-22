@@ -4,7 +4,8 @@ from typing import List
 from uuid import UUID
 
 from command.command_handler import CommandHandler
-from domain.classroom.classroom import Classroom, Duration, TimeUnit, Schedule, Attendee
+from domain.classroom.classroom import Classroom, Schedule, Attendee
+from domain.classroom.duration import Duration, TimeUnits, MinuteTimeUnit
 from domain.client.client import Client
 from domain.commands import ClassroomCreationCommand
 from event.event_store import Event, EventSourced
@@ -34,7 +35,10 @@ class ClassroomCreated(Event):
             "id": self.root_id,
             "name": self.name,
             "position": self.position,
-            "duration": self.duration.__dict__,
+            "duration": {
+                "duration": self.duration.time_unit.to_unit(MinuteTimeUnit).value,
+                "time_unit": "MINUTE"
+            },
             "schedule": self.schedule.__dict__,
             "attendees": self.attendees
         }
@@ -47,11 +51,11 @@ class ClassroomCreationCommandHandler(CommandHandler):
 
     def execute(self, command: ClassroomCreationCommand) -> ClassroomCreated:
         classroom = Classroom.create(command.name, command.start_date, command.position, stop_date=command.stop_date,
-                                     duration=Duration(duration=command.duration.duration,
-                                                       time_unit=TimeUnit(command.duration.unit.value)))
+                                     duration=Duration(TimeUnits.from_duration(command.duration.unit.value,
+                                                                               command.duration.duration)))
         clients: List[Client] = list(
             map(lambda id: RepositoryProvider.write_repositories.client.get_by_id(id), command.attendees))
-        classroom.all_attendees(list(map(lambda client: Attendee.create(client.id), clients)))
+        classroom.all_attendees(list(map(lambda client: Attendee.create(client._id), clients)))
         RepositoryProvider.write_repositories.classroom.persist(classroom)
         return ClassroomCreated(id=classroom.id, name=classroom.name, position=classroom.position,
                                 duration=classroom.duration, schedule=classroom.schedule, attendees=clients)
