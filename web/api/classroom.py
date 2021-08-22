@@ -72,21 +72,24 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
             }
             )
 def get_classroom(id: UUID):
-    detailed_classroom: DetailedClassroom = get_detailed_classroom(id)
-    return {
-        "name": detailed_classroom.name,
-        "id": detailed_classroom.id,
-        "position": detailed_classroom.position,
-        "schedule": {
-            "start": detailed_classroom.start,
-            "stop": detailed_classroom.stop
-        },
-        "duration": {
-            "duration": detailed_classroom.duration.duration,
-            "time_unit": detailed_classroom.duration.time_unit
-        },
-        "attendees": detailed_classroom.attendees
-    }
+    try:
+        detailed_classroom: DetailedClassroom = get_detailed_classroom(id)
+        return {
+            "name": detailed_classroom.name,
+            "id": detailed_classroom.id,
+            "position": detailed_classroom.position,
+            "schedule": {
+                "start": detailed_classroom.start,
+                "stop": detailed_classroom.stop
+            },
+            "duration": {
+                "duration": detailed_classroom.duration.duration,
+                "time_unit": detailed_classroom.duration.time_unit
+            },
+            "attendees": detailed_classroom.attendees
+        }
+    except AggregateNotFoundException:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Classroom with id '{str(id)}' not found")
 
 
 @router.patch("/classrooms/{id}",

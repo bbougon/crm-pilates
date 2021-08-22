@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+import pytest
 from fastapi import HTTPException
 from fastapi import Response
 
@@ -12,7 +13,7 @@ from infrastructure.repository.memory.memory_client_repositories import MemoryCl
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, ClassroomPatchJsonBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest, RepositoryProviderForTest
-from web.api.classroom import create_classroom, update_classroom
+from web.api.classroom import create_classroom, update_classroom, get_classroom
 from web.schema.classroom_schemas import ClassroomCreation, TimeUnit
 
 
@@ -138,3 +139,12 @@ def test_handle_business_exception_on_classroom_patch(mocker):
     except HTTPException as e:
         assert e.status_code == 409
         assert e.detail == "error occurred"
+
+
+def test_classroom_not_found():
+    unknown_uuid = uuid.uuid4()
+    with pytest.raises(HTTPException) as e:
+        get_classroom(unknown_uuid)
+
+    assert e.value.status_code == 404
+    assert e.value.detail == f"Classroom with id '{str(unknown_uuid)}' not found"
