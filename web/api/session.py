@@ -1,9 +1,9 @@
 import datetime
 
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Depends
 
-from domain.commands import GetNextSessionsCommand
 from domain.classroom.next_sessions_command_handler import NextScheduledSessions
+from domain.commands import GetNextSessionsCommand
 from infrastructure.command_bus_provider import CommandBusProvider
 
 router = APIRouter()
@@ -11,8 +11,7 @@ router = APIRouter()
 
 @router.get("/sessions/next"
             )
-def next_sessions(response: Response,
-                  command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     next_sessions_event: NextScheduledSessions = command_bus_provider.command_bus.send(GetNextSessionsCommand(datetime.datetime.now())).event
     result = []
     for session in next_sessions_event.sessions:
