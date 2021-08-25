@@ -100,6 +100,11 @@ class ScheduledSession(Classroom):
         self.__attendees = classroom._attendees
         self.__start = start
         self.__stop = stop
+        self.__classroom_id = classroom.id
+
+    @property
+    def classroom_id(self):
+        return self.__classroom_id
 
     @property
     def attendees(self):

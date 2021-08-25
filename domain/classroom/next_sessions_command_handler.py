@@ -15,6 +15,7 @@ class NextScheduledSession(Event):
     def __init__(self, session: ScheduledSession, attendees: List[Client], root_id: UUID = None) -> None:
         super().__init__(root_id)
         self.name = session.name
+        self.classroom_id = session.classroom_id
         self.id = session.id
         self.position = session.position
         self.start = session.start

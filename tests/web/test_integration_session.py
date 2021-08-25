@@ -36,6 +36,7 @@ def test_get_next_sessions(memory_repositories):
     assert response.json() == [
         {
             "name": first_classroom.name,
+            "classroom_id": str(first_classroom.id),
             "id": ANY,
             "position": first_classroom.position,
             "schedule": {
@@ -53,6 +54,7 @@ def test_get_next_sessions(memory_repositories):
         },
         {
             "name": second_classroom.name,
+            "classroom_id": str(second_classroom.id),
             "id": ANY,
             "position": second_classroom.position,
             "schedule": {
