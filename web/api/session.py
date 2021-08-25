@@ -1,15 +1,18 @@
 import datetime
+from typing import List
 
 from fastapi import APIRouter, Depends
 
 from domain.classroom.next_sessions_command_handler import NextScheduledSessions
 from domain.commands import GetNextSessionsCommand
 from infrastructure.command_bus_provider import CommandBusProvider
+from web.schema.session_response import Session
 
 router = APIRouter()
 
 
-@router.get("/sessions/next"
+@router.get("/sessions/next",
+            response_model=List[Session]
             )
 def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     next_sessions_event: NextScheduledSessions = command_bus_provider.command_bus.send(GetNextSessionsCommand(datetime.datetime.now())).event
@@ -25,7 +28,7 @@ def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusP
                 "stop": session.stop.isoformat() if session.stop else None
             },
             "duration": {
-                "time_unit": session.duration["time_unit"],
+                "unit": session.duration["time_unit"],
                 "duration": session.duration["duration"]
             },
             "attendees": session.attendees

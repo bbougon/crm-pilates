@@ -44,7 +44,7 @@ def test_get_next_sessions(memory_repositories):
                 "stop": "2019-05-07T11:00:00"
             },
             "duration": {
-                "time_unit": "MINUTE",
+                "unit": "MINUTE",
                 "duration": 60
             },
             "attendees": [
@@ -62,7 +62,7 @@ def test_get_next_sessions(memory_repositories):
                 "stop": "2019-05-07T12:00:00"
             },
             "duration": {
-                "time_unit": "MINUTE",
+                "unit": "MINUTE",
                 "duration": 60
             },
             "attendees": [

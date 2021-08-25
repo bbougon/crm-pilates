@@ -54,7 +54,7 @@ def test_retrieve_next_session():
 
 
 @immobilus("2020-9-24 08:24:15.230")
-def test_retrieve_next_session_for_duration():
+def test_retrieve_next_session_with_duration():
     classroom = Classroom.create("next session", datetime(2020, 9, 10, 10), 2, stop_date=datetime(2021, 6, 10, 10),
                                  duration=Duration(MinuteTimeUnit(45)))
 
@@ -70,8 +70,8 @@ def test_do_not_retrieve_next_session_if_no_session_today():
     assert classroom.next_session() is None
 
 
-@immobilus("2020-9-20 08:24:15.230")
+@immobilus("2021-08-22 08:24:15.230")
 def test_retrieve_next_session_if_today_is_sunday_and_next_session_on_monday():
-    classroom = Classroom.create("next session", datetime(2020, 9, 7, 10), 2, stop_date=datetime(2021, 6, 10, 10))
+    classroom = Classroom.create("next session", datetime(2021, 8, 23, 10), 2, stop_date=datetime(2022, 7, 12, 10))
 
     assert classroom.next_session()
