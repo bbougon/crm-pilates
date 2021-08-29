@@ -73,7 +73,7 @@ The API documentation is available in 3 formats:
 1. Create a classroom (see above section)
 1. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8081/classrooms/{id} -X PATCH --data '{"attendees": [{"client_id": "A_CLIENT_ID"}]}' -H"Content-Type: application/json" -v
+   curl http://localhost:8081/classrooms/{id} -X PATCH --data '{"attendees": [{"id": "A_CLIENT_ID"}]}' -H"Content-Type: application/json" -v
    ```
    Expected result:
    ```bash
@@ -85,5 +85,5 @@ The API documentation is available in 3 formats:
 1. Add attendees to a classroom (see above section)
 1. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8081/sessions/checkin -X PATCH --data '{"classroom_id": "CLASSROOM_ID", "session_date": "SESSION_DATE", "attendee": "ATTENDEE_ID"}' -H"Content-Type: application/json" -v | jq
+   curl http://localhost:8081/sessions/checkin -X POST --data '{"classroom_id": "CLASSROOM_ID", "session_date": "SESSION_DATE", "attendee": "ATTENDEE_ID"}' -H"Content-Type: application/json" -v | jq
    ```
