@@ -7,18 +7,12 @@ from domain.classroom.classroom import ConfirmedSession, Attendee
 from domain.classroom.session_creation_command_handler import ConfirmedSessionEvent
 from domain.commands import SessionCreationCommand
 from domain.sagas import SessionCheckinSaga
-from event.event_store import Event
+from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
 
 
+@EventSourced
 class SessionCheckedIn(Event):
-    id: UUID
-    name: str
-    classroom_id: UUID
-    position: int
-    start: datetime
-    stop: datetime
-    attendees: List[dict]
 
     def __init__(self, root_id: UUID, name: str, classroom_id: UUID, position: int, start: datetime, stop: datetime,
                  attendees: List[Attendee]) -> None:
@@ -34,7 +28,17 @@ class SessionCheckedIn(Event):
         return {"id": attendee.id, "attendance": attendee.attendance.value}
 
     def _to_payload(self):
-        pass
+        return {
+            "id": self.root_id,
+            "classroom_id": self.classroom_id,
+            "name": self.name,
+            "position": self.position,
+            "schedule": {
+                "start": self.start,
+                "stop": self.stop
+            },
+            "attendees": list(map(lambda attendee: {"id": attendee["id"], "attendance": attendee["attendance"]}, self.attendees))
+        }
 
 
 class SessionCheckinSagaHandler(SagaHandler):

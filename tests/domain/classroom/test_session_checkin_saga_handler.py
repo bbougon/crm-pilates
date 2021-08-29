@@ -2,16 +2,17 @@ from datetime import datetime
 
 from immobilus import immobilus
 
-from domain.classroom.session_creation_command_handler import SessionCreationCommandHandler, ConfirmedSessionEvent
-from domain.commands import SessionCreationCommand
+from domain.classroom.session_checkin_saga_handler import SessionCheckinSagaHandler, SessionCheckedIn
+from domain.sagas import SessionCheckinSaga
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
-from tests.builders.builders_for_test import ClassroomBuilderForTest, ClassroomContextBuilderForTest, \
-    ClientContextBuilderForTest
+from tests.builders.builders_for_test import ClientContextBuilderForTest, ClassroomContextBuilderForTest, \
+    ClassroomBuilderForTest
+from tests.builders.providers_for_test import CommandBusProviderForTest
 
 
 @immobilus("2020-04-03 10:24:15.230")
-def test_session_creation_event_is_stored(memory_event_store):
+def test_session_checkin_event_is_stored(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
         RepositoryProvider.write_repositories.client).build()
     repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
@@ -20,18 +21,19 @@ def test_session_creation_event_is_stored(memory_event_store):
         RepositoryProvider.write_repositories.classroom).build()
     classroom = classrooms[0]
 
-    confirmed_session: ConfirmedSessionEvent = SessionCreationCommandHandler().execute(SessionCreationCommand(
-        classroom.id, datetime(2020, 4, 3, 11, 0)))
+    session: SessionCheckedIn = SessionCheckinSagaHandler(CommandBusProviderForTest().provide().command_bus).execute(
+        SessionCheckinSaga(classroom.id, datetime(2020, 4, 3, 11, 0), clients[1].id))
 
     events = StoreLocator.store.get_all()
-    assert len(events) == 1
+    assert len(events) == 2
     assert events[0].type == "ConfirmedSessionEvent"
-    assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
-    assert events[0].payload == {
-        "id": confirmed_session.root_id,
+    assert events[1].type == "SessionCheckedIn"
+    assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
+    assert events[1].payload == {
+        "id": session.root_id,
         "classroom_id": classroom.id,
-        "name": confirmed_session.name,
-        "position": confirmed_session.position,
+        "name": session.name,
+        "position": session.position,
         "schedule": {
             "start": datetime(2020, 4, 3, 11, 0),
             "stop": datetime(2020, 4, 3, 12, 0)
@@ -43,7 +45,7 @@ def test_session_creation_event_is_stored(memory_event_store):
             },
             {
                 "id": clients[1].id,
-                "attendance": "REGISTERED"
+                "attendance": "CHECKED_IN"
             }
         ]
     }
