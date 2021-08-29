@@ -31,7 +31,7 @@ class SessionCheckedIn(Event):
         self.attendees = list(map(lambda attendee: self.__map_attendee(attendee), attendees))
 
     def __map_attendee(self, attendee: Attendee) -> dict:
-        return {"id": attendee.id, "status": attendee.attendance.value}
+        return {"id": attendee.id, "attendance": attendee.attendance.value}
 
     def _to_payload(self):
         pass

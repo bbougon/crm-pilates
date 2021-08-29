@@ -35,6 +35,7 @@ def test_get_next_sessions(memory_repositories):
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
         {
+            "id": None,
             "name": first_classroom.name,
             "classroom_id": str(first_classroom.id),
             "position": first_classroom.position,
@@ -42,16 +43,13 @@ def test_get_next_sessions(memory_repositories):
                 "start": "2019-05-07T10:00:00",
                 "stop": "2019-05-07T11:00:00"
             },
-            "duration": {
-                "unit": "MINUTE",
-                "duration": 60
-            },
             "attendees": [
-                {"client_id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
-                {"client_id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
+                {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname, "attendance": "REGISTERED"},
+                {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname, "attendance": "REGISTERED"}
             ]
         },
         {
+            "id": None,
             "name": second_classroom.name,
             "classroom_id": str(second_classroom.id),
             "position": second_classroom.position,
@@ -59,12 +57,8 @@ def test_get_next_sessions(memory_repositories):
                 "start": "2019-05-07T11:00:00",
                 "stop": "2019-05-07T12:00:00"
             },
-            "duration": {
-                "unit": "MINUTE",
-                "duration": 60
-            },
             "attendees": [
-                {"client_id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname},
+                {"id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname, "attendance": "REGISTERED"},
             ]
         }
     ]
@@ -97,7 +91,7 @@ def test_register_checkin(memory_repositories):
             "stop": "2019-05-07T11:00:00"
         },
         "attendees": [
-            {"id": str(clients[0].id), "status": "CHECKED_IN"},
-            {"id": str(clients[1].id), "status": "REGISTERED"}
+            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname, "attendance": "CHECKED_IN"},
+            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname, "attendance": "REGISTERED"}
         ]
     }

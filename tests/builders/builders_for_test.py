@@ -153,7 +153,7 @@ class ClassroomJsonBuilderForTest(Builder):
     def build(self):
         classroom = {"name": self.classroom_name, "position": self.position, "start_date": self.start_date.isoformat()}
         if self.attendees:
-            classroom["attendees"] = list(map(lambda attendee: {"client_id": attendee.hex}, self.attendees))
+            classroom["attendees"] = list(map(lambda attendee: {"id": attendee.hex}, self.attendees))
         if self.stop_date:
             classroom["stop_date"] = self.stop_date
         if self.duration:
@@ -195,7 +195,7 @@ class ClassroomPatchJsonBuilderForTest(Builder):
         return ClassroomPatch.parse_obj({"attendees": self.attendees})
 
     def with_attendee(self, client_id: UUID) -> ClassroomPatchJsonBuilderForTest:
-        self.attendees.append({"client_id": client_id.hex})
+        self.attendees.append({"id": client_id.hex})
         return self
 
 

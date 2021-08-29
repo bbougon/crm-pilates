@@ -1,16 +1,15 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic.main import BaseModel
 
-from web.schema.classroom_schemas import Duration
-
 
 class Attendee(BaseModel):
-    client_id: UUID
+    id: UUID
     firstname: str
     lastname: str
+    attendance: str
 
 
 class Schedule(BaseModel):
@@ -19,9 +18,9 @@ class Schedule(BaseModel):
 
 
 class SessionResponse(BaseModel):
+    id: Optional[UUID]
     name: str
     classroom_id: UUID
     position: int
     schedule: Schedule
-    duration: Duration
     attendees: List[Attendee]

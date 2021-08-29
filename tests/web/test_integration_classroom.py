@@ -59,8 +59,8 @@ def test_get_classroom(memory_repositories):
             "duration": classroom.duration.time_unit.value
         },
         "attendees": [
-            {"client_id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
-            {"client_id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
+            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
+            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
         ]
     }
 
@@ -73,6 +73,6 @@ def test_add_attendee_to_a_classroom():
         RepositoryProvider.write_repositories.classroom).build()
 
     response: Response = client.patch(f"/classrooms/{classrooms[0]._id}",
-                                      json={"attendees": [{"client_id": clients[1]._id.hex}]})
+                                      json={"attendees": [{"id": clients[1]._id.hex}]})
 
     assert response.status_code == status.HTTP_204_NO_CONTENT

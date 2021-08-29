@@ -11,8 +11,8 @@ def test_attendees_are_unique_for_creation():
             "position": 2,
             "start_date": Datetime().datetime(),
             "attendees": [
-                {"client_id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"},
-                {"client_id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"}
+                {"id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"},
+                {"id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"}
             ]
         })
 
@@ -23,8 +23,8 @@ def test_attendees_are_unique_for_patch():
     with pytest.raises(ValueError) as e:
         ClassroomPatch.parse_obj({
             "attendees": [
-                {"client_id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"},
-                {"client_id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"}
+                {"id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"},
+                {"id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"}
             ]
         })
 

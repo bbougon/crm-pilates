@@ -1,6 +1,8 @@
 from typing import List
+from uuid import UUID
 
 from domain.classroom.classroom import Classroom
+from web.presentation.domain.detailed_attendee import DetailedAttendee
 from web.presentation.domain.units import Units
 
 
@@ -14,12 +16,12 @@ class Duration:
 
 class DetailedClassroom:
 
-    def __init__(self, classroom: Classroom, attendees: List[dict]) -> None:
+    def __init__(self, classroom: Classroom, attendees: List[DetailedAttendee]) -> None:
         super().__init__()
-        self.id = classroom.id
-        self.name = classroom.name
-        self.position = classroom.position
-        self.start = classroom.schedule.start.isoformat()
-        self.stop = classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
-        self.duration = Duration(classroom.duration.time_unit.value, Units.units()[classroom.duration.time_unit.__class__.__name__])
-        self.attendees = attendees
+        self.id: UUID = classroom.id
+        self.name: str = classroom.name
+        self.position: int = classroom.position
+        self.start: str = classroom.schedule.start.isoformat()
+        self.stop: str = classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
+        self.duration: Duration = Duration(classroom.duration.time_unit.value, Units.units()[classroom.duration.time_unit.__class__.__name__])
+        self.attendees: List[DetailedAttendee] = attendees

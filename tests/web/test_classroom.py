@@ -58,7 +58,7 @@ def test_create_classroom_with_attendees(memory_event_store):
                                 CommandBusProviderForTest().provide())
 
     assert len(response["attendees"]) == 2
-    attendees_ids = list(map(lambda attendee: attendee['client_id'], response["attendees"]))
+    attendees_ids = list(map(lambda attendee: attendee['id'], response["attendees"]))
     assert clients[0]._id in attendees_ids
     assert clients[1]._id in attendees_ids
 

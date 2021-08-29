@@ -79,3 +79,11 @@ The API documentation is available in 3 formats:
    ```bash
     HTTP/1.1 204 No Content
    ```
+
+#### Checkin
+1. Run the API (see above section)
+1. Add attendees to a classroom (see above section)
+1. Use the `curl` command line as below
+   ```bash
+   curl http://localhost:8081/sessions/checkin -X PATCH --data '{"classroom_id": "CLASSROOM_ID", "session_date": "SESSION_DATE", "attendee": "ATTENDEE_ID"}' -H"Content-Type: application/json" -v | jq
+   ```

@@ -18,16 +18,16 @@ class Duration(BaseModel):
 
 
 class AttendeeSchema(BaseModel):
-    client_id: UUID
+    id: UUID
 
     def __hash__(self) -> int:
-        return hash(self.client_id)
+        return hash(self.id)
 
 
 def check_unique_attendees(v):
     unique_ids = set()
     for item in v:
-        unique_ids.add(item["client_id"])
+        unique_ids.add(item["id"])
     if len(v) != len(unique_ids):
         raise ValueError("You provided the same attendee twice or more, please check the attendees and retry")
     return v
