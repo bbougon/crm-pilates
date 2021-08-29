@@ -9,6 +9,7 @@ from infrastructure.command_bus_provider import CommandBusProvider, command_hand
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
+from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
 from infrastructure.repository_provider import RepositoryProvider
 
 
@@ -34,7 +35,11 @@ class RepositoryProviderForTest(ProviderForTest):
 
     def __init__(self) -> None:
         super().__init__()
-        self.repositories = {}
+        self.repositories = {
+            "classroom": MemoryClassroomRepository(),
+            "client": MemoryClientRepository(),
+            "session": MemorySessionRepository()
+        }
 
     def provide(self):
         RepositoryProvider.write_repositories = Repositories(self.repositories)

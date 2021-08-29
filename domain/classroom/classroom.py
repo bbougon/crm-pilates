@@ -116,7 +116,6 @@ class Session:
         self.__name: str = classroom.name
         self.__position: int = classroom.position
         self.__attendees: List[Attendee] = classroom.attendees
-        self.__duration: Duration = classroom.duration
         self.__start: datetime = start
         self.__stop: datetime = stop
         self.__classroom_id: UUID = classroom.id
@@ -136,10 +135,6 @@ class Session:
     @property
     def position(self):
         return self.__position
-
-    @property
-    def duration(self):
-        return self.__duration
 
     @property
     def start(self):
