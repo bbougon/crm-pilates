@@ -21,7 +21,6 @@ class Schedule(BaseModel):
 class Session(BaseModel):
     name: str
     classroom_id: UUID
-    id: UUID
     position: int
     schedule: Schedule
     duration: Duration

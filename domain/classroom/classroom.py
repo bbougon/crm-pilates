@@ -93,11 +93,13 @@ class Attendee:
         return Attendee(id)
 
 
-class ScheduledSession(Classroom):
+class Session:
 
     def __init__(self, classroom: Classroom, start: datetime, stop: datetime) -> None:
-        super().__init__(classroom._name, classroom._position, classroom._schedule, classroom._duration)
-        self.__attendees = classroom._attendees
+        self.__name = classroom.name
+        self.__position = classroom.position
+        self.__attendees = classroom.attendees
+        self.__duration = classroom.duration
         self.__start = start
         self.__stop = stop
         self.__classroom_id = classroom.id
@@ -112,19 +114,15 @@ class ScheduledSession(Classroom):
 
     @property
     def name(self):
-        return self._name
-
-    @property
-    def id(self):
-        return self._id
+        return self.__name
 
     @property
     def position(self):
-        return self._position
+        return self.__position
 
     @property
     def duration(self):
-        return self._duration
+        return self.__duration
 
     @property
     def start(self):
@@ -133,3 +131,9 @@ class ScheduledSession(Classroom):
     @property
     def stop(self):
         return self.__stop
+
+
+class ScheduledSession(Session):
+
+    def __init__(self, classroom: Classroom, start: datetime, stop: datetime) -> None:
+        super().__init__(classroom, start, stop)

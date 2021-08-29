@@ -21,7 +21,6 @@ def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusP
         next_session = {
             "name": session.name,
             "classroom_id": session.classroom_id,
-            "id": str(session.id),
             "position": session.position,
             "schedule": {
                 "start": session.start.isoformat(),

@@ -16,7 +16,6 @@ class NextScheduledSession(Event):
         super().__init__(root_id)
         self.name = session.name
         self.classroom_id = session.classroom_id
-        self.id = session.id
         self.position = session.position
         self.start = session.start
         self.stop = session.stop

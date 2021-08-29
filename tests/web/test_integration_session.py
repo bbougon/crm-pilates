@@ -1,5 +1,4 @@
 from datetime import datetime
-from unittest.mock import ANY
 
 from fastapi import status, Response
 from fastapi.testclient import TestClient
@@ -37,7 +36,6 @@ def test_get_next_sessions(memory_repositories):
         {
             "name": first_classroom.name,
             "classroom_id": str(first_classroom.id),
-            "id": ANY,
             "position": first_classroom.position,
             "schedule": {
                 "start": "2019-05-07T10:00:00",
@@ -55,7 +53,6 @@ def test_get_next_sessions(memory_repositories):
         {
             "name": second_classroom.name,
             "classroom_id": str(second_classroom.id),
-            "id": ANY,
             "position": second_classroom.position,
             "schedule": {
                 "start": "2019-05-07T11:00:00",
