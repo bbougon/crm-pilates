@@ -29,6 +29,12 @@ class ClassroomPatchCommand(Command):
     attendees: List[UUID] = field(default_factory=list)
 
 
-@dataclass()
+@dataclass
 class GetNextSessionsCommand(Command):
     current_time: datetime
+
+
+@dataclass
+class SessionCreationCommand(Command):
+    classroom_id: UUID
+    session_date: datetime

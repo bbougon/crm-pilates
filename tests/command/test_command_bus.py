@@ -26,7 +26,7 @@ class SimpleCommandHandler(CommandHandler):
 
 
 def test_send_a_command_and_retrieve_response():
-    command_bus = CommandBus({"SimpleCommand": SimpleCommandHandler()})
+    command_bus = CommandBus({"SimpleCommand": SimpleCommandHandler()}, {})
 
     response = command_bus.send(SimpleCommand(name="name"))
 

@@ -3,20 +3,13 @@ import sqlite3
 import immobilus  # noqa
 import pytest
 
-from command.command_bus import CommandBus
-from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler
-from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
-from domain.client.client_command_handler import ClientCreationCommandHandler
-from domain.commands import ClientCreationCommand, ClassroomCreationCommand, ClassroomPatchCommand, \
-    GetNextSessionsCommand
-from domain.classroom.next_sessions_command_handler import NextSessionsCommandHandler
 from event.event_store import StoreLocator
-from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
     MemoryClassRoomReadRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository, \
     MemoryClientReadRepository
+from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
 from infrastructure.repository_provider import RepositoryProvider
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
@@ -38,25 +31,14 @@ def memory_event_store():
 
 
 @pytest.fixture
-def command_bus():
-    command_bus = CommandBus(
-        {
-            ClientCreationCommand.__name__: ClientCreationCommandHandler(),
-            ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(),
-            ClassroomPatchCommand.__name__: ClassroomPatchCommandHandler(),
-            GetNextSessionsCommand.__name__: NextSessionsCommandHandler()
-        }
-    )
-    CommandBusProvider.command_bus = command_bus
-
-
-@pytest.fixture
 def memory_repositories():
     classroom_repository = MemoryClassroomRepository()
     client_repository = MemoryClientRepository()
+    session_repository = MemorySessionRepository()
     RepositoryProvider.write_repositories = Repositories({
         "classroom": classroom_repository,
-        "client": client_repository
+        "client": client_repository,
+        "session": session_repository
     })
     RepositoryProvider.read_repositories = Repositories({
         "classroom": MemoryClassRoomReadRepository(classroom_repository),

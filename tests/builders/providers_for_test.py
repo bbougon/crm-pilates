@@ -5,7 +5,7 @@ from abc import abstractmethod
 from command.command_bus import CommandBus
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.client.client_repository import ClientRepository
-from infrastructure.command_bus_provider import CommandBusProvider, handlers
+from infrastructure.command_bus_provider import CommandBusProvider, command_handlers, saga_handlers
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
@@ -26,7 +26,7 @@ class CommandBusProviderForTest(ProviderForTest):
         self.handlers = {}
 
     def provide(self):
-        CommandBusProvider.command_bus = CommandBus(handlers)
+        CommandBusProvider.command_bus = CommandBus(command_handlers, saga_handlers)
         return CommandBusProvider
 
 

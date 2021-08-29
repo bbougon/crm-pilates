@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from enum import Enum
 from typing import List
 from uuid import UUID
 
@@ -77,12 +79,21 @@ class Classroom(AggregateRoot):
         monday: datetime = datetime.now() + timedelta(days=1)
         return monday.isoweekday() == Weekdays.MONDAY
 
+    def confirm_session_at(self, session_date: datetime) -> ConfirmedSession:
+        return ConfirmedSession(self, session_date, session_date + timedelta(minutes=60))
+
+
+class Attendance(Enum):
+    REGISTERED = "REGISTERED"
+    CHECKED_IN = "CHECKED_IN"
+
 
 class Attendee:
 
     def __init__(self, id: UUID) -> None:
         super().__init__()
         self._id = id
+        self.attendance = Attendance.REGISTERED
 
     @property
     def id(self) -> UUID:
@@ -92,17 +103,23 @@ class Attendee:
     def create(id: UUID) -> Attendee:
         return Attendee(id)
 
+    def checkin(self):
+        self.attendance = Attendance.CHECKED_IN
+
+    def __eq__(self, o: object) -> bool:
+        return isinstance(o, Attendee) and self.id == o.id
+
 
 class Session:
 
     def __init__(self, classroom: Classroom, start: datetime, stop: datetime) -> None:
-        self.__name = classroom.name
-        self.__position = classroom.position
-        self.__attendees = classroom.attendees
-        self.__duration = classroom.duration
-        self.__start = start
-        self.__stop = stop
-        self.__classroom_id = classroom.id
+        self.__name: str = classroom.name
+        self.__position: int = classroom.position
+        self.__attendees: List[Attendee] = classroom.attendees
+        self.__duration: Duration = classroom.duration
+        self.__start: datetime = start
+        self.__stop: datetime = stop
+        self.__classroom_id: UUID = classroom.id
 
     @property
     def classroom_id(self):
@@ -137,3 +154,15 @@ class ScheduledSession(Session):
 
     def __init__(self, classroom: Classroom, start: datetime, stop: datetime) -> None:
         super().__init__(classroom, start, stop)
+
+
+class ConfirmedSession(Session, AggregateRoot):
+
+    def __init__(self, classroom: Classroom, start: datetime, stop: datetime) -> None:
+        super().__init__(classroom, start, stop)
+        self._id = uuid.uuid4()
+
+    def checkin(self, attendee: Attendee):
+        for registered_attendee in self.attendees:
+            if registered_attendee == attendee:
+                registered_attendee.checkin()

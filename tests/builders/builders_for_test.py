@@ -7,7 +7,7 @@ from uuid import UUID
 
 from mimesis import Person, Text, Numbers, Datetime
 
-from domain.classroom.classroom import Classroom, Attendee
+from domain.classroom.classroom import Classroom, Attendee, ScheduledSession
 from domain.classroom.duration import Duration, HourTimeUnit
 from domain.client.client import Client
 from domain.repository import Repository
@@ -196,4 +196,20 @@ class ClassroomPatchJsonBuilderForTest(Builder):
 
     def with_attendee(self, client_id: UUID) -> ClassroomPatchJsonBuilderForTest:
         self.attendees.append({"client_id": client_id.hex})
+        return self
+
+
+class SessionCheckinJsonBuilderForTest(Builder):
+
+    def __init__(self, session: ScheduledSession) -> None:
+        super().__init__()
+        self.classroom_id: UUID = session.classroom_id
+        self.session_date: datetime = session.start
+        self.attendee: UUID = None
+
+    def build(self):
+        return {"classroom_id": self.classroom_id.hex, "session_date": self.session_date.isoformat(), "attendee": self.attendee.hex}
+
+    def for_attendee(self, attendee_id: UUID) -> SessionCheckinJsonBuilderForTest:
+        self.attendee = attendee_id
         return self

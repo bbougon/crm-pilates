@@ -18,7 +18,7 @@ class Schedule(BaseModel):
     stop: datetime
 
 
-class Session(BaseModel):
+class SessionResponse(BaseModel):
     name: str
     classroom_id: UUID
     position: int
