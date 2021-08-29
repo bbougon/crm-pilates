@@ -7,12 +7,14 @@ from uuid import UUID
 
 from mimesis import Person, Text, Numbers, Datetime
 
-from domain.classroom.classroom import Classroom, Attendee, ScheduledSession
+from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
+from domain.classroom.classroom_repository import ClassroomRepository
 from domain.classroom.duration import Duration, HourTimeUnit
 from domain.client.client import Client
 from domain.repository import Repository
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
+from infrastructure.repository_provider import RepositoryProvider
 from web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 
 
@@ -139,6 +141,40 @@ class ClassroomContextBuilderForTest(Builder):
         return self
 
 
+class SessionContextBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.classroom = ClassroomBuilderForTest().build()
+        self.repository: ClassroomRepository = None
+        self.date: datetime = self.classroom.schedule.start
+        self.client_checkin: UUID = None
+
+    def build(self):
+        session: ConfirmedSession = self.classroom.confirm_session_at(self.date)
+        if self.client_checkin:
+            session.checkin(Attendee.create(self.client_checkin))
+        if self.repository:
+            self.repository.persist(session)
+        return self.repository, session
+
+    def with_classroom(self, classroom: Classroom) -> SessionContextBuilderForTest:
+        self.classroom = classroom
+        return self
+
+    def at(self, date: datetime) -> SessionContextBuilderForTest:
+        self.date = date
+        return self
+
+    def persist(self, repository: ClassroomRepository = None) -> SessionContextBuilderForTest:
+        self.repository = repository if repository else MemoryClassroomRepository()
+        return self
+
+    def checkin(self, client_id: UUID) -> SessionContextBuilderForTest:
+        self.client_checkin = client_id
+        return self
+
+
 class ClassroomJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
@@ -201,15 +237,36 @@ class ClassroomPatchJsonBuilderForTest(Builder):
 
 class SessionCheckinJsonBuilderForTest(Builder):
 
-    def __init__(self, session: ScheduledSession) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.classroom_id: UUID = session.classroom_id
-        self.session_date: datetime = session.start
         self.attendee: UUID = None
+        self.session_date: datetime = None
+        repository, classrooms = ClassroomContextBuilderForTest().persist(RepositoryProvider.write_repositories.classroom).build()
+        self.classroom: Classroom = classrooms[0]
+        self.classroom_id = self.classroom.id
 
     def build(self):
-        return {"classroom_id": self.classroom_id.hex, "session_date": self.session_date.isoformat(), "attendee": self.attendee.hex}
+        if not self.attendee:
+            repository, clients = ClientContextBuilderForTest().persist(RepositoryProvider.write_repositories.client).build()
+            self.attendee = clients[0].id
+            self.classroom.all_attendees([Attendee.create(self.attendee)])
+        if not self.session_date:
+            self.session_date = self.classroom.schedule.start
+        return {"classroom_id": str(self.classroom_id), "session_date": self.session_date.isoformat(), "attendee": str(self.attendee)}
+
+    def for_classroom(self, classroom: Classroom) -> SessionCheckinJsonBuilderForTest:
+        self.classroom_id = classroom.id
+        return self
+
+    def for_session(self, session: ScheduledSession) -> SessionCheckinJsonBuilderForTest:
+        self.classroom_id: UUID = session.classroom_id
+        self.session_date: datetime = session.start
+        return self
 
     def for_attendee(self, attendee_id: UUID) -> SessionCheckinJsonBuilderForTest:
         self.attendee = attendee_id
+        return self
+
+    def at(self, date: datetime) -> SessionCheckinJsonBuilderForTest:
+        self.session_date = date
         return self

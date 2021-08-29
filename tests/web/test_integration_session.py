@@ -9,7 +9,8 @@ from domain.classroom.classroom import Classroom, ScheduledSession
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientContextBuilderForTest, \
-    ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionCheckinJsonBuilderForTest
+    ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionCheckinJsonBuilderForTest, \
+    SessionContextBuilderForTest
 
 client = TestClient(app)
 
@@ -44,8 +45,10 @@ def test_get_next_sessions(memory_repositories):
                 "stop": "2019-05-07T11:00:00"
             },
             "attendees": [
-                {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname, "attendance": "REGISTERED"},
-                {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname, "attendance": "REGISTERED"}
+                {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
+                 "attendance": "REGISTERED"},
+                {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+                 "attendance": "REGISTERED"}
             ]
         },
         {
@@ -58,7 +61,8 @@ def test_get_next_sessions(memory_repositories):
                 "stop": "2019-05-07T12:00:00"
             },
             "attendees": [
-                {"id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname, "attendance": "REGISTERED"},
+                {"id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname,
+                 "attendance": "REGISTERED"},
             ]
         }
     ]
@@ -77,8 +81,9 @@ def test_register_checkin(memory_repositories):
 
     classroom: Classroom = classrooms[0]
     session: ScheduledSession = classroom.next_session()
-    response: Response = client.post("/sessions/checkin", json=SessionCheckinJsonBuilderForTest(session).for_attendee(
-        clients[0]._id).build())
+    response: Response = client.post("/sessions/checkin",
+                                     json=SessionCheckinJsonBuilderForTest().for_session(session).for_attendee(
+                                         clients[0]._id).build())
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == {
@@ -91,7 +96,44 @@ def test_register_checkin(memory_repositories):
             "stop": "2019-05-07T11:00:00"
         },
         "attendees": [
-            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname, "attendance": "CHECKED_IN"},
-            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname, "attendance": "REGISTERED"}
+            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
+             "attendance": "CHECKED_IN"},
+            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+             "attendance": "REGISTERED"}
+        ]
+    }
+
+
+@immobilus("2019-03-08 09:24:15.230")
+def test_updated_session_produces_ok_200(memory_event_store):
+    client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
+        RepositoryProvider.write_repositories.client).build()
+    repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().starting_at(datetime(2020, 3, 8, 11, 0)).with_attendee(clients[0].id).with_attendee(
+            clients[1].id)).persist(
+        RepositoryProvider.write_repositories.classroom).build()
+    classroom = classrooms[0]
+    SessionContextBuilderForTest().with_classroom(classroom).checkin(clients[0].id).at(
+        datetime(2020, 3, 8, 11, 0)).persist(RepositoryProvider.write_repositories.session).build()
+
+    response: Response = client.post("/sessions/checkin",
+                                     json=SessionCheckinJsonBuilderForTest().for_classroom(classroom).for_attendee(
+                                         clients[1]._id).at(datetime(2020, 3, 8, 11, 0)).build())
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "id": ANY,
+        "name": classroom.name,
+        "classroom_id": str(classroom.id),
+        "position": classroom.position,
+        "schedule": {
+            "start": "2020-03-08T11:00:00",
+            "stop": "2020-03-08T12:00:00"
+        },
+        "attendees": [
+            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
+             "attendance": "CHECKED_IN"},
+            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+             "attendance": "CHECKED_IN"}
         ]
     }

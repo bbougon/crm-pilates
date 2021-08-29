@@ -1,10 +1,10 @@
 import datetime
 from typing import List
 
-from fastapi import status, APIRouter, Depends
+from fastapi import status, APIRouter, Depends, Response
 
 from domain.classroom.next_sessions_command_handler import NextScheduledSessions
-from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
+from domain.classroom.session_checkin_saga_handler import SessionCheckedIn, SessionCheckedInStatus
 from domain.commands import GetNextSessionsCommand
 from domain.sagas import SessionCheckinSaga
 from infrastructure.command_bus_provider import CommandBusProvider
@@ -41,10 +41,12 @@ def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusP
              status_code=status.HTTP_201_CREATED,
              response_model=SessionResponse
              )
-def session_checkin(session_checkin: SessionCheckin,
+def session_checkin(session_checkin: SessionCheckin, response: Response,
                     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     checkin_event: SessionCheckedIn = command_bus_provider.command_bus.send(
         SessionCheckinSaga(session_checkin.classroom_id, session_checkin.session_date, session_checkin.attendee)).event
+    if checkin_event.status == SessionCheckedInStatus.UPDATED:
+        response.status_code = status.HTTP_200_OK
     return {
         "id": checkin_event.id,
         "name": checkin_event.name,
