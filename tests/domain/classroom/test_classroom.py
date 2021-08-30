@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, Attendee, ScheduledSession
+from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.exceptions import DomainException
 
@@ -75,3 +75,11 @@ def test_retrieve_next_session_if_today_is_sunday_and_next_session_on_monday():
     classroom = Classroom.create("next session", datetime(2021, 8, 23, 10), 2, stop_date=datetime(2022, 7, 12, 10))
 
     assert classroom.next_session()
+
+
+def test_confirm_session_with_scheduled_time():
+    classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
+
+    session: ConfirmedSession = classroom.confirm_session_at(datetime(2019, 6, 7, 10))
+
+    assert session.stop == datetime(2019, 6, 7, 10, 45)

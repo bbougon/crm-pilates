@@ -80,7 +80,7 @@ class Classroom(AggregateRoot):
         return monday.isoweekday() == Weekdays.MONDAY
 
     def confirm_session_at(self, session_date: datetime) -> ConfirmedSession:
-        return ConfirmedSession(self, session_date, session_date + timedelta(minutes=60))
+        return ConfirmedSession(self, session_date, session_date + timedelta(minutes=self.duration.time_unit.to_unit(MinuteTimeUnit).value))
 
 
 class Attendance(Enum):
