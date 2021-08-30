@@ -4,7 +4,8 @@ from datetime import datetime
 import pytest
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
+from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession, \
+    InvalidSessionStartDateException
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.exceptions import DomainException
 
@@ -83,3 +84,11 @@ def test_confirm_session_with_scheduled_time():
     session: ConfirmedSession = classroom.confirm_session_at(datetime(2019, 6, 7, 10))
 
     assert session.stop == datetime(2019, 6, 7, 10, 45)
+
+
+def test_confirm_session_with_valid_date():
+    with pytest.raises(InvalidSessionStartDateException) as e:
+        classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
+        classroom.confirm_session_at(datetime(2019, 6, 8, 10))
+
+    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 8, 10).isoformat()}'"

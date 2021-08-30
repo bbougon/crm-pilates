@@ -154,9 +154,17 @@ class ConfirmedSession(Session, AggregateRoot):
 
     def __init__(self, classroom: Classroom, start: datetime) -> None:
         super().__init__(classroom, start)
+        if (classroom.schedule.start.date() - start.date()).days % 7 != 0:
+            raise InvalidSessionStartDateException(classroom, start)
         self._id = uuid.uuid4()
 
     def checkin(self, attendee: Attendee):
         for registered_attendee in self.attendees:
             if registered_attendee == attendee:
                 registered_attendee.checkin()
+
+
+class InvalidSessionStartDateException(DomainException):
+
+    def __init__(self, classroom: Classroom, start_date: datetime, *args: object) -> None:
+        super().__init__(f"Classroom '{classroom.name}' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{start_date.isoformat()}'", *args)
