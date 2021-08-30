@@ -92,3 +92,11 @@ def test_confirm_session_with_valid_date():
         classroom.confirm_session_at(datetime(2019, 6, 8, 10))
 
     assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 8, 10).isoformat()}'"
+
+
+def test_confirm_session_with_valid_date_and_time():
+    with pytest.raises(InvalidSessionStartDateException) as e:
+        classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
+        classroom.confirm_session_at(datetime(2019, 6, 7, 10, 30))
+
+    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 7, 10, 30).isoformat()}'"

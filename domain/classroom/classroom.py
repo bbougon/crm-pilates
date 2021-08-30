@@ -154,7 +154,7 @@ class ConfirmedSession(Session, AggregateRoot):
 
     def __init__(self, classroom: Classroom, start: datetime) -> None:
         super().__init__(classroom, start)
-        if (classroom.schedule.start.date() - start.date()).days % 7 != 0:
+        if (classroom.schedule.start.date() - start.date()).days % 7 != 0 or (classroom.schedule.start.time() != start.time()):
             raise InvalidSessionStartDateException(classroom, start)
         self._id = uuid.uuid4()
 
