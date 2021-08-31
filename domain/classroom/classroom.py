@@ -69,7 +69,7 @@ class Classroom(AggregateRoot):
             return ScheduledSession(self, start)
 
     def __has_session_today(self) -> bool:
-        return self._schedule.start.date() == datetime.now().date() or (self._schedule.stop and (datetime.now().date() - self._schedule.start.date()).days % 7 == 0)
+        return self._schedule.start.date() == datetime.now().date() or (self._schedule.stop and datetime.now().weekday() == self._schedule.start.weekday())
 
     def __today_is_sunday(self):
         return datetime.now().today().isoweekday() == Weekdays.SUNDAY
@@ -154,7 +154,7 @@ class ConfirmedSession(Session, AggregateRoot):
 
     def __init__(self, classroom: Classroom, start: datetime) -> None:
         super().__init__(classroom, start)
-        if (classroom.schedule.start.date() - start.date()).days % 7 != 0 or (classroom.schedule.start.time() != start.time()):
+        if classroom.schedule.start.date().weekday() != start.date().weekday() or classroom.schedule.start.time() != start.time() or start < classroom.schedule.start:
             raise InvalidSessionStartDateException(classroom, start)
         self._id = uuid.uuid4()
 
@@ -167,4 +167,13 @@ class ConfirmedSession(Session, AggregateRoot):
 class InvalidSessionStartDateException(DomainException):
 
     def __init__(self, classroom: Classroom, start_date: datetime, *args: object) -> None:
-        super().__init__(f"Classroom '{classroom.name}' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{start_date.isoformat()}'", *args)
+        if start_date < classroom.schedule.start:
+            message = f"Classroom '{classroom.name}' starting at '{classroom.schedule.start.isoformat()}' cannot be set before"
+        else:
+            weekdays_difference = abs(classroom.schedule.start.date().weekday() - start_date.date().weekday())
+            closest_prior_date = datetime.combine((start_date.date() - timedelta(days=weekdays_difference)),
+                                                  classroom.schedule.start.time())
+            closest_following_date = datetime.combine((start_date.date() + timedelta(days=7 - weekdays_difference)),
+                                                      classroom.schedule.start.time())
+            message = f"Classroom '{classroom.name}' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{start_date.isoformat()}', closest possible dates are '{closest_prior_date.isoformat()}' or '{closest_following_date.isoformat()}'"
+        super().__init__(message, *args)

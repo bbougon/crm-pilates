@@ -270,3 +270,7 @@ class SessionCheckinJsonBuilderForTest(Builder):
     def at(self, date: datetime) -> SessionCheckinJsonBuilderForTest:
         self.session_date = date
         return self
+
+    def for_classroom_id(self, classroom_id) -> SessionCheckinJsonBuilderForTest:
+        self.classroom_id = classroom_id
+        return self

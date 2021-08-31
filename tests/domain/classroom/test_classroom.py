@@ -86,17 +86,25 @@ def test_confirm_session_with_scheduled_time():
     assert session.stop == datetime(2019, 6, 7, 10, 45)
 
 
-def test_confirm_session_with_valid_date():
+def test_cannot_confirm_session_with_invalid_date():
     with pytest.raises(InvalidSessionStartDateException) as e:
         classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
         classroom.confirm_session_at(datetime(2019, 6, 8, 10))
 
-    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 8, 10).isoformat()}'"
+    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 8, 10).isoformat()}', closest possible dates are '{datetime(2019, 6, 7, 10).isoformat()}' or '{datetime(2019, 6, 14, 10).isoformat()}'"
 
 
-def test_confirm_session_with_valid_date_and_time():
+def test_cannot_confirm_session_with_invalid_date_and_time():
     with pytest.raises(InvalidSessionStartDateException) as e:
-        classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
-        classroom.confirm_session_at(datetime(2019, 6, 7, 10, 30))
+        classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2020, 6, 1, 10), 2, duration=Duration(MinuteTimeUnit(45)))
+        classroom.confirm_session_at(datetime(2020, 6, 8, 10, 30))
 
-    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 7, 10, 30).isoformat()}'"
+    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2020, 6, 8, 10, 30).isoformat()}', closest possible dates are '{datetime(2020, 6, 8, 10).isoformat()}' or '{datetime(2020, 6, 15, 10).isoformat()}'"
+
+
+def test_cannot_confirm_session_with_date_prior_to_classroom_start_date():
+    with pytest.raises(InvalidSessionStartDateException) as e:
+        classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2020, 6, 1, 10), 2, duration=Duration(MinuteTimeUnit(45)))
+        classroom.confirm_session_at(datetime(2020, 5, 25, 10, 0))
+
+    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set before"
