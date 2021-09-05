@@ -26,6 +26,7 @@ def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusP
     result = []
     for session in next_sessions_event.sessions:
         next_session = {
+            "id": session.root_id,
             "name": session.name,
             "classroom_id": session.classroom_id,
             "position": session.position,

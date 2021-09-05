@@ -31,5 +31,5 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
 
     def __in_between_dates(self, classroom, at_date):
         if classroom.schedule.stop:
-            return classroom.schedule.start > at_date < classroom.schedule.stop
+            return classroom.schedule.start.date() <= at_date.date() <= classroom.schedule.stop.date()
         return classroom.schedule.start.date() == at_date.date() and classroom.schedule.start.time() >= at_date.time()
