@@ -2,7 +2,8 @@ from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
     MemoryClassRoomReadRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository, MemoryClientReadRepository
-from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
+from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository, \
+    MemorySessionReadRepository
 
 
 class RepositoryProvider:
@@ -23,4 +24,5 @@ RepositoryProvider.write_repositories = Repositories({
 RepositoryProvider.read_repositories = Repositories({
     "classroom": MemoryClassRoomReadRepository(classroom_repository),
     "client": MemoryClientReadRepository(client_repository),
+    "session": MemorySessionReadRepository(session_repository)
 })

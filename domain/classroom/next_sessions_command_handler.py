@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from command.command_handler import CommandHandler
-from domain.classroom.classroom import Classroom, ScheduledSession
+from domain.classroom.classroom import Classroom, Session
 from domain.commands import GetNextSessionsCommand
 from event.event_store import Event
 from infrastructure.repository_provider import RepositoryProvider
@@ -10,8 +10,9 @@ from infrastructure.repository_provider import RepositoryProvider
 
 class NextScheduledSession(Event):
 
-    def __init__(self, session: ScheduledSession, root_id: UUID = None) -> None:
+    def __init__(self, session: Session, root_id: UUID = None) -> None:
         super().__init__(root_id)
+        self.root_id = session.id
         self.name = session.name
         self.classroom_id = session.classroom_id
         self.position = session.position
@@ -43,5 +44,7 @@ class NextSessionsCommandHandler(CommandHandler):
             RepositoryProvider.read_repositories.classroom.get_next_classrooms_from(command.current_time))
         next_sessions = []
         for classroom in classrooms:
-            next_sessions.append(NextScheduledSession(classroom.next_session()))
+            next_session = classroom.next_session()
+            session: Session = RepositoryProvider.read_repositories.session.get_by_classroom_id_and_date(classroom.id, next_session.start)
+            next_sessions.append(NextScheduledSession(session or next_session))
         return NextScheduledSessions(next_sessions)

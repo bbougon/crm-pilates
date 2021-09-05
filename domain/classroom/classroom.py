@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -143,11 +144,20 @@ class Session:
     def stop(self):
         return self.__stop
 
+    @property
+    @abstractmethod
+    def id(self):
+        return None
+
 
 class ScheduledSession(Session):
 
     def __init__(self, classroom: Classroom, start: datetime) -> None:
         super().__init__(classroom, start)
+
+    @property
+    def id(self):
+        return None
 
 
 class ConfirmedSession(Session, AggregateRoot):
@@ -157,6 +167,10 @@ class ConfirmedSession(Session, AggregateRoot):
         if classroom.schedule.start.date().weekday() != start.date().weekday() or classroom.schedule.start.time() != start.time() or start < classroom.schedule.start:
             raise InvalidSessionStartDateException(classroom, start)
         self._id = uuid.uuid4()
+
+    @property
+    def id(self):
+        return self._id
 
     def checkin(self, attendee: Attendee):
         for registered_attendee in self.attendees:

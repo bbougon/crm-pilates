@@ -9,7 +9,8 @@ from infrastructure.repository.memory.memory_classroom_repositories import Memor
     MemoryClassRoomReadRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository, \
     MemoryClientReadRepository
-from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
+from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository, \
+    MemorySessionReadRepository
 from infrastructure.repository_provider import RepositoryProvider
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
@@ -43,4 +44,5 @@ def memory_repositories():
     RepositoryProvider.read_repositories = Repositories({
         "classroom": MemoryClassRoomReadRepository(classroom_repository),
         "client": MemoryClientReadRepository(client_repository),
+        "session": MemorySessionReadRepository(session_repository),
     })

@@ -141,40 +141,6 @@ class ClassroomContextBuilderForTest(Builder):
         return self
 
 
-class SessionContextBuilderForTest(Builder):
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.classroom = ClassroomBuilderForTest().build()
-        self.repository: ClassroomRepository = None
-        self.date: datetime = self.classroom.schedule.start
-        self.client_checkin: UUID = None
-
-    def build(self):
-        session: ConfirmedSession = self.classroom.confirm_session_at(self.date)
-        if self.client_checkin:
-            session.checkin(Attendee.create(self.client_checkin))
-        if self.repository:
-            self.repository.persist(session)
-        return self.repository, session
-
-    def with_classroom(self, classroom: Classroom) -> SessionContextBuilderForTest:
-        self.classroom = classroom
-        return self
-
-    def at(self, date: datetime) -> SessionContextBuilderForTest:
-        self.date = date
-        return self
-
-    def persist(self, repository: ClassroomRepository = None) -> SessionContextBuilderForTest:
-        self.repository = repository if repository else MemoryClassroomRepository()
-        return self
-
-    def checkin(self, client_id: UUID) -> SessionContextBuilderForTest:
-        self.client_checkin = client_id
-        return self
-
-
 class ClassroomJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
@@ -218,6 +184,45 @@ class ClassroomJsonBuilderForTest(Builder):
 
     def with_duration(self, duration: int, time_unit: TimeUnit) -> ClassroomJsonBuilderForTest:
         self.duration = {"duration": duration, "unit": time_unit.value}
+        return self
+
+
+class SessionContextBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.classroom = ClassroomBuilderForTest().build()
+        self.repository: ClassroomRepository = None
+        self.date: datetime = self.classroom.schedule.start
+        self.client_checkin: UUID = None
+        self.session_to_create = "confirm_session_at"
+
+    def build(self):
+        session: ConfirmedSession = getattr(self.classroom, self.session_to_create)(self.date)
+        if self.client_checkin:
+            session.checkin(Attendee.create(self.client_checkin))
+        if self.repository:
+            self.repository.persist(session)
+        return self.repository, session
+
+    def with_classroom(self, classroom: Classroom) -> SessionContextBuilderForTest:
+        self.classroom = classroom
+        return self
+
+    def at(self, date: datetime) -> SessionContextBuilderForTest:
+        self.date = date
+        return self
+
+    def persist(self, repository: ClassroomRepository = None) -> SessionContextBuilderForTest:
+        self.repository = repository if repository else MemoryClassroomRepository()
+        return self
+
+    def checkin(self, client_id: UUID) -> SessionContextBuilderForTest:
+        self.client_checkin = client_id
+        return self
+
+    def confirm(self) -> SessionContextBuilderForTest:
+        self.session_to_create = "confirm_session_at"
         return self
 
 
