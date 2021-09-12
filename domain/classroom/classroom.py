@@ -8,6 +8,7 @@ from enum import Enum
 from typing import List
 from uuid import UUID
 
+from domain.classroom.date_time_comparator import DateTimeComparator
 from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit
 from domain.datetimes import Weekdays
 from domain.exceptions import DomainException
@@ -70,7 +71,7 @@ class Classroom(AggregateRoot):
             return ScheduledSession(self, start)
 
     def __has_session_today(self) -> bool:
-        return self._schedule.start.date() == datetime.now().date() or (self._schedule.stop and datetime.now().weekday() == self._schedule.start.weekday())
+        return DateTimeComparator(self._schedule.start, datetime.now()).same_date().compare() or (self._schedule.stop and DateTimeComparator(datetime.now(), self._schedule.start).same_day().compare())
 
     def __today_is_sunday(self):
         return datetime.now().today().isoweekday() == Weekdays.SUNDAY
@@ -164,9 +165,21 @@ class ConfirmedSession(Session, AggregateRoot):
 
     def __init__(self, classroom: Classroom, start: datetime) -> None:
         super().__init__(classroom, start)
-        if classroom.schedule.start.date().weekday() != start.date().weekday() or classroom.schedule.start.time() != start.time() or start < classroom.schedule.start:
+        if not DateTimeComparator(classroom.schedule.start, start).same_day().same_time().before().compare():
             raise InvalidSessionStartDateException(classroom, start)
         self._id = uuid.uuid4()
+
+    @staticmethod
+    def is_before(start: datetime, start_to_compare: datetime):
+        return start < start_to_compare
+
+    @staticmethod
+    def is_the_same_time(classroom: datetime, start: datetime):
+        return classroom.time() == start.time()
+
+    @staticmethod
+    def is_the_same_day(date: datetime, date_to_copare: datetime):
+        return date.date().weekday() == date_to_copare.date().weekday()
 
     @property
     def id(self):
