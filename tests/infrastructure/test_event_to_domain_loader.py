@@ -21,7 +21,7 @@ def test_load_classroom(database):
     assert classroom.schedule.stop == stop_date
 
 
-def test_load_classroom_with_attendees(database):
+def test_load_clients_and_classroom_with_attendees(database):
     events = EventBuilderForTest().client(3).classroom_with_attendees(2).persist(database).build()
     first_client_id: UUID = events[0].root_id
     second_client_id: UUID = events[1].root_id

@@ -26,7 +26,7 @@ def database(tmpdir):
     return database_file
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def memory_event_store():
     StoreLocator.store = MemoryEventStore()
 
