@@ -93,8 +93,8 @@ class Attendee:
 
     def __init__(self, id: UUID) -> None:
         super().__init__()
-        self._id = id
-        self.attendance = Attendance.REGISTERED
+        self._id: UUID = id
+        self.attendance: Attendance = Attendance.REGISTERED
 
     @property
     def id(self) -> UUID:

@@ -30,6 +30,7 @@ class SessionCheckedIn(Event):
         self.stop = stop
         self.attendees = list(map(lambda attendee: self.__map_attendee(attendee), attendees))
         self.status: SessionCheckedInStatus = status
+        self.payload = self._to_payload()
 
     def __map_attendee(self, attendee: Attendee) -> dict:
         return {"id": attendee.id, "attendance": attendee.attendance.value}

@@ -1,4 +1,5 @@
 import datetime
+import logging
 from http import HTTPStatus
 from typing import List
 
@@ -10,6 +11,7 @@ from domain.commands import GetNextSessionsCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
 from domain.sagas import SessionCheckinSaga
 from infrastructure.command_bus_provider import CommandBusProvider
+from infrastructure.repository_provider import RepositoryProvider
 from web.presentation.service.classroom_service import to_detailed_attendee
 from web.schema.session_response import SessionResponse
 from web.schema.session_schemas import SessionCheckin
@@ -21,6 +23,7 @@ router = APIRouter()
             response_model=List[SessionResponse]
             )
 def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+    logging.Logger("repository").debug(msg=f"classes: {RepositoryProvider.read_repositories.classroom.get_all()}")
     next_sessions_event: NextScheduledSessions = command_bus_provider.command_bus.send(
         GetNextSessionsCommand(datetime.datetime.now())).event
     result = []

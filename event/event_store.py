@@ -13,10 +13,7 @@ class Event:
         self.root_id: UUID = root_id
         self.type: str = self.__class__.__name__
         self.timestamp: datetime = datetime.now()
-
-    @property
-    def payload(self):
-        return self._to_payload()
+        self.payload = None
 
     @abstractmethod
     def _to_payload(self):

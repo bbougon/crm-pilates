@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "formatters": {
+    "default": {
+      "format": "%(asctime)s %(levelname)s %(message)s"
+    },
+    "named": {
+      "format": "%(asctime)s %(name)s %(levelname)s %(message)s"
+    },
+    "colored-named": {
+      "()": "colorlog.ColoredFormatter",
+      "format": "%(asctime)s %(log_color)s%(levelname)7s%(reset)s %(name)s %(message)s",
+      "datefmt": "%H:%M:%S",
+      "log_colors": {
+        "DEBUG": "cyan",
+        "INFO": "green",
+        "WARNING": "yellow",
+        "ERROR": "red",
+        "CRITICAL": "red"
+      }
+    }
+  },
+  "handlers": {
+    "console": {
+      "class": "logging.StreamHandler",
+      "formatter": "colored-named",
+      "level": "DEBUG",
+      "stream": "ext://sys.stdout"
+    }
+  },
+  "loggers": {
+    "console":{
+      "level": "DEBUG",
+      "handlers": ["console"]
+    }
+  },
+  "root": {
+    "level": "DEBUG",
+    "handlers": ["console"]
+  }
+}

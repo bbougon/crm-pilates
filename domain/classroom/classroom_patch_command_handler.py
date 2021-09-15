@@ -14,6 +14,7 @@ class AllAttendeesAdded(Event):
     def __init__(self, root_id: UUID, attendees: List[Attendee]) -> None:
         super().__init__(root_id)
         self.attendees = list(map(lambda attendee: {"id": attendee._id}, attendees))
+        self.payload = self._to_payload()
 
     def _to_payload(self):
         return {

@@ -2,6 +2,7 @@ fastapi
 uvicorn[standard]
 gunicorn
 pydantic
+colorlog
 
 # test
 coverage

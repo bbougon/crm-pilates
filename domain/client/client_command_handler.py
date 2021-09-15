@@ -14,6 +14,7 @@ class ClientCreated(Event):
         super().__init__(root_id)
         self.firstname = firstname
         self.lastname = lastname
+        self.payload = self._to_payload()
 
     def _to_payload(self):
         return {

@@ -3,7 +3,7 @@ import os.path
 import sqlite3
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, List
 from uuid import UUID
 
 from event.event_store import EventStore, Event
@@ -68,6 +68,13 @@ class SQLiteEventStore(EventStore):
         connect.close()
         pass
 
+    def get_all(self) -> List[Event]:
+        connect, cursor = self.__connect_and_get_cursor()
+        cursor.execute("SELECT * FROM event")
+        rows = cursor.fetchall()
+        events: List[Event] = list(map(lambda event: self.__map(event), rows))
+        return events
+
     def get_by_id(self, id: UUID) -> Event:
         connect, cursor = self.__connect_and_get_cursor()
         cursor.execute("SELECT * FROM event WHERE id=:event_id", {"event_id": str(id)})
@@ -87,4 +94,5 @@ class SQLiteEventStore(EventStore):
         event.id = UUID(row[0])
         event.type = row[2]
         event.timestamp = datetime.fromisoformat(row[3])
+        event.payload = json.loads(row[4])
         return event

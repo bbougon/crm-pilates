@@ -31,7 +31,7 @@ def memory_event_store():
     StoreLocator.store = MemoryEventStore()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def memory_repositories():
     classroom_repository = MemoryClassroomRepository()
     client_repository = MemoryClientRepository()

@@ -20,6 +20,7 @@ class ConfirmedSessionEvent(Event):
         self.start = start
         self.stop = stop
         self.attendees = attendees
+        self.payload = self._to_payload()
 
     def _to_payload(self):
         return {

@@ -4,6 +4,7 @@ import settings
 from api import api_router
 from event.event_store import StoreLocator
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
+from infrastructure.event_to_domain_loader import EventToDomainLoader
 
 app = FastAPI(
     title="CRM Pilates",
@@ -15,3 +16,4 @@ app = FastAPI(
 
 app.include_router(api_router)
 StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)
+EventToDomainLoader(settings.EVENT_STORE_PATH).load()
