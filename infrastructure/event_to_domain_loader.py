@@ -61,8 +61,7 @@ class EventToClientMapper(EventToDomainMapper):
 
 
 class EventToDomainLoader:
-    def __init__(self, database) -> None:
-        self.database = database
+    def __init__(self) -> None:
         self.mappers = {
             "ClassroomCreated": EventToClassroomMapper,
             "ClientCreated": EventToClientMapper

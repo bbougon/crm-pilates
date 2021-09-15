@@ -13,7 +13,7 @@ def test_load_classroom(database):
     start_date = events[0].payload["schedule"]["start"]
     stop_date = events[0].payload["schedule"]["stop"]
 
-    EventToDomainLoader(database).load()
+    EventToDomainLoader().load()
 
     classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(expected_uuid)
     assert classroom
@@ -28,7 +28,7 @@ def test_load_clients_and_classroom_with_attendees(database):
     third_client_id: UUID = events[2].root_id
     classroom_id: UUID = events[3].root_id
 
-    EventToDomainLoader(database).load()
+    EventToDomainLoader().load()
 
     classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(classroom_id)
 
@@ -45,7 +45,7 @@ def test_load_classroom_with_50_minutes_duration(database):
     events = EventBuilderForTest().classroom(ClassroomBuilderForTest().with_duration(Duration(MinuteTimeUnit(50))).build()).persist(database).build()
     expected_uuid = events[0].payload["id"]
 
-    EventToDomainLoader(database).load()
+    EventToDomainLoader().load()
 
     classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(expected_uuid)
     assert classroom

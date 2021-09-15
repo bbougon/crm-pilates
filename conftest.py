@@ -29,6 +29,7 @@ def database(tmpdir):
 @pytest.fixture(autouse=True)
 def memory_event_store():
     StoreLocator.store = MemoryEventStore()
+    yield StoreLocator.store
 
 
 @pytest.fixture(autouse=True)

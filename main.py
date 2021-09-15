@@ -16,4 +16,4 @@ app = FastAPI(
 
 app.include_router(api_router)
 StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)
-EventToDomainLoader(settings.EVENT_STORE_PATH).load()
+EventToDomainLoader().load()
