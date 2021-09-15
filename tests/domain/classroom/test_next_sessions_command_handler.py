@@ -28,3 +28,14 @@ def test_next_sessions_with_confirmed_sessions(memory_repositories):
     next_sessions: NextScheduledSessions = NextSessionsCommandHandler().execute(GetNextSessionsCommand(datetime.now()))
 
     assert next_sessions.sessions[0].root_id == confirmed_session.id
+
+
+@immobilus("2021-10-14T08:50")
+def test_next_sessions_with_classroom_and_no_next_session(memory_repositories):
+    ClassroomContextBuilderForTest() \
+        .with_classroom(ClassroomBuilderForTest().starting_at(datetime(2021, 10, 13, 10)).ending_at(datetime(2022, 7, 14, 11))) \
+        .persist(RepositoryProvider.write_repositories.classroom).build()
+
+    next_sessions: NextScheduledSessions = NextSessionsCommandHandler().execute(GetNextSessionsCommand(datetime.now()))
+
+    assert len(next_sessions.sessions) == 0

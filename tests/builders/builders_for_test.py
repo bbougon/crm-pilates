@@ -119,6 +119,10 @@ class ClassroomBuilderForTest(Builder):
         self.stop_date = ends_at
         return self
 
+    def with_duration(self, duration: Duration) -> ClassroomBuilderForTest:
+        self.duration = duration
+        return self
+
 
 class ClassroomContextBuilderForTest(Builder):
 
@@ -255,18 +259,21 @@ class SessionCheckinJsonBuilderForTest(Builder):
         super().__init__()
         self.attendee: UUID = None
         self.session_date: datetime = None
-        repository, classrooms = ClassroomContextBuilderForTest().persist(RepositoryProvider.write_repositories.classroom).build()
+        repository, classrooms = ClassroomContextBuilderForTest().persist(
+            RepositoryProvider.write_repositories.classroom).build()
         self.classroom: Classroom = classrooms[0]
         self.classroom_id = self.classroom.id
 
     def build(self):
         if not self.attendee:
-            repository, clients = ClientContextBuilderForTest().persist(RepositoryProvider.write_repositories.client).build()
+            repository, clients = ClientContextBuilderForTest().persist(
+                RepositoryProvider.write_repositories.client).build()
             self.attendee = clients[0].id
             self.classroom.all_attendees([Attendee.create(self.attendee)])
         if not self.session_date:
             self.session_date = self.classroom.schedule.start
-        return {"classroom_id": str(self.classroom_id), "session_date": self.session_date.isoformat(), "attendee": str(self.attendee)}
+        return {"classroom_id": str(self.classroom_id), "session_date": self.session_date.isoformat(),
+                "attendee": str(self.attendee)}
 
     def for_classroom(self, classroom: Classroom) -> SessionCheckinJsonBuilderForTest:
         self.classroom_id = classroom.id
@@ -304,8 +311,8 @@ class EventBuilderForTest(Builder):
     def __to_event(self, _call, _args):
         return _call(*_args)
 
-    def classroom(self) -> EventBuilderForTest:
-        classroom = ClassroomBuilderForTest().build()
+    def classroom(self, classroom=None) -> EventBuilderForTest:
+        classroom = classroom or ClassroomBuilderForTest().build()
         self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, [])))
         return self
 
@@ -315,11 +322,14 @@ class EventBuilderForTest(Builder):
 
     def client(self, nb_clients: int) -> EventBuilderForTest:
         clients: List[Client] = [ClientBuilderForTest().build() for _ in range(nb_clients)]
-        self.event_to_store.extend([(ClientCreated, (client.id, client.firstname, client.lastname)) for client in clients])
+        self.event_to_store.extend(
+            [(ClientCreated, (client.id, client.firstname, client.lastname)) for client in clients])
         return self
 
     def classroom_with_attendees(self, nb_attendees):
-        attendees = itertools.islice(filter(lambda event: event[0].__class__.__name__ == ClientCreated.__class__.__name__, self.event_to_store), nb_attendees)
+        attendees = itertools.islice(
+            filter(lambda event: event[0].__class__.__name__ == ClientCreated.__class__.__name__, self.event_to_store),
+            nb_attendees)
 
         def create_client(id: UUID, firstname: str, lastname: str) -> Client:
             client = Client(firstname, lastname)

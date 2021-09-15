@@ -1,9 +1,10 @@
 from uuid import UUID
 
 from domain.classroom.classroom import Classroom
+from domain.classroom.duration import Duration, MinuteTimeUnit
 from infrastructure.event_to_domain_loader import EventToDomainLoader
 from infrastructure.repository_provider import RepositoryProvider
-from tests.builders.builders_for_test import EventBuilderForTest
+from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuilderForTest
 
 
 def test_load_classroom(database):
@@ -38,3 +39,15 @@ def test_load_classroom_with_attendees(database):
     assert RepositoryProvider.read_repositories.client.get_by_id(first_client_id)
     assert RepositoryProvider.read_repositories.client.get_by_id(second_client_id)
     assert RepositoryProvider.read_repositories.client.get_by_id(third_client_id)
+
+
+def test_load_classroom_with_50_minutes_duration(database):
+    events = EventBuilderForTest().classroom(ClassroomBuilderForTest().with_duration(Duration(MinuteTimeUnit(50))).build()).persist(database).build()
+    expected_uuid = events[0].payload["id"]
+
+    EventToDomainLoader(database).load()
+
+    classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(expected_uuid)
+    assert classroom
+    assert classroom.duration.time_unit.value == 50
+    assert isinstance(classroom.duration.time_unit, MinuteTimeUnit)

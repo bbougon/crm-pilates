@@ -45,6 +45,7 @@ class NextSessionsCommandHandler(CommandHandler):
         next_sessions = []
         for classroom in classrooms:
             next_session = classroom.next_session()
-            session: Session = RepositoryProvider.read_repositories.session.get_by_classroom_id_and_date(classroom.id, next_session.start)
-            next_sessions.append(NextScheduledSession(session or next_session))
+            if next_session:
+                session: Session = RepositoryProvider.read_repositories.session.get_by_classroom_id_and_date(classroom.id, next_session.start)
+                next_sessions.append(NextScheduledSession(session or next_session))
         return NextScheduledSessions(next_sessions)
