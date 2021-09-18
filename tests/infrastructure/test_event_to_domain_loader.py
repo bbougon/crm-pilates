@@ -1,10 +1,12 @@
+from datetime import datetime
 from uuid import UUID
 
-from domain.classroom.classroom import Classroom
+from domain.classroom.classroom import Classroom, Session
 from domain.classroom.duration import Duration, MinuteTimeUnit
 from infrastructure.event_to_domain_loader import EventToDomainLoader
 from infrastructure.repository_provider import RepositoryProvider
-from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuilderForTest
+from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuilderForTest, \
+    ConfirmedSessionBuilderForTest
 
 
 def test_load_classroom(database):
@@ -51,3 +53,13 @@ def test_load_classroom_with_50_minutes_duration(database):
     assert classroom
     assert classroom.duration.time_unit.value == 50
     assert isinstance(classroom.duration.time_unit, MinuteTimeUnit)
+
+
+def test_load_confirmed_session(database):
+    events = EventBuilderForTest().confirmed_session(ConfirmedSessionBuilderForTest().starting_at(datetime(2021, 9, 14, 10)).build()).persist(database).build()
+    session_id = events[0].payload["id"]
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
+    assert confirmed_session

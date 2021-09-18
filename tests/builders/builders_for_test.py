@@ -12,6 +12,7 @@ from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, Co
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.classroom.duration import Duration, HourTimeUnit
+from domain.classroom.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
 from domain.repository import Repository
@@ -297,6 +298,22 @@ class SessionCheckinJsonBuilderForTest(Builder):
         return self
 
 
+class ConfirmedSessionBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.classroom = ClassroomBuilderForTest().build()
+        self.start_at = self.classroom.schedule.start
+
+    def build(self):
+        return ConfirmedSession(self.classroom, self.start_at)
+
+    def starting_at(self, start_at: datetime) -> ConfirmedSessionBuilderForTest:
+        self.start_at = start_at
+        self.classroom = ClassroomBuilderForTest().starting_at(self.start_at).build()
+        return self
+
+
 class EventBuilderForTest(Builder):
 
     def __init__(self) -> None:
@@ -308,22 +325,14 @@ class EventBuilderForTest(Builder):
         self.events = [self.__to_event(event, value) for event, value in self.event_to_store]
         return self.events
 
-    def __to_event(self, _call, _args):
-        return _call(*_args)
-
-    def classroom(self, classroom=None) -> EventBuilderForTest:
+    def classroom(self, classroom: Classroom = None) -> EventBuilderForTest:
         classroom = classroom or ClassroomBuilderForTest().build()
         self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, [])))
         return self
 
-    def persist(self, database) -> EventBuilderForTest:
-        StoreLocator.store = SQLiteEventStore(database)
-        return self
-
     def client(self, nb_clients: int) -> EventBuilderForTest:
         clients: List[Client] = [ClientBuilderForTest().build() for _ in range(nb_clients)]
-        self.event_to_store.extend(
-            [(ClientCreated, (client.id, client.firstname, client.lastname)) for client in clients])
+        self.event_to_store.extend([(ClientCreated, (client.id, client.firstname, client.lastname)) for client in clients])
         return self
 
     def classroom_with_attendees(self, nb_attendees):
@@ -341,3 +350,14 @@ class EventBuilderForTest(Builder):
 
         self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, clients)))
         return self
+
+    def confirmed_session(self, confirmed_session: ConfirmedSession) -> EventBuilderForTest:
+        self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.start, confirmed_session.stop, [])))
+        return self
+
+    def persist(self, database) -> EventBuilderForTest:
+        StoreLocator.store = SQLiteEventStore(database)
+        return self
+
+    def __to_event(self, _call, _args):
+        return _call(*_args)

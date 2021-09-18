@@ -60,11 +60,23 @@ class EventToClientMapper(EventToDomainMapper):
         RepositoryProvider.write_repositories.client.persist(self.client)
 
 
+class EventToConfirmedSessionMapper(EventToDomainMapper):
+
+    def map(self, event: Event) -> EventToDomainMapper:
+        self.session = None
+        # self.session = ConfirmedSession()
+        return self
+
+    def and_persist(self) -> None:
+        RepositoryProvider.write_repositories.session.persist(self.session)
+
+
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
             "ClassroomCreated": EventToClassroomMapper,
-            "ClientCreated": EventToClientMapper
+            "ClientCreated": EventToClientMapper,
+            "ConfirmedSessionEvent": EventToConfirmedSessionMapper,
         }
 
     def load(self) -> None:

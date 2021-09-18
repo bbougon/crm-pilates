@@ -178,8 +178,8 @@ class ConfirmedSession(Session, AggregateRoot):
         return classroom.time() == start.time()
 
     @staticmethod
-    def is_the_same_day(date: datetime, date_to_copare: datetime):
-        return date.date().weekday() == date_to_copare.date().weekday()
+    def is_the_same_day(date: datetime, date_to_compare: datetime):
+        return date.date().weekday() == date_to_compare.date().weekday()
 
     @property
     def id(self):
