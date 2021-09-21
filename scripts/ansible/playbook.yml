@@ -1,0 +1,5 @@
+- name: configure settings
+  hosts: crm-pilates
+  roles:
+    - role: settings
+      persistent_path: {{}}

@@ -2,7 +2,7 @@
 ## PATHS DEFINITION ##
 ######################
 persistent_path := local.persistent
-local_virtualenv_path := local.virtualenv
+virtualenv_path := local.virtualenv
 
 install-virtualenv:
 	./install-virtualenv.sh
@@ -11,7 +11,7 @@ requirements:
 	./install-virtualenv.sh requirements.txt
 
 settings:
-	$(local_virtualenv_path)/bin/ansible-playbook scripts/ansible/playbook_settings.yml --inventory scripts/ansible/local.yml --diff --extra-vars "settings_destination={{ repository_path }}"
+	$(virtualenv_path)/bin/ansible-playbook scripts/ansible/playbook_settings.yml --inventory scripts/ansible/local.yml --diff --extra-vars "settings_destination={{ repository_path }}"
 
 install-persistent:
 	mkdir -p $(persistent_path)
@@ -39,4 +39,4 @@ run:
 	./run.sh
 
 linter:
-	flake8 --verbose --ignore E501 --exclude $(local_virtualenv_path)
+	flake8 --verbose --ignore E501 --exclude $(virtualenv_path)

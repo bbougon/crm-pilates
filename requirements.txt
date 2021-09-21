@@ -3,6 +3,7 @@ uvicorn[standard]
 gunicorn
 pydantic
 colorlog
+ansible
 
 # test
 coverage

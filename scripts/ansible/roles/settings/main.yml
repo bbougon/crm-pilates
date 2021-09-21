@@ -1,0 +1,4 @@
+- name: copy logrotate configuration file
+  template:
+    src: settings.ini
+    dest: "{{ persistent_path }}/settings.ini"
