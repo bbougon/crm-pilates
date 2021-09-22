@@ -1,0 +1,4 @@
+- name: copy settings
+  template:
+    src: settings.ini
+    dest: "{{ root_dir }}/settings.ini"

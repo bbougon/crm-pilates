@@ -1,0 +1,2 @@
+root_dir: "{{ (playbook_dir + '/../..') | realpath }}"
+event_store_path: "{{ root_dir }}/local.persistent/event/event_store.db"

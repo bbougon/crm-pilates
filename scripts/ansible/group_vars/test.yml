@@ -1,0 +1,2 @@
+root_dir: "/home/runner/work/crm-pilates/crm-pilates"
+event_store_path: "{{ root_dir }}/local.persistent/event/event_store.db"
