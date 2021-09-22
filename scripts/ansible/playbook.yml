@@ -2,4 +2,8 @@
   hosts: all
   roles:
     - role: settings
+
+- name: create directories
+  hosts: test
+  roles:
     - role: create-directories

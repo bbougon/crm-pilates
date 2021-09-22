@@ -1,9 +1,6 @@
-- name: create directories
-  hosts: test
-  tasks:
-    - name: Create directory for database
-      ansible.builtin.file:
-        path: "{{ root_dir }}/local.persistent/event/event_store.db"
-        owner: runner
-        group: docker
-        mode: '0644'
+- name: Create directory for database
+  ansible.builtin.file:
+    path: "{{ root_dir }}/local.persistent/event/event_store.db"
+    owner: runner
+    group: docker
+    mode: '0644'
