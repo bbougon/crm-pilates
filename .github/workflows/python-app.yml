@@ -28,6 +28,9 @@ jobs:
     - name: Configure settings
       run: |
         ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/test.yml --diff
+    - name: Create database
+      run: |
+        make create-local-database
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
