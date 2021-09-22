@@ -25,6 +25,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Configure settings
+      run: |
         ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/test.yml --diff
     - name: Lint with flake8
       run: |
