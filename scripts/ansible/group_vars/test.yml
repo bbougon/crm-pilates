@@ -1,2 +1,2 @@
-root_dir: "/home/runner/work/crm-pilates/crm-pilates"
-event_store_path: "{{ root_dir }}/local.persistent/event/event_store.db"
+root_dir: "{{ (playbook_dir + '/../..') | realpath }}"
+event_store_path: "{{ root_dir }}/test/ci/test_event_store.db"
