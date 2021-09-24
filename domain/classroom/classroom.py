@@ -9,7 +9,7 @@ from typing import List
 from uuid import UUID
 
 from domain.classroom.date_time_comparator import DateTimeComparator
-from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit
+from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
 from domain.datetimes import Weekdays
 from domain.exceptions import DomainException
 from domain.repository import AggregateRoot
@@ -68,7 +68,7 @@ class Classroom(AggregateRoot):
         if self.__has_session_today() or (self.__today_is_sunday() and self.__next_session_on_monday()):
             start: datetime = datetime.now().replace(hour=self._schedule.start.hour, minute=self._schedule.start.minute,
                                                      second=0, microsecond=0)
-            return ScheduledSession(self, start)
+            return ScheduledSession.create(self, start)
 
     def __has_session_today(self) -> bool:
         return DateTimeComparator(self._schedule.start, datetime.now()).same_date().compare() or (self._schedule.stop and DateTimeComparator(datetime.now(), self._schedule.start).same_day().compare())
@@ -81,7 +81,7 @@ class Classroom(AggregateRoot):
         return monday.isoweekday() == Weekdays.MONDAY
 
     def confirm_session_at(self, session_date: datetime) -> ConfirmedSession:
-        return ConfirmedSession(self, session_date)
+        return ConfirmedSession.create(self, session_date)
 
 
 class Attendance(Enum):
@@ -113,13 +113,13 @@ class Attendee:
 
 class Session:
 
-    def __init__(self, classroom: Classroom, start: datetime) -> None:
-        self.__name: str = classroom.name
-        self.__position: int = classroom.position
-        self.__attendees: List[Attendee] = classroom.attendees
+    def __init__(self, classroom_id: UUID, name: str, position: int, start: datetime, classroom_duration: TimeUnit, attendees: [Attendee]) -> None:
+        self.__name: str = name
+        self.__position: int = position
+        self.__attendees: List[Attendee] = attendees
         self.__start: datetime = start
-        self.__stop: datetime = start + timedelta(minutes=classroom.duration.time_unit.to_unit(MinuteTimeUnit).value)
-        self.__classroom_id: UUID = classroom.id
+        self.__stop: datetime = start + timedelta(minutes=classroom_duration.to_unit(MinuteTimeUnit).value)
+        self.__classroom_id: UUID = classroom_id
 
     @property
     def classroom_id(self):
@@ -153,8 +153,9 @@ class Session:
 
 class ScheduledSession(Session):
 
-    def __init__(self, classroom: Classroom, start: datetime) -> None:
-        super().__init__(classroom, start)
+    @staticmethod
+    def create(classroom: Classroom, start) -> ScheduledSession:
+        return ScheduledSession(classroom.id, classroom.name, classroom.position, start, classroom.duration.time_unit, classroom.attendees)
 
     @property
     def id(self):
@@ -163,11 +164,15 @@ class ScheduledSession(Session):
 
 class ConfirmedSession(Session, AggregateRoot):
 
-    def __init__(self, classroom: Classroom, start: datetime) -> None:
-        super().__init__(classroom, start)
+    def __init__(self, classroom_id: UUID, name: str, position: int, start: datetime, duration_time_unit: TimeUnit, attendees: [Attendee]) -> None:
+        super().__init__(classroom_id, name, position, start, duration_time_unit, attendees)
+        self._id = uuid.uuid4()
+
+    @staticmethod
+    def create(classroom: Classroom, start: datetime) -> ConfirmedSession:
         if not DateTimeComparator(classroom.schedule.start, start).same_day().same_time().before().compare():
             raise InvalidSessionStartDateException(classroom, start)
-        self._id = uuid.uuid4()
+        return ConfirmedSession(classroom.id, classroom.name, classroom.position, start, classroom.duration.time_unit, classroom.attendees)
 
     @staticmethod
     def is_before(start: datetime, start_to_compare: datetime):

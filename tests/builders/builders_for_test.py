@@ -306,7 +306,7 @@ class ConfirmedSessionBuilderForTest(Builder):
         self.start_at = self.classroom.schedule.start
 
     def build(self):
-        return ConfirmedSession(self.classroom, self.start_at)
+        return ConfirmedSession.create(self.classroom, self.start_at)
 
     def starting_at(self, start_at: datetime) -> ConfirmedSessionBuilderForTest:
         self.start_at = start_at

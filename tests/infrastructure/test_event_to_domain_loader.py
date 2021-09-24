@@ -1,6 +1,4 @@
-import pytest
-
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from domain.classroom.classroom import Classroom, Session
@@ -57,12 +55,17 @@ def test_load_classroom_with_50_minutes_duration(database):
     assert isinstance(classroom.duration.time_unit, MinuteTimeUnit)
 
 
-@pytest.mark.skip(reason="FIX loader in CI first thanks to ansible")
 def test_load_confirmed_session(database):
     events = EventBuilderForTest().confirmed_session(ConfirmedSessionBuilderForTest().starting_at(datetime(2021, 9, 14, 10)).build()).persist(database).build()
-    session_id = events[0].payload["id"]
+    payload = events[0].payload
+    session_id = payload["id"]
 
     EventToDomainLoader().load()
 
     confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
-    assert confirmed_session
+    assert confirmed_session.classroom_id == payload["classroom_id"]
+    assert confirmed_session.name == payload["name"]
+    assert confirmed_session.position == payload["position"]
+    assert confirmed_session.start == payload["schedule"]["start"]
+    assert confirmed_session.stop == datetime(2021, 9, 14, 10) + timedelta(hours=1)
+    assert len(confirmed_session.attendees) == 0

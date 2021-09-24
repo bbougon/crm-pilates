@@ -5,7 +5,7 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import List
 
-from domain.classroom.classroom import Classroom, Schedule, Attendee
+from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.client.client import Client
@@ -64,7 +64,11 @@ class EventToConfirmedSessionMapper(EventToDomainMapper):
 
     def map(self, event: Event) -> EventToDomainMapper:
         self.session = None
-        # self.session = ConfirmedSession()
+        payload = event.payload
+        start = datetime.fromisoformat(payload["schedule"]["start"])
+        stop = datetime.fromisoformat(payload["schedule"]["stop"])
+        self.session = ConfirmedSession(uuid.UUID(payload["classroom_id"]), payload["name"], payload["position"], start, MinuteTimeUnit(divmod((stop - start).seconds, 60)[0]), [])
+        self.session._id = uuid.UUID(payload["id"])
         return self
 
     def and_persist(self) -> None:
