@@ -11,6 +11,8 @@ def main(argv):
             create_tables(arg)
     except getopt.GetoptError:
         create_tables()
+    except IndexError:
+        create_tables()
 
 
 def create_tables(db_file="./local.persistent/event/event_store.db"):

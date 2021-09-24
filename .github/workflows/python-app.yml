@@ -30,7 +30,7 @@ jobs:
         ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/test.yml --diff
     - name: Create database
       run: |
-        python scripts/create_database.py
+        python scripts/create_database.py -f tests/ci/test_event_store.db
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
