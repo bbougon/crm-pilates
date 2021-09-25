@@ -22,5 +22,7 @@ keepalive = 5
 max_requests = 100
 
 # workers calc
-workers_per_core = 1.0
-workers = int(workers_per_core * cores)
+# workers_per_core = 1.0
+# workers = int(workers_per_core * cores)
+workers = 3
+worker_tmp_dir = "/tmp"
