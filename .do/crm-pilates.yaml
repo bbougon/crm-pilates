@@ -1,19 +1,18 @@
 alerts:
-- rule: DEPLOYMENT_FAILED
-- rule: DOMAIN_FAILED
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
 name: crm-pilates
 region: fra
 services:
-- dockerfile_path: Dockerfile
-  github:
-    branch: main
-    repo: bbougon/crm-pilates
-  http_port: 8080
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  name: crm-pilates
-  routes:
-  - path: /crm-pilates
-  source_dir: /
-  health_checks:
-    - http: /health
+  - dockerfile_path: Dockerfile
+    github:
+      branch: main
+      repo: bbougon/crm-pilates
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    name: crm-pilates
+    routes:
+      - path: /crm-pilates
+    run_command: /app/local.virtualenv/bin/gunicorn --config /app/local.persistent/gunicorn.py
+    source_dir: /
