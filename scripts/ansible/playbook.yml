@@ -1,4 +1,9 @@
-- name: configure settings
+- name: Configure settings
   hosts: all
   roles:
     - role: settings
+
+- name: Deploy
+  hosts: deploy
+  roles:
+    - role: server

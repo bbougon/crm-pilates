@@ -3,29 +3,41 @@
 CRM Pilates is an application to manage Pilates classroom for small and medium Pilates offices.
 
 ## Development
-CRM Pilates is made with `python 3.9.2`
+CRM Pilates is made over `python 3.9.2`
 
 [Documentation](https://miro.com/app/board/o9J_leSmQNU=/)
 
 Everything is in the Makefile
 
-- Installation
-  
-  `make install` will install the virtual env, all needed dependencies, setup your local environment and setup local sqlite database
-- Test
+### ADR
 
-  `make test` will run all the tests
-- Run the API
-
-  `make run` will run the application with all the modules
-
-#### ADR
-
-Nat Pryce [ADR tools](https://github.com/npryce/adr-tools) 
+Nat Pryce [ADR tools](https://github.com/npryce/adr-tools)
 
 ADR index is kept [here](./adr/README.md)
 
-#### API
+### Installation
+  
+  `make install` will install the virtual env, all needed dependencies, setup your local environment and setup local sqlite database
+
+### Test
+
+1. `make test` will run all the tests
+1. `make coverage` will run coverage
+
+### Run the API
+
+#### Locally
+  `make run` will run the application with all the modules
+
+#### Docker
+There is a `Dockerfile` within root directory. It builds the api then creates an image.
+
+There is also a `docker-compose.yml` file
+
+1. `docker build -t crm-pilates-api .`
+1. `docker-compese up`
+
+### API
 
 The API documentation is available in 3 formats:
 - [openapi](http://localhost:8081/openapi.json)

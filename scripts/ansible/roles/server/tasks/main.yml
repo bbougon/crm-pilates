@@ -1,0 +1,4 @@
+- name: copy gunicorn configuration
+  template:
+    src: gunicorn.py
+    dest: "{{ root_dir }}/local.persistent/gunicorn.py"

@@ -1,0 +1,6 @@
+deploy:
+  hosts: localhost
+
+  vars:
+    ansible_connection: local
+    gather_facts: false

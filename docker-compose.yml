@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+
+  crm-pilates-api:
+    image: crm-pilates-api:latest
+    container_name: crm-pilates-api
+    ports:
+      - 8081:8081
