@@ -11,13 +11,13 @@ Everything is in the Makefile
 
 - Installation
   
-  `make requirements` will install the virtual env and all dependencies needed
+  `make install` will install the virtual env, all needed dependencies, setup your local environment and setup local sqlite database
 - Test
 
   `make test` will run all the tests
 - Run the API
 
-  `make run-all` will run the application with all the modules
+  `make run` will run the application with all the modules
 
 #### ADR
 
