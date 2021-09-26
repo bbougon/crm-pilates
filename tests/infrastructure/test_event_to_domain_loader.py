@@ -69,3 +69,15 @@ def test_load_confirmed_session(database):
     assert confirmed_session.start == payload["schedule"]["start"]
     assert confirmed_session.stop == datetime(2021, 9, 14, 10) + timedelta(hours=1)
     assert len(confirmed_session.attendees) == 0
+
+
+def test_load_confirmed_session_with_attendees(database):
+    events = EventBuilderForTest().client(3).classroom_with_attendees(2).confirmed_session().persist(database).build()
+    payload = events[-1].payload
+    session_id = payload["id"]
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
+    assert confirmed_session
+    assert len(confirmed_session.attendees) == 2

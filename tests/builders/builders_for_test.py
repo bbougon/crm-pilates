@@ -313,6 +313,11 @@ class ConfirmedSessionBuilderForTest(Builder):
         self.classroom = ClassroomBuilderForTest().starting_at(self.start_at).build()
         return self
 
+    def for_classroom(self, classroom: Classroom) -> ConfirmedSessionBuilderForTest:
+        self.classroom = classroom
+        self.start_at = self.classroom.schedule.start
+        return self
+
 
 class EventBuilderForTest(Builder):
 
@@ -320,6 +325,9 @@ class EventBuilderForTest(Builder):
         super().__init__()
         self.events = List[Event]
         self.event_to_store = []
+        self.classrooms = []
+        self.clients = []
+        self.sessions = []
 
     def build(self):
         self.events = [self.__to_event(event, value) for event, value in self.event_to_store]
@@ -328,31 +336,31 @@ class EventBuilderForTest(Builder):
     def classroom(self, classroom: Classroom = None) -> EventBuilderForTest:
         classroom = classroom or ClassroomBuilderForTest().build()
         self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, [])))
+        self.classrooms.append(classroom)
         return self
 
     def client(self, nb_clients: int) -> EventBuilderForTest:
         clients: List[Client] = [ClientBuilderForTest().build() for _ in range(nb_clients)]
         self.event_to_store.extend([(ClientCreated, (client.id, client.firstname, client.lastname)) for client in clients])
+        self.clients.extend(clients)
         return self
 
     def classroom_with_attendees(self, nb_attendees):
-        attendees = itertools.islice(
-            filter(lambda event: event[0].__class__.__name__ == ClientCreated.__class__.__name__, self.event_to_store),
-            nb_attendees)
-
-        def create_client(id: UUID, firstname: str, lastname: str) -> Client:
-            client = Client(firstname, lastname)
-            client._id = id
-            return client
-
-        clients: List[Client] = list(map(lambda client: create_client(*client[1]), attendees))
-        classroom = ClassroomBuilderForTest().with_attendees(list(map(lambda client: client.id, clients))).build()
-
-        self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, clients)))
+        attendees: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.client(nb_attendees).clients
+        classroom = ClassroomBuilderForTest().with_attendees(list(map(lambda client: client.id, attendees))).build()
+        self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, attendees)))
+        self.classrooms.append(classroom)
         return self
 
-    def confirmed_session(self, confirmed_session: ConfirmedSession) -> EventBuilderForTest:
-        self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.start, confirmed_session.stop, [])))
+    def confirmed_session(self, confirmed_session: ConfirmedSession = None) -> EventBuilderForTest:
+        def get_confirmed_session(_confirmed_session: ConfirmedSession):
+            if not confirmed_session:
+                classroom: Classroom = self.classrooms[0] if self.classrooms else ClassroomBuilderForTest().build()
+                _confirmed_session = ConfirmedSessionBuilderForTest().for_classroom(classroom).build()
+            return _confirmed_session
+
+        confirmed_session = get_confirmed_session(confirmed_session)
+        self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
         return self
 
     def persist(self, database) -> EventBuilderForTest:

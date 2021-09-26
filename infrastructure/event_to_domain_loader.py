@@ -67,7 +67,8 @@ class EventToConfirmedSessionMapper(EventToDomainMapper):
         payload = event.payload
         start = datetime.fromisoformat(payload["schedule"]["start"])
         stop = datetime.fromisoformat(payload["schedule"]["stop"])
-        self.session = ConfirmedSession(uuid.UUID(payload["classroom_id"]), payload["name"], payload["position"], start, MinuteTimeUnit(divmod((stop - start).seconds, 60)[0]), [])
+        attendees = list(map(lambda attendee: Attendee(uuid.UUID(attendee["id"])), event.payload["attendees"])) if "attendees" in event.payload else []
+        self.session = ConfirmedSession(uuid.UUID(payload["classroom_id"]), payload["name"], payload["position"], start, MinuteTimeUnit(divmod((stop - start).seconds, 60)[0]), attendees)
         self.session._id = uuid.UUID(payload["id"])
         return self
 
