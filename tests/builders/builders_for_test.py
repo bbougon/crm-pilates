@@ -10,6 +10,7 @@ from mimesis import Person, Text, Numbers, Datetime
 
 from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
+from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.classroom.duration import Duration, HourTimeUnit
 from domain.classroom.session_creation_command_handler import ConfirmedSessionEvent
@@ -361,6 +362,13 @@ class EventBuilderForTest(Builder):
 
         confirmed_session = get_confirmed_session(confirmed_session)
         self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
+        return self
+
+    def attendees_added(self, nb_attendees) -> EventBuilderForTest:
+        clients: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.client(nb_attendees).clients
+        attendees = list(map(lambda client: Attendee(client.id), clients))
+        classroom: Classroom = self.classrooms[0]
+        self.event_to_store.append((AllAttendeesAdded, (classroom.id, attendees)))
         return self
 
     def persist(self, database) -> EventBuilderForTest:

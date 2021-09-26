@@ -7,8 +7,11 @@ from typing import List
 
 from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
+from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
+from domain.classroom.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
+from domain.client.client_command_handler import ClientCreated
 from event.event_store import StoreLocator, Event
 from infrastructure.repository_provider import RepositoryProvider
 
@@ -67,7 +70,7 @@ class EventToConfirmedSessionMapper(EventToDomainMapper):
         payload = event.payload
         start = datetime.fromisoformat(payload["schedule"]["start"])
         stop = datetime.fromisoformat(payload["schedule"]["stop"])
-        attendees = list(map(lambda attendee: Attendee(uuid.UUID(attendee["id"])), event.payload["attendees"])) if "attendees" in event.payload else []
+        attendees = list(map(lambda attendee: Attendee(uuid.UUID(attendee["id"])), payload["attendees"])) if "attendees" in payload else []
         self.session = ConfirmedSession(uuid.UUID(payload["classroom_id"]), payload["name"], payload["position"], start, MinuteTimeUnit(divmod((stop - start).seconds, 60)[0]), attendees)
         self.session._id = uuid.UUID(payload["id"])
         return self
@@ -76,12 +79,27 @@ class EventToConfirmedSessionMapper(EventToDomainMapper):
         RepositoryProvider.write_repositories.session.persist(self.session)
 
 
+class EventToAttendeesAddedMapper(EventToDomainMapper):
+
+    def map(self, event: Event) -> EventToDomainMapper:
+        payload = event.payload
+        classroom_id = event.root_id
+        attendees = list(map(lambda attendee: Attendee(uuid.UUID(attendee["id"])), payload["attendees"])) if "attendees" in payload else []
+        classroom: Classroom = RepositoryProvider.write_repositories.classroom.get_by_id(classroom_id)
+        classroom._attendees = attendees
+        return self
+
+    def and_persist(self) -> None:
+        pass
+
+
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
-            "ClassroomCreated": EventToClassroomMapper,
-            "ClientCreated": EventToClientMapper,
-            "ConfirmedSessionEvent": EventToConfirmedSessionMapper,
+            ClassroomCreated.event.__name__: EventToClassroomMapper,
+            ClientCreated.event.__name__: EventToClientMapper,
+            ConfirmedSessionEvent.event.__name__: EventToConfirmedSessionMapper,
+            AllAttendeesAdded.event.__name__: EventToAttendeesAddedMapper
         }
 
     def load(self) -> None:

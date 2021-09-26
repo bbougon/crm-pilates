@@ -81,3 +81,15 @@ def test_load_confirmed_session_with_attendees(database):
     confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
     assert confirmed_session
     assert len(confirmed_session.attendees) == 2
+
+
+def test_load_attendees_added_to_classroom(database):
+    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).persist(database).build()
+    payload = events[3].payload
+    classroom_id = payload["id"]
+
+    EventToDomainLoader().load()
+
+    classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(classroom_id)
+    assert classroom
+    assert len(classroom.attendees) == 2
