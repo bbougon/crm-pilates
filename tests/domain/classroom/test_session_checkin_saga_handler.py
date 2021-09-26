@@ -34,24 +34,12 @@ def test_session_checkin_event_is_stored(memory_event_store):
     assert events[1].type == "SessionCheckedIn"
     assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
     assert events[1].payload == {
-        "id": result.root_id,
-        "classroom_id": classroom.id,
-        "name": result.name,
-        "position": result.position,
-        "schedule": {
-            "start": datetime(2020, 4, 3, 11, 0),
-            "stop": datetime(2020, 4, 3, 12, 0)
-        },
-        "attendees": [
-            {
-                "id": clients[0].id,
-                "attendance": "REGISTERED"
-            },
+        "session_id": result.root_id,
+        "attendee":
             {
                 "id": clients[1].id,
                 "attendance": "CHECKED_IN"
             }
-        ]
     }
 
 
@@ -75,22 +63,10 @@ def test_session_checkin_on_already_confirmed_session(memory_event_store):
     assert len(events) == 1
     assert events[0].type == "SessionCheckedIn"
     assert events[0].payload == {
-        "id": result.root_id,
-        "classroom_id": classroom.id,
-        "name": result.name,
-        "position": result.position,
-        "schedule": {
-            "start": datetime(2020, 8, 3, 11, 0),
-            "stop": datetime(2020, 8, 3, 12, 0)
-        },
-        "attendees": [
-            {
-                "id": clients[0].id,
-                "attendance": "CHECKED_IN"
-            },
+        "session_id": result.root_id,
+        "attendee":
             {
                 "id": clients[1].id,
                 "attendance": "CHECKED_IN"
             }
-        ]
     }

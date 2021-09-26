@@ -6,6 +6,7 @@ from typing import List, Tuple
 from fastapi import status, APIRouter, Depends, Response, HTTPException
 
 from command.command_handler import Status
+from domain.classroom.classroom import Session
 from domain.classroom.next_sessions_command_handler import NextScheduledSessions
 from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
 from domain.commands import GetNextSessionsCommand
@@ -57,18 +58,19 @@ def session_checkin(session_checkin: SessionCheckin, response: Response,
         checkin_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
             SessionCheckinSaga(session_checkin.classroom_id, session_checkin.session_date, session_checkin.attendee))
         result: SessionCheckedIn = checkin_event_result[0].event
+        session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
         if checkin_event_result[1] == Status.UPDATED:
             response.status_code = status.HTTP_200_OK
         return {
-            "id": result.id,
-            "name": result.name,
-            "classroom_id": result.classroom_id,
-            "position": result.position,
+            "id": result.root_id,
+            "name": session.name,
+            "classroom_id": session.classroom_id,
+            "position": session.position,
             "schedule": {
-                "start": result.start.isoformat(),
-                "stop": result.stop.isoformat()
+                "start": session.start.isoformat(),
+                "stop": session.stop.isoformat()
             },
-            "attendees": list(map(lambda attendee: to_detailed_attendee(attendee["id"], attendee["attendance"]), result.attendees))
+            "attendees": list(map(lambda attendee: to_detailed_attendee(attendee.id, attendee.attendance.value), session.attendees))
         }
     except AggregateNotFoundException as e:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found")

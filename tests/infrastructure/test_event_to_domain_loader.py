@@ -35,7 +35,6 @@ def test_load_clients_and_classroom_with_attendees(database):
     EventToDomainLoader().load()
 
     classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(classroom_id)
-
     assert classroom
     assert len(classroom.attendees) == 2
     assert classroom.attendees[0].id == first_client_id

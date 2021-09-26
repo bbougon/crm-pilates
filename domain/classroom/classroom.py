@@ -190,10 +190,11 @@ class ConfirmedSession(Session, AggregateRoot):
     def id(self):
         return self._id
 
-    def checkin(self, attendee: Attendee):
+    def checkin(self, attendee: Attendee) -> Attendee:
         for registered_attendee in self.attendees:
             if registered_attendee == attendee:
                 registered_attendee.checkin()
+                return registered_attendee
 
 
 class InvalidSessionStartDateException(DomainException):
