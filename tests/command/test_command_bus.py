@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+from typing import Tuple
 
 from command.command_bus import CommandBus
-from command.command_handler import CommandHandler, Command
+from command.command_handler import CommandHandler, Command, Status
 from event.event_store import Event
 
 
@@ -21,14 +22,14 @@ class SimpleCommandExecuted(Event):
 
 class SimpleCommandHandler(CommandHandler):
 
-    def execute(self, command: SimpleCommand) -> SimpleCommandExecuted:
-        return SimpleCommandExecuted(name=command.name)
+    def execute(self, command: SimpleCommand) -> Tuple[SimpleCommandExecuted, Status]:
+        return SimpleCommandExecuted(name=command.name), Status.NONE
 
 
 def test_send_a_command_and_retrieve_response():
     command_bus = CommandBus({"SimpleCommand": SimpleCommandHandler()}, {})
 
-    response = command_bus.send(SimpleCommand(name="name"))
+    response, status = command_bus.send(SimpleCommand(name="name"))
 
     assert isinstance(response.event, SimpleCommandExecuted)
     assert response.event.id == 123

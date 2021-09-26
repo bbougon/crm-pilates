@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from uuid import UUID
 
+import pytest
+
 from domain.classroom.classroom import Classroom, Session
 from domain.classroom.duration import Duration, MinuteTimeUnit
 from infrastructure.event_to_domain_loader import EventToDomainLoader
@@ -93,3 +95,15 @@ def test_load_attendees_added_to_classroom(database):
     classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(classroom_id)
     assert classroom
     assert len(classroom.attendees) == 2
+
+
+@pytest.mark.skip("Refacto first attendee check in => big mess")
+def test_load_checkin_session(database):
+    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).checked_in(1).persist(database).build()
+    payload = events[4].payload
+    session_id = payload["id"]
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
+
+    assert confirmed_session
+    assert len(confirmed_session.attendees) == 2

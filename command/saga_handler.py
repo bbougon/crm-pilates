@@ -1,7 +1,8 @@
 from abc import abstractmethod
+from typing import Tuple
 
 from command.command_bus import CommandBus
-from command.command_handler import Command
+from command.command_handler import Command, Status
 from event.event_store import Event
 
 
@@ -16,5 +17,5 @@ class SagaHandler:
         self._command_bus = command_bus
 
     @abstractmethod
-    def execute(self, saga: Saga) -> Event:
+    def execute(self, saga: Saga) -> Tuple[Event, Status]:
         pass

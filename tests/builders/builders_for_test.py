@@ -13,6 +13,7 @@ from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.classroom.duration import Duration, HourTimeUnit
+from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
@@ -346,7 +347,7 @@ class EventBuilderForTest(Builder):
         self.clients.extend(clients)
         return self
 
-    def classroom_with_attendees(self, nb_attendees):
+    def classroom_with_attendees(self, nb_attendees: int):
         attendees: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.client(nb_attendees).clients
         classroom = ClassroomBuilderForTest().with_attendees(list(map(lambda client: client.id, attendees))).build()
         self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, attendees)))
@@ -362,13 +363,21 @@ class EventBuilderForTest(Builder):
 
         confirmed_session = get_confirmed_session(confirmed_session)
         self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
+        self.sessions.append(confirmed_session)
         return self
 
-    def attendees_added(self, nb_attendees) -> EventBuilderForTest:
+    def attendees_added(self, nb_attendees: int) -> EventBuilderForTest:
         clients: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.client(nb_attendees).clients
         attendees = list(map(lambda client: Attendee(client.id), clients))
         classroom: Classroom = self.classrooms[0]
         self.event_to_store.append((AllAttendeesAdded, (classroom.id, attendees)))
+        return self
+
+    def checked_in(self, nb_attendees_checked_in: int) -> EventBuilderForTest:
+        confirmed_session: ConfirmedSession = self.sessions[0]
+        for i in range(nb_attendees_checked_in):
+            confirmed_session.attendees[i]
+            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.name, confirmed_session.classroom_id, confirmed_session.position, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
         return self
 
     def persist(self, database) -> EventBuilderForTest:

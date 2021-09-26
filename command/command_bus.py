@@ -1,4 +1,6 @@
-from command.command_handler import Command
+from typing import Tuple
+
+from command.command_handler import Command, Status
 from command.response import Response
 
 
@@ -10,5 +12,6 @@ class CommandBus:
         for saga, saga_handler in saga_handlers.items():
             self.handlers[saga] = saga_handler(self)
 
-    def send(self, command: Command) -> Response:
-        return Response(self.handlers[command.__class__.__name__].execute(command))
+    def send(self, command: Command) -> Tuple[Response, Status]:
+        event, status = self.handlers[command.__class__.__name__].execute(command)
+        return Response(event), status

@@ -1,9 +1,10 @@
 from datetime import datetime
+from typing import Tuple
 
 from immobilus import immobilus
 
-from domain.classroom.session_checkin_saga_handler import SessionCheckinSagaHandler, SessionCheckedIn, \
-    SessionCheckedInStatus
+from command.command_handler import Status
+from domain.classroom.session_checkin_saga_handler import SessionCheckinSagaHandler, SessionCheckedIn
 from domain.sagas import SessionCheckinSaga
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
@@ -22,20 +23,21 @@ def test_session_checkin_event_is_stored(memory_event_store):
         RepositoryProvider.write_repositories.classroom).build()
     classroom = classrooms[0]
 
-    session: SessionCheckedIn = SessionCheckinSagaHandler(CommandBusProviderForTest().provide().command_bus).execute(
+    session_result: Tuple[SessionCheckedIn, Status] = SessionCheckinSagaHandler(CommandBusProviderForTest().provide().command_bus).execute(
         SessionCheckinSaga(classroom.id, datetime(2020, 4, 3, 11, 0), clients[1].id))
 
-    assert session.status == SessionCheckedInStatus.CREATED
+    result = session_result[0]
+    assert session_result[1] == Status.CREATED
     events = StoreLocator.store.get_all()
     assert len(events) == 2
     assert events[0].type == "ConfirmedSessionEvent"
     assert events[1].type == "SessionCheckedIn"
     assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
     assert events[1].payload == {
-        "id": session.root_id,
+        "id": result.root_id,
         "classroom_id": classroom.id,
-        "name": session.name,
-        "position": session.position,
+        "name": result.name,
+        "position": result.position,
         "schedule": {
             "start": datetime(2020, 4, 3, 11, 0),
             "stop": datetime(2020, 4, 3, 12, 0)
@@ -64,18 +66,19 @@ def test_session_checkin_on_already_confirmed_session(memory_event_store):
     classroom = classrooms[0]
     SessionContextBuilderForTest().with_classroom(classroom).checkin(clients[0].id).at(datetime(2020, 8, 3, 11, 0)).persist(RepositoryProvider.write_repositories.session).build()
 
-    session: SessionCheckedIn = SessionCheckinSagaHandler(CommandBusProviderForTest().provide().command_bus).execute(
+    session_result: Tuple[SessionCheckedIn, Status] = SessionCheckinSagaHandler(CommandBusProviderForTest().provide().command_bus).execute(
         SessionCheckinSaga(classroom.id, datetime(2020, 8, 3, 11, 0), clients[1].id))
 
-    assert session.status == SessionCheckedInStatus.UPDATED
+    result = session_result[0]
+    assert session_result[1] == Status.UPDATED
     events = StoreLocator.store.get_all()
     assert len(events) == 1
     assert events[0].type == "SessionCheckedIn"
     assert events[0].payload == {
-        "id": session.root_id,
+        "id": result.root_id,
         "classroom_id": classroom.id,
-        "name": session.name,
-        "position": session.position,
+        "name": result.name,
+        "position": result.position,
         "schedule": {
             "start": datetime(2020, 8, 3, 11, 0),
             "stop": datetime(2020, 8, 3, 12, 0)

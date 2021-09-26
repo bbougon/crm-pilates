@@ -1,6 +1,7 @@
+from typing import Tuple
 from uuid import UUID
 
-from command.command_handler import CommandHandler
+from command.command_handler import CommandHandler, Status
 from domain.client.client import Client
 from domain.commands import ClientCreationCommand
 from event.event_store import Event, EventSourced
@@ -25,7 +26,7 @@ class ClientCreated(Event):
 
 
 class ClientCreationCommandHandler(CommandHandler):
-    def execute(self, command: ClientCreationCommand) -> Event:
+    def execute(self, command: ClientCreationCommand) -> Tuple[ClientCreated, Status]:
         client = Client.create(command.firstname, command.lastname)
         RepositoryProvider.write_repositories.client.persist(client)
-        return ClientCreated(client._id, client.firstname, client.lastname)
+        return ClientCreated(client._id, client.firstname, client.lastname), Status.CREATED

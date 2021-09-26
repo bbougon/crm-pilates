@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
-from command.command_handler import CommandHandler
+from command.command_handler import CommandHandler, Status
 from domain.classroom.classroom import Classroom, Attendee
 from domain.commands import ClassroomPatchCommand
 from event.event_store import Event, EventSourced
@@ -24,12 +24,12 @@ class AllAttendeesAdded(Event):
 
 class ClassroomPatchCommandHandler(CommandHandler):
 
-    def execute(self, command: ClassroomPatchCommand) -> AllAttendeesAdded:
+    def execute(self, command: ClassroomPatchCommand) -> Tuple[AllAttendeesAdded, Status]:
         self.__check_attendees_are_clients(command)
         classroom: Classroom = RepositoryProvider.write_repositories.classroom.get_by_id(command.classroom_id)
         attendees: List[Attendee] = list(map(lambda attendee: Attendee(attendee), command.attendees))
         classroom.all_attendees(attendees)
-        return AllAttendeesAdded(classroom._id, attendees)
+        return AllAttendeesAdded(classroom._id, attendees), Status.CREATED
 
     @classmethod
     def __check_attendees_are_clients(cls, command):

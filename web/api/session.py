@@ -1,12 +1,13 @@
 import datetime
 import logging
 from http import HTTPStatus
-from typing import List
+from typing import List, Tuple
 
 from fastapi import status, APIRouter, Depends, Response, HTTPException
 
+from command.command_handler import Status
 from domain.classroom.next_sessions_command_handler import NextScheduledSessions
-from domain.classroom.session_checkin_saga_handler import SessionCheckedIn, SessionCheckedInStatus
+from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
 from domain.commands import GetNextSessionsCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
 from domain.sagas import SessionCheckinSaga
@@ -24,10 +25,12 @@ router = APIRouter()
             )
 def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     logging.Logger("repository").debug(msg=f"classes: {RepositoryProvider.read_repositories.classroom.get_all()}")
-    next_sessions_event: NextScheduledSessions = command_bus_provider.command_bus.send(
-        GetNextSessionsCommand(datetime.datetime.now())).event
+    from command.response import Response
+    next_sessions_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
+        GetNextSessionsCommand(datetime.datetime.now()))
     result = []
-    for session in next_sessions_event.sessions:
+    event: NextScheduledSessions = next_sessions_result[0].event
+    for session in event.sessions:
         next_session = {
             "id": session.root_id,
             "name": session.name,
@@ -50,20 +53,22 @@ def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusP
 def session_checkin(session_checkin: SessionCheckin, response: Response,
                     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     try:
-        checkin_event: SessionCheckedIn = command_bus_provider.command_bus.send(
-            SessionCheckinSaga(session_checkin.classroom_id, session_checkin.session_date, session_checkin.attendee)).event
-        if checkin_event.status == SessionCheckedInStatus.UPDATED:
+        from command.response import Response
+        checkin_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
+            SessionCheckinSaga(session_checkin.classroom_id, session_checkin.session_date, session_checkin.attendee))
+        result: SessionCheckedIn = checkin_event_result[0].event
+        if checkin_event_result[1] == Status.UPDATED:
             response.status_code = status.HTTP_200_OK
         return {
-            "id": checkin_event.id,
-            "name": checkin_event.name,
-            "classroom_id": checkin_event.classroom_id,
-            "position": checkin_event.position,
+            "id": result.id,
+            "name": result.name,
+            "classroom_id": result.classroom_id,
+            "position": result.position,
             "schedule": {
-                "start": checkin_event.start.isoformat(),
-                "stop": checkin_event.stop.isoformat()
+                "start": result.start.isoformat(),
+                "stop": result.stop.isoformat()
             },
-            "attendees": list(map(lambda attendee: to_detailed_attendee(attendee["id"], attendee["attendance"]), checkin_event.attendees))
+            "attendees": list(map(lambda attendee: to_detailed_attendee(attendee["id"], attendee["attendance"]), result.attendees))
         }
     except AggregateNotFoundException as e:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found")

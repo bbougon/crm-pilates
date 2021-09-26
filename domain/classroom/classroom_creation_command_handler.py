@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
-from command.command_handler import CommandHandler
+from command.command_handler import CommandHandler, Status
 from domain.classroom.classroom import Classroom, Schedule, Attendee
 from domain.classroom.duration import Duration, TimeUnits, MinuteTimeUnit
 from domain.client.client import Client
@@ -50,7 +50,7 @@ class ClassroomCreationCommandHandler(CommandHandler):
     def __init__(self) -> None:
         super().__init__()
 
-    def execute(self, command: ClassroomCreationCommand) -> ClassroomCreated:
+    def execute(self, command: ClassroomCreationCommand) -> Tuple[ClassroomCreated, Status]:
         classroom = Classroom.create(command.name, command.start_date, command.position, stop_date=command.stop_date,
                                      duration=Duration(TimeUnits.from_duration(command.duration.unit.value,
                                                                                command.duration.duration)))
@@ -59,4 +59,4 @@ class ClassroomCreationCommandHandler(CommandHandler):
         classroom.all_attendees(list(map(lambda client: Attendee.create(client._id), clients)))
         RepositoryProvider.write_repositories.classroom.persist(classroom)
         return ClassroomCreated(id=classroom.id, name=classroom.name, position=classroom.position,
-                                duration=classroom.duration, schedule=classroom.schedule, attendees=clients)
+                                duration=classroom.duration, schedule=classroom.schedule, attendees=clients), Status.CREATED

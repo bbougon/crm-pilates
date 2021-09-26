@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
-from command.command_handler import CommandHandler
+from command.command_handler import CommandHandler, Status
 from domain.classroom.classroom import Classroom, Session
 from domain.commands import GetNextSessionsCommand
 from event.event_store import Event
@@ -39,7 +39,7 @@ class NextScheduledSessions(Event):
 
 class NextSessionsCommandHandler(CommandHandler):
 
-    def execute(self, command: GetNextSessionsCommand) -> NextScheduledSessions:
+    def execute(self, command: GetNextSessionsCommand) -> Tuple[NextScheduledSessions, Status]:
         classrooms: List[Classroom] = next(
             RepositoryProvider.read_repositories.classroom.get_next_classrooms_from(command.current_time))
         next_sessions = []
@@ -48,4 +48,4 @@ class NextSessionsCommandHandler(CommandHandler):
             if next_session:
                 session: Session = RepositoryProvider.read_repositories.session.get_by_classroom_id_and_date(classroom.id, next_session.start)
                 next_sessions.append(NextScheduledSession(session or next_session))
-        return NextScheduledSessions(next_sessions)
+        return NextScheduledSessions(next_sessions), Status.NONE

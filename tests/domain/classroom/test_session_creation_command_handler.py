@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import Tuple
 
 from immobilus import immobilus
 
+from command.command_handler import Status
 from domain.classroom.session_creation_command_handler import SessionCreationCommandHandler, ConfirmedSessionEvent
 from domain.commands import SessionCreationCommand
 from event.event_store import StoreLocator
@@ -20,18 +22,19 @@ def test_session_creation_event_is_stored(memory_event_store):
         RepositoryProvider.write_repositories.classroom).build()
     classroom = classrooms[0]
 
-    confirmed_session: ConfirmedSessionEvent = SessionCreationCommandHandler().execute(SessionCreationCommand(
+    confirmed_session_result: Tuple[ConfirmedSessionEvent, Status] = SessionCreationCommandHandler().execute(SessionCreationCommand(
         classroom.id, datetime(2020, 4, 3, 11, 0)))
 
     events = StoreLocator.store.get_all()
     assert len(events) == 1
     assert events[0].type == "ConfirmedSessionEvent"
     assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
+    result = confirmed_session_result[0]
     assert events[0].payload == {
-        "id": confirmed_session.root_id,
+        "id": result.root_id,
         "classroom_id": classroom.id,
-        "name": confirmed_session.name,
-        "position": confirmed_session.position,
+        "name": result.name,
+        "position": result.position,
         "schedule": {
             "start": datetime(2020, 4, 3, 11, 0),
             "stop": datetime(2020, 4, 3, 12, 0)

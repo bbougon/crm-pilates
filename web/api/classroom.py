@@ -1,8 +1,10 @@
 from http import HTTPStatus
+from typing import Tuple
 from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends, HTTPException
 
+from command.command_handler import Status
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
@@ -43,7 +45,9 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
                                            classroom_creation.duration,
                                            classroom_creation.start_date, classroom_creation.stop_date,
                                            list(map(lambda client: client.id, classroom_creation.attendees)))
-        event: ClassroomCreated = command_bus_provider.command_bus.send(command).event
+        from command.response import Response
+        result: Tuple[Response, Status] = command_bus_provider.command_bus.send(command)
+        event: ClassroomCreated = result[0].event
         response.headers["location"] = f"/classrooms/{event.root_id}"
         return {
             "name": event.name,

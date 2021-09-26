@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import Tuple
 
 from immobilus import immobilus
 
+from command.command_handler import Status
 from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
 from domain.commands import ClassroomCreationCommand
 from event.event_store import StoreLocator
@@ -12,7 +14,7 @@ from web.schema.classroom_schemas import Duration
 
 @immobilus("2020-04-03 10:24:15.230")
 def test_classroom_creation_event_is_stored(memory_event_store):
-    classroom_created: ClassroomCreated = ClassroomCreationCommandHandler().execute(
+    result: Tuple[ClassroomCreated, Status] = ClassroomCreationCommandHandler().execute(
         ClassroomCreationCommand(name="classroom", position=2, start_date=datetime(2020, 5, 7, 11, 0),
                                  duration=Duration.parse_obj({"duration": 1, "unit": "HOUR"})))
 
@@ -21,7 +23,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
     assert events[0].type == "ClassroomCreated"
     assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
     assert events[0].payload == {
-        "id": classroom_created.root_id,
+        "id": result[0].root_id,
         "name": "classroom", "position": 2,
         "duration": {
             "duration": 60,
@@ -40,7 +42,7 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
         RepositoryProvider.write_repositories.client).build()
 
-    classroom_created: ClassroomCreated = ClassroomCreationCommandHandler().execute(
+    result: Tuple[ClassroomCreated, Status] = ClassroomCreationCommandHandler().execute(
         ClassroomCreationCommand(name="classroom", position=2, start_date=datetime(2019, 6, 7, 11, 0),
                                  duration=Duration.parse_obj({"duration": 1, "unit": "HOUR"}),
                                  attendees=[clients[0]._id, clients[1]._id]))
@@ -50,7 +52,7 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
     assert events[0].type == "ClassroomCreated"
     assert events[0].timestamp == datetime(2019, 5, 7, 8, 24, 15, 230000)
     assert events[0].payload == {
-        "id": classroom_created.root_id,
+        "id": result[0].root_id,
         "name": "classroom", "position": 2,
         "duration": {
             "duration": 60,

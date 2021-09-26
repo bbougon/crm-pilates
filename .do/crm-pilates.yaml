@@ -7,6 +7,7 @@ services:
   - dockerfile_path: Dockerfile
     github:
       branch: main
+      #deploy_on_push: true
       repo: bbougon/crm-pilates
     health_check:
       http_path: /health
