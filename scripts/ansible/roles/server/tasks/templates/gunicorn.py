@@ -23,6 +23,6 @@ max_requests = 100
 
 # workers calc
 workers_per_core = 1.0
-workers = int(workers_per_core * cores)
-# workers = 1
+# workers = int(workers_per_core * cores)
+workers = 1
 worker_tmp_dir = "/dev/shm"

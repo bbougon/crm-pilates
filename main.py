@@ -5,6 +5,7 @@ from api import api_router
 from event.event_store import StoreLocator
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.event_to_domain_loader import EventToDomainLoader
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="CRM Pilates",
@@ -13,6 +14,15 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["same-origin", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(api_router)
 StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)
