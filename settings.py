@@ -5,8 +5,8 @@ from configparser import ConfigParser
 class Config:
     KEY_SEPARATOR = "."
 
-    def __init__(self) -> None:
-        self._file_path = os.environ.get("SETTINGS_PATH", "settings.ini")
+    def __init__(self, settings_path="settings.ini") -> None:
+        self._file_path = os.environ.get("SETTINGS_PATH", settings_path)
         self._config = self._parse_file(self._file_path)
 
     @staticmethod
@@ -38,3 +38,4 @@ class Config:
 config = Config()
 
 EVENT_STORE_PATH = config("EVENT_STORE_PATH")
+CORS_ALLOW_ORIGINS = config("CORS.CORS_ALLOW_ORIGINS").split(",")

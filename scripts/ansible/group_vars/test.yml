@@ -1,2 +1,3 @@
 root_dir: "{{ (playbook_dir + '/../..') | realpath }}"
 event_store_path: "{{ root_dir }}/tests/ci/test_event_store.db"
+cors_allow_origins: "http://locahost"

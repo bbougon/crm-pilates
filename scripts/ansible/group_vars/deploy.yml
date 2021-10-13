@@ -1,3 +1,4 @@
 gunicorn_port: "8081"
 root_dir: "{{ (playbook_dir + '/../..') | realpath }}"
 event_store_path: "{{ root_dir }}/local.persistent/event/event_store.db"
+cors_allow_origins: "https://crm-pilates-ui-bvntz.ondigitalocean.app,https://ui.crm.alinebellardipilates.fr"
