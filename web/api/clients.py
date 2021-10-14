@@ -1,9 +1,10 @@
-from typing import Tuple
+from typing import Tuple, List
 from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends, HTTPException
 
 from command.command_handler import Status
+from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
 from domain.commands import ClientCreationCommand
 from domain.exceptions import AggregateNotFoundException
@@ -54,7 +55,7 @@ def create_client(client_creation: ClientCreation, response: Response,
             )
 def get_client(id: UUID):
     try:
-        client = RepositoryProvider.write_repositories.client.get_by_id(id)
+        client: Client = RepositoryProvider.write_repositories.client.get_by_id(id)
         return {
             "id": client._id,
             "firstname": client.firstname,
@@ -62,3 +63,12 @@ def get_client(id: UUID):
         }
     except AggregateNotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Client with id '{e.unknown_id}' not found")
+
+
+def get_clients():
+    clients = RepositoryProvider.read_repositories.client.get_all()
+    return __map_client(next(clients))
+
+
+def __map_client(clients: List[Client]) -> List[dict]:
+    return [{"id": client.id, "firstname": client.firstname, "lastname": client.lastname} for client in clients]

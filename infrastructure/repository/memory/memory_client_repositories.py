@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 
 from domain.client.client_repository import ClientRepository
@@ -20,3 +21,6 @@ class MemoryClientReadRepository(ClientRepository, MemoryRepository):
 
     def get_by_id(self, id: UUID):
         return self.__repository.get_by_id(id)
+
+    def get_all(self) -> List:
+        return self.__repository.get_all()
