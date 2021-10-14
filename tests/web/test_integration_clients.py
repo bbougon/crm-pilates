@@ -13,13 +13,27 @@ from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientCon
 http_client = TestClient(app)
 
 
-def test_post_client(database):
+def test_should_create_client(database):
     StoreLocator.store = SQLiteEventStore(database)
 
     response = http_client.post("/clients", json=ClientJsonBuilderForTest().build())
 
     assert response.status_code == 201
     assert response.headers["Location"] == f"/clients/{response.json()['id']}"
+
+
+def test_should_not_create_client_with_empty_lastname_or_firstname(database):
+    StoreLocator.store = SQLiteEventStore(database)
+
+    response = http_client.post("/clients", json={"firstname": "", "lastname": ""})
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.json() == {'detail': [{'loc': ['body', 'firstname'],
+                                           'msg': 'You must provide the client firstname',
+                                           'type': 'value_error'},
+                                          {'loc': ['body', 'lastname'],
+                                           'msg': 'You must provide the client lastname',
+                                           'type': 'value_error'}]}
 
 
 def test_get_client():
