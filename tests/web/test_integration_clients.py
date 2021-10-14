@@ -44,3 +44,13 @@ def test_client_is_not_found():
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json()["detail"] == f"Client with id '{unknown_uuid}' not found"
+
+
+def test_get_clients_should_return_all_clients():
+    repository, clients = ClientContextBuilderForTest().with_clients(3).persist(
+        RepositoryProvider.write_repositories.client).build()
+
+    response: Response = http_client.get(f"/clients/{clients[0]._id}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 3

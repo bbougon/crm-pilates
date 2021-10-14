@@ -65,6 +65,14 @@ def get_client(id: UUID):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Client with id '{e.unknown_id}' not found")
 
 
+@router.get("/clients",
+            status_code=status.HTTP_200_OK,
+            response_model=List[ClientReadResponse],
+            responses={
+                200: {
+                    "description": "Get all clients"
+                }
+            })
 def get_clients():
     clients = RepositoryProvider.read_repositories.client.get_all()
     return __map_client(next(clients))
