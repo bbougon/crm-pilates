@@ -17,7 +17,7 @@ from web.api.classroom import create_classroom, update_classroom, get_classroom
 from web.schema.classroom_schemas import ClassroomCreation, TimeUnit
 
 
-def test_create_classroom(memory_event_store):
+def test_should_create_classroom(memory_event_store):
     repository = MemoryClassroomRepository()
     classroom_json = ClassroomJsonBuilderForTest().with_name("advanced classroom").with_start_date(
         datetime(2020, 2, 11, 10)).with_position(3).with_duration(45, TimeUnit.MINUTE).build()
@@ -26,16 +26,11 @@ def test_create_classroom(memory_event_store):
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert response["name"] == "advanced classroom"
-    assert response["schedule"]["start"] == datetime(2020, 2, 11, 10, 0)
-    assert response["position"] == 3
-    assert response["duration"]["duration"] == 45
-    assert response["duration"]["time_unit"] == "MINUTE"
-    assert response["id"]
+    assert_response_has_expected_values(response, "advanced classroom", datetime(2020, 2, 11, 10, 0), 3, 45, "MINUTE")
     assert repository.get_by_id(response["id"])
 
 
-def test_create_scheduled_classroom(memory_event_store):
+def test_should_create_scheduled_classroom(memory_event_store):
     start_date = datetime(2020, 2, 11, 10, 0)
     stop_date = datetime(2020, 3, 11, 10, 0)
     classroom_json = ClassroomJsonBuilderForTest().with_start_date(start_date).with_stop_date(stop_date).build()
@@ -44,11 +39,11 @@ def test_create_scheduled_classroom(memory_event_store):
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert response["schedule"]["start"] == start_date
-    assert response["schedule"]["stop"] == stop_date
+    assert_response_has_expected_values(response, classroom_json["name"], start_date, classroom_json["position"],
+                                        stop_date=stop_date)
 
 
-def test_create_classroom_with_attendees(memory_event_store):
+def test_should_create_classroom_with_attendees(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
     RepositoryProviderForTest().for_classroom().for_client(client_repository).provide()
     classroom_json = ClassroomJsonBuilderForTest().with_position(2).with_attendees(
@@ -57,13 +52,12 @@ def test_create_classroom_with_attendees(memory_event_store):
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert len(response["attendees"]) == 2
-    attendees_ids = list(map(lambda attendee: attendee['id'], response["attendees"]))
-    assert clients[0]._id in attendees_ids
-    assert clients[1]._id in attendees_ids
+    assert_response_has_expected_values(response, classroom_json["name"],
+                                        datetime.fromisoformat(classroom_json["start_date"]), 2,
+                                        expected_attendees=[{"id": clients[0]._id}, {"id": clients[1]._id}])
 
 
-def test_handle_business_exception_on_classroom_creation(memory_event_store, mocker):
+def test_should_handle_business_exception_on_classroom_creation(memory_event_store, mocker):
     mocker.patch.object(Classroom, "all_attendees", side_effect=DomainException("something wrong occurred"))
     classroom_json = ClassroomJsonBuilderForTest().build()
 
@@ -148,3 +142,24 @@ def test_classroom_not_found():
 
     assert e.value.status_code == 404
     assert e.value.detail == f"Classroom with id '{str(unknown_uuid)}' not found"
+
+
+def assert_response_has_expected_values(response: dict, expected_name: str, expected_start: datetime,
+                                        expected_position: int, expected_duration: int = 1,
+                                        expected_time_unit: str = "HOUR", stop_date: datetime = None,
+                                        expected_attendees: [] = []):
+    assert response.items() >= {
+        "name": expected_name,
+        "schedule": {
+            "start": expected_start,
+            "stop": stop_date
+        },
+        "position": expected_position,
+        "duration": {
+            "duration": expected_duration,
+            "time_unit": expected_time_unit
+        }
+    }.items()
+    for expected_attendee in expected_attendees:
+        assert expected_attendee in response["attendees"]
+    assert response["id"]

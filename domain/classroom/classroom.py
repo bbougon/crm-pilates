@@ -174,18 +174,6 @@ class ConfirmedSession(Session, AggregateRoot):
             raise InvalidSessionStartDateException(classroom, start)
         return ConfirmedSession(classroom.id, classroom.name, classroom.position, start, classroom.duration.time_unit, classroom.attendees)
 
-    @staticmethod
-    def is_before(start: datetime, start_to_compare: datetime):
-        return start < start_to_compare
-
-    @staticmethod
-    def is_the_same_time(classroom: datetime, start: datetime):
-        return classroom.time() == start.time()
-
-    @staticmethod
-    def is_the_same_day(date: datetime, date_to_compare: datetime):
-        return date.date().weekday() == date_to_compare.date().weekday()
-
     @property
     def id(self):
         return self._id
