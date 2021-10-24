@@ -16,6 +16,9 @@ settings:
 settings-docker:
 	$(virtualenv_path)/bin/ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/deploy.yml --diff
 
+settings-docker-local:
+	$(virtualenv_path)/bin/ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/docker-local.yml --diff
+
 install-persistent:
 	mkdir -p $(persistent_path)
 	mkdir -p $(persistent_path)/event
@@ -27,6 +30,8 @@ create-local-database:
 install: requirements install-persistent settings create-local-database
 
 install-docker: requirements install-persistent settings-docker create-local-database
+
+install-docker-local: requirements install-persistent settings-docker-local create-local-database
 
 run-all: run
 

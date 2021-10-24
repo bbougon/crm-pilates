@@ -7,3 +7,6 @@ services:
     container_name: crm-pilates-api
     ports:
       - 8081:8081
+    build:
+      context: .
+      target: development

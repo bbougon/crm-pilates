@@ -21,9 +21,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["x-link", "X-Link"]
 )
 
 
 app.include_router(api_router)
 StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)
-EventToDomainLoader().load()
+# EventToDomainLoader().load()

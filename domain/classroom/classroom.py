@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import uuid
 from abc import abstractmethod
+import calendar
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import List
 from uuid import UUID
 
-from domain.classroom.date_time_comparator import DateTimeComparator
+from domain.classroom.date_time_comparator import DateTimeComparator, SameDayComparator
 from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
 from domain.datetimes import Weekdays
 from domain.exceptions import DomainException
@@ -82,6 +83,16 @@ class Classroom(AggregateRoot):
 
     def confirm_session_at(self, session_date: datetime) -> ConfirmedSession:
         return ConfirmedSession.create(self, session_date)
+
+    def sessions_in(self, start_date: datetime, end_date: datetime) -> List[Session]:
+        weeks: [] = calendar.Calendar().monthdatescalendar(start_date.year, start_date.month)
+        day_of_session:int = self._schedule.start.weekday()
+        sessions: [Session] = []
+        for week in weeks:
+            for day in week:
+                if day.day == self.schedule.start.day and start_date.month == day.month:
+                    sessions.append(Session(self.id, self.name, self.position, day, self.duration.time_unit, self.attendees))
+        return sessions
 
 
 class Attendance(Enum):

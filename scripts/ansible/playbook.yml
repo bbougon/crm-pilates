@@ -4,6 +4,8 @@
     - role: settings
 
 - name: Deploy
-  hosts: deploy
+  hosts:
+    deploy
+    docker-local
   roles:
     - role: server

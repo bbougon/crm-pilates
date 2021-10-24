@@ -3,9 +3,10 @@ from domain.classroom.classroom_creation_command_handler import ClassroomCreatio
 from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
 from domain.classroom.session_checkin_saga_handler import SessionCheckinSagaHandler
 from domain.classroom.session_creation_command_handler import SessionCreationCommandHandler
+from domain.classroom.session_in_range_command_handler import SessionInRangeCommandHandler
 from domain.client.client_command_handler import ClientCreationCommandHandler
 from domain.commands import ClassroomCreationCommand, ClientCreationCommand, ClassroomPatchCommand, \
-    GetNextSessionsCommand, SessionCreationCommand
+    GetNextSessionsCommand, SessionCreationCommand, GetSessionsInRangeCommand
 from domain.classroom.next_sessions_command_handler import NextSessionsCommandHandler
 from domain.sagas import SessionCheckinSaga
 
@@ -19,6 +20,7 @@ command_handlers = {
     ClassroomPatchCommand.__name__: ClassroomPatchCommandHandler(),
     ClientCreationCommand.__name__: ClientCreationCommandHandler(),
     GetNextSessionsCommand.__name__: NextSessionsCommandHandler(),
+    GetSessionsInRangeCommand.__name__: SessionInRangeCommandHandler(),
     SessionCreationCommand.__name__: SessionCreationCommandHandler()
 }
 

@@ -5,6 +5,7 @@ from uuid import UUID
 
 from domain.classroom.classroom import Classroom
 from domain.classroom.classroom_repository import ClassroomRepository
+from domain.classroom.date_time_comparator import DateTimeComparator
 from domain.repository import AggregateRoot
 from infrastructure.repository.memory.memory_repository import MemoryRepository
 
@@ -32,6 +33,10 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
     def get_next_classrooms_from(self, at_date: datetime) -> Iterator[Classroom]:
         classrooms: List[Classroom] = next(self.__repository.get_all())
         yield [classroom for classroom in classrooms if self.__in_between_dates(classroom, at_date)]
+
+    def get_classrooms_in_range(self, start_date: datetime, end_date: datetime) -> List[Classroom]:
+        classrooms: List[Classroom] = next(self.__repository.get_all())
+        yield [classroom for classroom in classrooms if DateTimeComparator(classroom.schedule.start, end_date).before().compare() and DateTimeComparator(start_date, classroom.schedule.stop).before().compare()]
 
     def __in_between_dates(self, classroom, at_date):
         logging.Logger("repository").debug(msg=f"classes: {self.__repository.get_all()}")

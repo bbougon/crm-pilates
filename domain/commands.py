@@ -38,3 +38,9 @@ class GetNextSessionsCommand(Command):
 class SessionCreationCommand(Command):
     classroom_id: UUID
     session_date: datetime
+
+
+@dataclass
+class GetSessionsInRangeCommand(Command):
+    start_date: datetime
+    end_date: datetime
