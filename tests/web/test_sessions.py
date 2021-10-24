@@ -11,6 +11,7 @@ from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import SessionCheckinJsonBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionContextBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
+from tests.helpers.helpers import expected_session_response
 from web.api.session import session_checkin, next_sessions, sessions
 from web.presentation.domain.detailed_attendee import DetailedAttendee
 from web.schema.session_schemas import SessionCheckin
@@ -73,13 +74,18 @@ def test_get_next_sessions_with_confirmed_sessions():
     first_classroom = classrooms[0]
     second_classroom = classrooms[1]
     assert response == [
-        expected_session(None, first_classroom, "2020-03-19T10:00:00", "2020-03-19T11:00:00", [
-            DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname, "REGISTERED"),
-            DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
-        ]),
-        expected_session(session.id, second_classroom, "2020-03-19T11:00:00", "2020-03-19T12:00:00", [
-            DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname, "REGISTERED")
-        ])
+        expected_session_response(None, first_classroom.id, first_classroom, "2020-03-19T10:00:00",
+                                  "2020-03-19T11:00:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(session.id, second_classroom.id, second_classroom, "2020-03-19T11:00:00",
+                                  "2020-03-19T12:00:00", [
+                                      DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
+                                                       "REGISTERED")
+                                  ])
     ]
 
 
@@ -108,45 +114,49 @@ def test_sessions_should_return_sessions_in_current_month_range():
     first_classroom = classrooms[0]
     second_classroom = classrooms[1]
     assert result == [
-        expected_session(None, first_classroom, "2021-09-02T10:00:00", "2021-09-02T11:00:00", [
-            DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname, "REGISTERED"),
-            DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
-        ]),
-        expected_session(None, first_classroom, "2021-09-09T10:00:00", "2021-09-09T11:00:00", [
-            DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname, "REGISTERED"),
-            DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
-        ]),
-        expected_session(None, first_classroom, "2021-09-16T10:00:00", "2021-09-16T11:00:00", [
-            DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname, "REGISTERED"),
-            DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
-        ]),
-        expected_session(None, second_classroom, "2021-09-18T11:00:00", "2021-09-18T12:00:00", [
-            DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname, "REGISTERED")
-        ]),
-        expected_session(None, first_classroom, "2021-09-23T10:00:00", "2021-09-23T11:00:00", [
-            DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname, "REGISTERED"),
-            DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
-        ]),
-        expected_session(confirmed_session.id, second_classroom, "2021-09-25T11:00:00", "2021-09-25T12:00:00", [
-            DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname, "REGISTERED")
-        ]),
-        expected_session(None, first_classroom, "2021-09-30T10:00:00", "2021-09-30T11:00:00", [
-            DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname, "REGISTERED"),
-            DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
-        ]),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-02T10:00:00",
+                                  "2021-09-02T11:00:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-09T10:00:00",
+                                  "2021-09-09T11:00:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-16T10:00:00",
+                                  "2021-09-16T11:00:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(None, second_classroom.id, second_classroom, "2021-09-18T11:00:00",
+                                  "2021-09-18T12:00:00", [
+                                      DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-23T10:00:00",
+                                  "2021-09-23T11:00:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(confirmed_session.id, second_classroom.id, second_classroom, "2021-09-25T11:00:00",
+                                  "2021-09-25T12:00:00", [
+                                      DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-30T10:00:00",
+                                  "2021-09-30T11:00:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ])
     ]
-
-
-def expected_session(session_id, classroom: Classroom, start_date: str, end_date: str, attendees):
-    return {
-        "id": session_id,
-        "name": classroom.name,
-        "classroom_id": classroom.id,
-        "position": classroom.position,
-        "schedule": {
-            "start": start_date,
-            "stop": end_date
-        },
-        "attendees": attendees
-
-    }

@@ -11,6 +11,7 @@ from main import app
 from tests.builders.builders_for_test import ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionCheckinJsonBuilderForTest, \
     SessionContextBuilderForTest
+from tests.helpers.helpers import expected_session_response
 
 client = TestClient(app)
 
@@ -35,36 +36,16 @@ def test_get_next_sessions(memory_repositories):
     second_classroom: Classroom = classrooms[1]
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
-        {
-            "id": None,
-            "name": first_classroom.name,
-            "classroom_id": str(first_classroom.id),
-            "position": first_classroom.position,
-            "schedule": {
-                "start": "2019-05-07T10:00:00",
-                "stop": "2019-05-07T11:00:00"
-            },
-            "attendees": [
-                {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-                 "attendance": "REGISTERED"},
-                {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
-                 "attendance": "REGISTERED"}
-            ]
-        },
-        {
-            "id": None,
-            "name": second_classroom.name,
-            "classroom_id": str(second_classroom.id),
-            "position": second_classroom.position,
-            "schedule": {
-                "start": "2019-05-07T11:00:00",
-                "stop": "2019-05-07T12:00:00"
-            },
-            "attendees": [
-                {"id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname,
-                 "attendance": "REGISTERED"},
-            ]
-        }
+        expected_session_response(ANY, str(str(first_classroom.id)), first_classroom, "2019-05-07T10:00:00", "2019-05-07T11:00:00", [
+            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
+             "attendance": "REGISTERED"},
+            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+             "attendance": "REGISTERED"}
+        ]),
+        expected_session_response(ANY, str(second_classroom.id), second_classroom, "2019-05-07T11:00:00", "2019-05-07T12:00:00", [
+            {"id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname,
+             "attendance": "REGISTERED"}
+        ])
     ]
 
 
@@ -86,22 +67,12 @@ def test_register_checkin(memory_repositories):
                                          clients[0]._id).build())
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == {
-        "id": ANY,
-        "name": session.name,
-        "classroom_id": str(classroom.id),
-        "position": session.position,
-        "schedule": {
-            "start": "2019-05-07T10:00:00",
-            "stop": "2019-05-07T11:00:00"
-        },
-        "attendees": [
-            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-             "attendance": "CHECKED_IN"},
-            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
-             "attendance": "REGISTERED"}
-        ]
-    }
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-07T10:00:00", "2019-05-07T11:00:00", [
+        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
+         "attendance": "CHECKED_IN"},
+        {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+         "attendance": "REGISTERED"}
+    ])
 
 
 @immobilus("2019-03-08 09:24:15.230")
@@ -121,19 +92,10 @@ def test_updated_session_produces_ok_200(memory_event_store):
                                          clients[1]._id).at(datetime(2020, 3, 8, 11, 0)).build())
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {
-        "id": ANY,
-        "name": classroom.name,
-        "classroom_id": str(classroom.id),
-        "position": classroom.position,
-        "schedule": {
-            "start": "2020-03-08T11:00:00",
-            "stop": "2020-03-08T12:00:00"
-        },
-        "attendees": [
-            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-             "attendance": "CHECKED_IN"},
-            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
-             "attendance": "CHECKED_IN"}
-        ]
-    }
+
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2020-03-08T11:00:00", "2020-03-08T12:00:00", [
+        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
+         "attendance": "CHECKED_IN"},
+        {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+         "attendance": "CHECKED_IN"}
+    ])
