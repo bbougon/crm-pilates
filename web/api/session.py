@@ -55,13 +55,27 @@ def map_sessions(event):
 def sessions(response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     # headers = {"X-Link": '</sessions?from=previous>; rel="previous", </sessions?from=current>; rel="current", </sessions?from=next>; rel="next"'}
     current_date = datetime.now()
-    first_day_of_month: datetime = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    last_day_of_month: datetime = current_date.replace(
+    first_day_of_current_month: datetime = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_day_of_current_month: datetime = current_date.replace(
         day=calendar.monthrange(current_date.year, current_date.month)[1], hour=23, minute=59, second=59, microsecond=0)
+    __set_link_header(response, first_day_of_current_month, last_day_of_current_month)
     from command.response import Response
     result: Tuple[Response, status] = command_bus_provider.command_bus.send(
-        GetSessionsInRangeCommand(first_day_of_month, last_day_of_month))
+        GetSessionsInRangeCommand(first_day_of_current_month, last_day_of_current_month))
     return map_sessions(result[0].event)
+
+
+def __set_link_header(response: Response, first_day_of_current_month: datetime, last_day_of_current_month: datetime):
+    first_day_of_previous_month = first_day_of_current_month.replace(month=first_day_of_current_month.month - 1)
+    last_day_of_previous_month = first_day_of_previous_month.replace(
+        day=calendar.monthrange(first_day_of_previous_month.year, first_day_of_previous_month.month)[1], hour=23,
+        minute=59, second=59)
+    first_day_of_next_month = first_day_of_current_month.replace(month=first_day_of_current_month.month + 1)
+    last_day_of_next_month = first_day_of_next_month.replace(day=calendar.monthrange(first_day_of_next_month.year, first_day_of_next_month.month)[1], hour=23, minute=59, second=59)
+    previous_header = f'</sessions?start_date={first_day_of_previous_month.isoformat()}&end_date={last_day_of_previous_month.isoformat()}>; rel="previous"'
+    current_header = f'</sessions?start_date={first_day_of_current_month.isoformat()}&end_date={last_day_of_current_month.isoformat()}>; rel="current"'
+    next_header = f'</sessions?start_date={first_day_of_next_month.isoformat()}&end_date={last_day_of_next_month.isoformat()}>; rel="next"'
+    response.headers["X-Link"] = f"{previous_header}, {current_header}, {next_header}"
 
 
 @router.post("/sessions/checkin",
