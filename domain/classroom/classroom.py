@@ -9,7 +9,7 @@ from enum import Enum
 from typing import List
 from uuid import UUID
 
-from domain.classroom.date_time_comparator import DateTimeComparator
+from domain.classroom.date_time_comparator import DateTimeComparator, DateComparator
 from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
 from domain.datetimes import Weekdays
 from domain.exceptions import DomainException
@@ -90,7 +90,7 @@ class Classroom(AggregateRoot):
         classroom_start_date = self.schedule.start
         for week in weeks:
             for day in week:
-                if day.weekday() == classroom_start_date.weekday() and classroom_start_date.date() <= day and start_date.month == day.month:
+                if DateComparator(classroom_start_date.date(), day).same_month().same_day().before().compare():
                     sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute), self.duration.time_unit, self.attendees))
         return sessions
 
