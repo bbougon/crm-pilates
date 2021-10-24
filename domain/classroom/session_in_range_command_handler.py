@@ -42,8 +42,9 @@ class SessionInRangeCommandHandler(CommandHandler):
         classrooms: List[Classroom] = next(RepositoryProvider.read_repositories.classroom.get_classrooms_in_range(command.start_date, command.end_date))
         sessions = []
         for classroom in classrooms:
-            classroom_sessions: [Session] = classroom.sessions_in(command.start_date, command.end_date)
+            classroom_sessions: [Session] = classroom.sessions_in_range(command.start_date, command.end_date)
             for classroom_session in classroom_sessions:
                 session: Session = RepositoryProvider.read_repositories.session.get_by_classroom_id_and_date(classroom_session.classroom_id, classroom_session.start)
                 sessions.append(SessionInRange(session or classroom_session))
+        sessions.sort(key=lambda session: session.start)
         return SessionsInRange(sessions), Status.NONE

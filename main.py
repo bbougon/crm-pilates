@@ -27,4 +27,4 @@ app.add_middleware(
 
 app.include_router(api_router)
 StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)
-# EventToDomainLoader().load()
+EventToDomainLoader().load()

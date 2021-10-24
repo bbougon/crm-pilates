@@ -1,16 +1,12 @@
 import calendar
 from datetime import datetime
-import logging
 from http import HTTPStatus
 from typing import List, Tuple
 
-import dateutil
 from fastapi import status, APIRouter, Depends, Response, HTTPException
-from starlette.responses import JSONResponse
 
 from command.command_handler import Status
 from domain.classroom.classroom import Session
-from domain.classroom.next_sessions_command_handler import NextScheduledSessions
 from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
 from domain.commands import GetNextSessionsCommand, GetSessionsInRangeCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
@@ -57,8 +53,7 @@ def map_sessions(event):
             response_model=List[SessionResponse]
             )
 def sessions(response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
-    headers = {
-        "X-Link": '</sessions?from=previous>; rel="previous", </sessions?from=current>; rel="current", </sessions?from=next>; rel="next"'}
+    # headers = {"X-Link": '</sessions?from=previous>; rel="previous", </sessions?from=current>; rel="current", </sessions?from=next>; rel="next"'}
     current_date = datetime.now()
     first_day_of_month: datetime = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     last_day_of_month: datetime = current_date.replace(

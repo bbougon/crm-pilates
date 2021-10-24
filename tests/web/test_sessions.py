@@ -1,10 +1,8 @@
-import ast
 import uuid
 from datetime import datetime
 
 from fastapi import Response, HTTPException, status
 from immobilus import immobilus
-from starlette.responses import JSONResponse
 
 from domain.classroom.classroom import Classroom
 from domain.exceptions import AggregateNotFoundException
@@ -111,21 +109,20 @@ def test_sessions_should_return_sessions_in_current_month_range():
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
     repository, classrooms = ClassroomContextBuilderForTest() \
-        .with_classrooms(ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10))
-                        .ending_at(datetime(2022, 6, 25, 11))
+        .with_classrooms(ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10)).ending_at(datetime(2022, 6, 25, 11))
                          .with_attendee(clients[0]._id).with_attendee(clients[1]._id),
                          ClassroomBuilderForTest().starting_at(datetime(2021, 9, 18, 11))
                          .ending_at(datetime(2022, 6, 25, 12)).with_attendee(clients[2]._id),
                          ClassroomBuilderForTest().starting_at(datetime(2021, 10, 1, 10)).ending_at(datetime(2022, 6, 25, 11))) \
         .persist(RepositoryProvider.write_repositories.classroom) \
         .build()
-    session_repository, session = SessionContextBuilderForTest().with_classroom(classrooms[1]).at(
+    session_repository, confirmed_session = SessionContextBuilderForTest().with_classroom(classrooms[1]).at(
         datetime(2021, 9, 25, 11)).confirm().persist(RepositoryProvider.write_repositories.session).build()
 
     response = sessions(Response(), CommandBusProviderForTest().provide())
 
     first_classroom = classrooms[0]
-    second_classroom = classrooms[2]
+    second_classroom = classrooms[1]
     assert response == [
         {
             "id": None,
@@ -170,7 +167,7 @@ def test_sessions_should_return_sessions_in_current_month_range():
             ]
         },
         {
-            "id": session.id,
+            "id": None,
             "name": second_classroom.name,
             "classroom_id": second_classroom.id,
             "position": second_classroom.position,
@@ -179,7 +176,7 @@ def test_sessions_should_return_sessions_in_current_month_range():
                 "stop": "2021-09-18T12:00:00"
             },
             "attendees": [
-                DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
+                DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname, "REGISTERED")
             ]
         },
         {
@@ -197,7 +194,7 @@ def test_sessions_should_return_sessions_in_current_month_range():
             ]
         },
         {
-            "id": session.id,
+            "id": confirmed_session.id,
             "name": second_classroom.name,
             "classroom_id": second_classroom.id,
             "position": second_classroom.position,
@@ -206,7 +203,7 @@ def test_sessions_should_return_sessions_in_current_month_range():
                 "stop": "2021-09-25T12:00:00"
             },
             "attendees": [
-                DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname, "REGISTERED")
+                DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname, "REGISTERED")
             ]
         },
         {
