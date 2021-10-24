@@ -27,26 +27,7 @@ def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusP
     from command.response import Response
     next_sessions_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
         GetNextSessionsCommand(datetime.now()))
-    return map_sessions(next_sessions_result[0].event)
-
-
-def map_sessions(event):
-    result = []
-    for session in event.sessions:
-        next_session = {
-            "id": session.root_id,
-            "name": session.name,
-            "classroom_id": session.classroom_id,
-            "position": session.position,
-            "schedule": {
-                "start": session.start.isoformat(),
-                "stop": session.stop.isoformat() if session.stop else None
-            },
-            "attendees": list(
-                map(lambda attendee: to_detailed_attendee(attendee["id"], attendee["attendance"]), session.attendees))
-        }
-        result.append(next_session)
-    return result
+    return __map_sessions(next_sessions_result[0].event)
 
 
 @router.get("/sessions",
@@ -55,45 +36,16 @@ def map_sessions(event):
 def sessions(response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider), start_date: datetime = None, end_date: datetime = None):
     if start_date and end_date:
         command = GetSessionsInRangeCommand(start_date, end_date)
-        __set_link_header(response, *__get_dates_for_period(start_date, end_date))
     else:
-        current_date = datetime.now()
-        first_day_of_current_month: datetime = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        last_day_of_current_month: datetime = current_date.replace(
-            day=calendar.monthrange(current_date.year, current_date.month)[1], hour=23, minute=59, second=59, microsecond=0)
-        command = GetSessionsInRangeCommand(first_day_of_current_month, last_day_of_current_month)
-        __set_link_header(response, *__get_dates_for_month_period(first_day_of_current_month, last_day_of_current_month))
+        start_date: datetime = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_date: datetime = start_date.replace(
+            day=calendar.monthrange(start_date.year, start_date.month)[1], hour=23, minute=59, second=59, microsecond=0)
+        command = GetSessionsInRangeCommand(start_date, end_date)
 
+    __set_link_header(response, *__get_dates_for_period(start_date, end_date))
     from command.response import Response
     result: Tuple[Response, status] = command_bus_provider.command_bus.send(command)
-    return map_sessions(result[0].event)
-
-
-def __get_dates_for_period(start_date: datetime, end_date: datetime):
-    delta = end_date.date() - start_date.date()
-    first_day_of_previous_period = start_date - delta
-    last_day_of_previous_period = end_date - delta - timedelta(days=1)
-    first_day_of_next_period = start_date + delta + timedelta(days=1)
-    last_day_of_next_period = end_date + delta + timedelta(days=1)
-    return start_date, first_day_of_next_period, first_day_of_previous_period, end_date, last_day_of_next_period, last_day_of_previous_period
-
-
-def __get_dates_for_month_period(first_day_of_current_month: datetime, last_day_of_current_month: datetime):
-    first_day_of_previous_month = first_day_of_current_month.replace(month=first_day_of_current_month.month - 1)
-    last_day_of_previous_month = first_day_of_previous_month.replace(
-        day=calendar.monthrange(first_day_of_previous_month.year, first_day_of_previous_month.month)[1], hour=23,
-        minute=59, second=59)
-    first_day_of_next_month = first_day_of_current_month.replace(month=first_day_of_current_month.month + 1)
-    last_day_of_next_month = first_day_of_next_month.replace(day=calendar.monthrange(first_day_of_next_month.year, first_day_of_next_month.month)[1], hour=23, minute=59, second=59)
-    return first_day_of_current_month, first_day_of_next_month, first_day_of_previous_month, last_day_of_current_month, last_day_of_next_month, last_day_of_previous_month
-
-
-def __set_link_header(response, first_day_of_current_month, first_day_of_next_month, first_day_of_previous_month,
-                      last_day_of_current_month, last_day_of_next_month, last_day_of_previous_month):
-    previous_header = f'</sessions?start_date={first_day_of_previous_month.isoformat()}&end_date={last_day_of_previous_month.isoformat()}>; rel="previous"'
-    current_header = f'</sessions?start_date={first_day_of_current_month.isoformat()}&end_date={last_day_of_current_month.isoformat()}>; rel="current"'
-    next_header = f'</sessions?start_date={first_day_of_next_month.isoformat()}&end_date={last_day_of_next_month.isoformat()}>; rel="next"'
-    response.headers["X-Link"] = f"{previous_header}, {current_header}, {next_header}"
+    return __map_sessions(result[0].event)
 
 
 @router.post("/sessions/checkin",
@@ -127,3 +79,45 @@ def session_checkin(session_checkin: SessionCheckin, response: Response,
                             detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found")
     except DomainException as e:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
+
+
+def __map_sessions(event):
+    result = []
+    for session in event.sessions:
+        next_session = {
+            "id": session.root_id,
+            "name": session.name,
+            "classroom_id": session.classroom_id,
+            "position": session.position,
+            "schedule": {
+                "start": session.start.isoformat(),
+                "stop": session.stop.isoformat() if session.stop else None
+            },
+            "attendees": list(
+                map(lambda attendee: to_detailed_attendee(attendee["id"], attendee["attendance"]), session.attendees))
+        }
+        result.append(next_session)
+    return result
+
+
+def __set_link_header(response, first_day_of_current_month, first_day_of_next_month, first_day_of_previous_month,
+                      last_day_of_current_month, last_day_of_next_month, last_day_of_previous_month):
+    previous_header = f'</sessions?start_date={first_day_of_previous_month.isoformat()}&end_date={last_day_of_previous_month.isoformat()}>; rel="previous"'
+    current_header = f'</sessions?start_date={first_day_of_current_month.isoformat()}&end_date={last_day_of_current_month.isoformat()}>; rel="current"'
+    next_header = f'</sessions?start_date={first_day_of_next_month.isoformat()}&end_date={last_day_of_next_month.isoformat()}>; rel="next"'
+    response.headers["X-Link"] = f"{previous_header}, {current_header}, {next_header}"
+
+
+def __get_dates_for_period(start_date: datetime, end_date: datetime):
+    if start_date.day == 1 and end_date.day == calendar.monthrange(start_date.year, start_date.month)[1]:
+        first_day_of_previous_period = start_date.replace(month=start_date.month - 1)
+        last_day_of_previous_period = first_day_of_previous_period.replace(day=calendar.monthrange(first_day_of_previous_period.year, first_day_of_previous_period.month)[1], hour=23, minute=59, second=59)
+        first_day_of_next_period = start_date.replace(month=start_date.month + 1)
+        last_day_of_next_period = first_day_of_next_period.replace(day=calendar.monthrange(first_day_of_next_period.year, first_day_of_next_period.month)[1], hour=23, minute=59, second=59)
+    else:
+        delta = end_date.date() - start_date.date()
+        first_day_of_previous_period = start_date - delta
+        last_day_of_previous_period = end_date - delta - timedelta(days=1)
+        first_day_of_next_period = start_date + delta + timedelta(days=1)
+        last_day_of_next_period = end_date + delta + timedelta(days=1)
+    return start_date, first_day_of_next_period, first_day_of_previous_period, end_date, last_day_of_next_period, last_day_of_previous_period
