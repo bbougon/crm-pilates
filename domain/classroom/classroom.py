@@ -90,7 +90,7 @@ class Classroom(AggregateRoot):
         classroom_start_date = self.schedule.start
         for week in weeks:
             for day in week:
-                if DateComparator(classroom_start_date.date(), day).same_month().same_day().before().compare():
+                if DateComparator(classroom_start_date.date(), day).same_month().same_day().before().compare() and DateComparator(day, end_date.date()).before().compare():
                     sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute), self.duration.time_unit, self.attendees))
         return sessions
 

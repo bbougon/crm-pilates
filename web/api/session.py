@@ -1,5 +1,5 @@
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import List, Tuple
 
@@ -52,26 +52,44 @@ def map_sessions(event):
 @router.get("/sessions",
             response_model=List[SessionResponse]
             )
-def sessions(response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
-    # headers = {"X-Link": '</sessions?from=previous>; rel="previous", </sessions?from=current>; rel="current", </sessions?from=next>; rel="next"'}
-    current_date = datetime.now()
-    first_day_of_current_month: datetime = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    last_day_of_current_month: datetime = current_date.replace(
-        day=calendar.monthrange(current_date.year, current_date.month)[1], hour=23, minute=59, second=59, microsecond=0)
-    __set_link_header(response, first_day_of_current_month, last_day_of_current_month)
+def sessions(response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider), start_date: datetime = None, end_date: datetime = None):
+    if start_date and end_date:
+        command = GetSessionsInRangeCommand(start_date, end_date)
+        __set_link_header(response, *__get_dates_for_period(start_date, end_date))
+    else:
+        current_date = datetime.now()
+        first_day_of_current_month: datetime = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        last_day_of_current_month: datetime = current_date.replace(
+            day=calendar.monthrange(current_date.year, current_date.month)[1], hour=23, minute=59, second=59, microsecond=0)
+        command = GetSessionsInRangeCommand(first_day_of_current_month, last_day_of_current_month)
+        __set_link_header(response, *__get_dates_for_month_period(first_day_of_current_month, last_day_of_current_month))
+
     from command.response import Response
-    result: Tuple[Response, status] = command_bus_provider.command_bus.send(
-        GetSessionsInRangeCommand(first_day_of_current_month, last_day_of_current_month))
+    result: Tuple[Response, status] = command_bus_provider.command_bus.send(command)
     return map_sessions(result[0].event)
 
 
-def __set_link_header(response: Response, first_day_of_current_month: datetime, last_day_of_current_month: datetime):
+def __get_dates_for_period(start_date: datetime, end_date: datetime):
+    delta = end_date.date() - start_date.date()
+    first_day_of_previous_period = start_date - delta
+    last_day_of_previous_period = end_date - delta - timedelta(days=1)
+    first_day_of_next_period = start_date + delta + timedelta(days=1)
+    last_day_of_next_period = end_date + delta + timedelta(days=1)
+    return start_date, first_day_of_next_period, first_day_of_previous_period, end_date, last_day_of_next_period, last_day_of_previous_period
+
+
+def __get_dates_for_month_period(first_day_of_current_month: datetime, last_day_of_current_month: datetime):
     first_day_of_previous_month = first_day_of_current_month.replace(month=first_day_of_current_month.month - 1)
     last_day_of_previous_month = first_day_of_previous_month.replace(
         day=calendar.monthrange(first_day_of_previous_month.year, first_day_of_previous_month.month)[1], hour=23,
         minute=59, second=59)
     first_day_of_next_month = first_day_of_current_month.replace(month=first_day_of_current_month.month + 1)
     last_day_of_next_month = first_day_of_next_month.replace(day=calendar.monthrange(first_day_of_next_month.year, first_day_of_next_month.month)[1], hour=23, minute=59, second=59)
+    return first_day_of_current_month, first_day_of_next_month, first_day_of_previous_month, last_day_of_current_month, last_day_of_next_month, last_day_of_previous_month
+
+
+def __set_link_header(response, first_day_of_current_month, first_day_of_next_month, first_day_of_previous_month,
+                      last_day_of_current_month, last_day_of_next_month, last_day_of_previous_month):
     previous_header = f'</sessions?start_date={first_day_of_previous_month.isoformat()}&end_date={last_day_of_previous_month.isoformat()}>; rel="previous"'
     current_header = f'</sessions?start_date={first_day_of_current_month.isoformat()}&end_date={last_day_of_current_month.isoformat()}>; rel="current"'
     next_header = f'</sessions?start_date={first_day_of_next_month.isoformat()}&end_date={last_day_of_next_month.isoformat()}>; rel="next"'

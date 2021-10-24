@@ -92,10 +92,27 @@ def test_updated_session_produces_ok_200(memory_event_store):
                                          clients[1]._id).at(datetime(2020, 3, 8, 11, 0)).build())
 
     assert response.status_code == status.HTTP_200_OK
-
     assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2020-03-08T11:00:00", "2020-03-08T12:00:00", [
         {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
          "attendance": "CHECKED_IN"},
         {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
          "attendance": "CHECKED_IN"}
     ])
+
+
+@immobilus("2021-09-02 10:00:00")
+def test_sessions_should_return_all_sessions_in_range(memory_repositories):
+    repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10, 0)).ending_at(datetime(2021, 9, 16, 10, 0))).persist(
+        RepositoryProvider.write_repositories.classroom).build()
+
+    response: Response = client.get("/sessions?start_date=2021-09-02T00:00:00&end_date=2021-09-09T23:59:59")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-26T00:00:00&end_date=2021-09-01T23:59:59>; rel="previous", ' \
+                                         '</sessions?start_date=2021-09-02T00:00:00&end_date=2021-09-09T23:59:59>; rel="current", ' \
+                                         '</sessions?start_date=2021-09-10T00:00:00&end_date=2021-09-17T23:59:59>; rel="next"'
+    assert response.json() == [
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-02T10:00:00", "2021-09-02T11:00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00", "2021-09-09T11:00:00", [])
+    ]
