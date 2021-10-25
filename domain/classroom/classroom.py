@@ -55,8 +55,9 @@ class Classroom(AggregateRoot):
     @staticmethod
     def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
                duration: Duration = Duration(HourTimeUnit(1))) -> Classroom:
+        if not stop_date:
+            stop_date = start_date + timedelta(hours=duration.time_unit.to_unit(HourTimeUnit).value)
         classroom = Classroom(name, position, Schedule(start=start_date, stop=stop_date), duration)
-        classroom._duration = duration
         return classroom
 
     def all_attendees(self, attendees: [Attendee]):
@@ -90,7 +91,7 @@ class Classroom(AggregateRoot):
         classroom_start_date = self.schedule.start
         for week in weeks:
             for day in week:
-                if DateComparator(classroom_start_date.date(), day).same_month().same_day().before().compare() and DateComparator(day, end_date.date()).before().compare():
+                if DateComparator(classroom_start_date.date(), day).same_day().before().compare() and DateComparator(day, end_date.date()).before().compare():
                     sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute), self.duration.time_unit, self.attendees))
         return sessions
 

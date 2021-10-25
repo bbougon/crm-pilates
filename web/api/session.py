@@ -31,7 +31,23 @@ def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusP
 
 
 @router.get("/sessions",
-            response_model=List[SessionResponse]
+            response_model=List[SessionResponse],
+            responses={
+                200: {
+                    "description": "List all sessions for a given period or by default for the current month."
+                                   "If you want all the sessions for a specific period, you must provide both start date and end date in iso format (i.e: YYYY-MM-DDTHH:mm:ss)",
+                    "headers": {
+                        "X-Link": {
+                            "description": "The previous, current and next period according to the start date and end date given, otherwise, previous month, current month and next month"
+                                           "example: "
+                                           "X-Link: </sessions?start_date=2021-08-01T00:00:00&end_date=2021-08-31T23:59:59>; rel='previous',"
+                                           "</sessions?start_date=2021-09-01T00:00:00&end_date=2021-09-30T23:59:59>; rel='current',"
+                                           "</sessions?start_date=2021-10-01T00:00:00&end_date=2021-10-31T23:59:59>; rel='next'",
+                            "schema": {"type": "URL"},
+                        }
+                    }
+                }
+            }
             )
 def sessions(response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider), start_date: datetime = None, end_date: datetime = None):
     if start_date and end_date:
@@ -110,9 +126,9 @@ def __set_link_header(response, first_day_of_current_month, first_day_of_next_mo
 
 def __get_dates_for_period(start_date: datetime, end_date: datetime):
     if start_date.day == 1 and end_date.day == calendar.monthrange(start_date.year, start_date.month)[1]:
-        first_day_of_previous_period = start_date.replace(month=start_date.month - 1)
+        first_day_of_previous_period = start_date.replace(month=start_date.month - 1, day=1)
         last_day_of_previous_period = first_day_of_previous_period.replace(day=calendar.monthrange(first_day_of_previous_period.year, first_day_of_previous_period.month)[1], hour=23, minute=59, second=59)
-        first_day_of_next_period = start_date.replace(month=start_date.month + 1)
+        first_day_of_next_period = start_date.replace(month=start_date.month + 1, day=1)
         last_day_of_next_period = first_day_of_next_period.replace(day=calendar.monthrange(first_day_of_next_period.year, first_day_of_next_period.month)[1], hour=23, minute=59, second=59)
     else:
         delta = end_date.date() - start_date.date()

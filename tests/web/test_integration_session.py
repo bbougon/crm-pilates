@@ -116,3 +116,23 @@ def test_sessions_should_return_all_sessions_in_range(memory_repositories):
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-02T10:00:00", "2021-09-02T11:00:00", []),
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00", "2021-09-09T11:00:00", [])
     ]
+
+
+@immobilus("2021-09-25 10:00:00", tz_offset=2)
+def test_sessions_should_return_all_sessions_from_classroom_for_current_month(memory_repositories):
+    repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
+        ClassroomBuilderForTest().starting_at(datetime(2021, 8, 13, 10, 0)).ending_at(datetime(2022, 6, 16, 10, 0))).persist(
+        RepositoryProvider.write_repositories.classroom).build()
+
+    response: Response = client.get("/sessions?start_date=2021-10-01T00:00:00&end_date=2021-10-31T23:59:59")
+
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-09-01T00:00:00&end_date=2021-09-30T23:59:59>; rel="previous", ' \
+                                         '</sessions?start_date=2021-10-01T00:00:00&end_date=2021-10-31T23:59:59>; rel="current", ' \
+                                         '</sessions?start_date=2021-11-01T00:00:00&end_date=2021-11-30T23:59:59>; rel="next"'
+    assert response.json() == [
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-01T10:00:00", "2021-10-01T11:00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-08T10:00:00", "2021-10-08T11:00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-15T10:00:00", "2021-10-15T11:00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-22T10:00:00", "2021-10-22T11:00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-29T10:00:00", "2021-10-29T11:00:00", [])
+    ]

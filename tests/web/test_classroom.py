@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 from fastapi import HTTPException
@@ -26,7 +26,7 @@ def test_should_create_classroom(memory_event_store):
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert_response_has_expected_values(response, "advanced classroom", datetime(2020, 2, 11, 10, 0), 3, 45, "MINUTE")
+    assert_response_has_expected_values(response, "advanced classroom", datetime(2020, 2, 11, 10, 0), 3, 45, "MINUTE", datetime(2020, 2, 11, 10, 45))
     assert repository.get_by_id(response["id"])
 
 
@@ -54,6 +54,7 @@ def test_should_create_classroom_with_attendees(memory_event_store):
 
     assert_response_has_expected_values(response, classroom_json["name"],
                                         datetime.fromisoformat(classroom_json["start_date"]), 2,
+                                        stop_date=datetime.fromisoformat(classroom_json["start_date"]) + timedelta(hours=1),
                                         expected_attendees=[{"id": clients[0]._id}, {"id": clients[1]._id}])
 
 

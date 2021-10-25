@@ -31,7 +31,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
         },
         "schedule": {
             "start": datetime(2020, 5, 7, 11, 0),
-            "stop": None
+            "stop": datetime(2020, 5, 7, 12, 0)
         },
         "attendees": []
     }
@@ -60,7 +60,7 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
         },
         "schedule": {
             "start": datetime(2019, 6, 7, 11, 0),
-            "stop": None
+            "stop": datetime(2019, 6, 7, 12, 0)
         },
         "attendees": [
             {"id": clients[0]._id},

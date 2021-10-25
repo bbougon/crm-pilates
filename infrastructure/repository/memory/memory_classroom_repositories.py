@@ -41,5 +41,4 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
     def __in_between_dates(self, classroom, at_date):
         logging.Logger("repository").debug(msg=f"classes: {self.__repository.get_all()}")
         if classroom.schedule.stop:
-            return classroom.schedule.start.date() <= at_date.date() <= classroom.schedule.stop.date()
-        return classroom.schedule.start.date() == at_date.date() and classroom.schedule.start.time() >= at_date.time()
+            return classroom.schedule.start.date() <= at_date.date() <= classroom.schedule.stop.date() and classroom.schedule.start.time() >= at_date.time()

@@ -14,7 +14,7 @@ def test_create_should_create_a_classroom_with_1_hour_duration():
     classroom = Classroom.create("mat class room", datetime(2020, 1, 2, 10, 0), 2)
 
     assert classroom.schedule.start == datetime(2020, 1, 2, 10, 0)
-    assert not classroom.schedule.stop
+    assert classroom.schedule.stop == datetime(2020, 1, 2, 11, 0)
     assert classroom.duration == Duration(HourTimeUnit(1))
 
 
