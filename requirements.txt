@@ -4,6 +4,7 @@ gunicorn
 pydantic
 colorlog
 ansible
+arrow
 
 # test
 coverage

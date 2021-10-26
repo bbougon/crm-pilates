@@ -160,3 +160,32 @@ def test_sessions_should_return_sessions_in_current_month_range():
                                                        "REGISTERED")
                                   ])
     ]
+
+
+@immobilus("2021-09-05 08:24:15.230")
+def test_sessions_should_return_sessions_in_december_and_link_in_january():
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10)).ending_at(datetime(2022, 6, 25, 11))) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+
+    response = Response()
+    result = sessions(response, CommandBusProviderForTest().provide(), datetime(2021, 12, 1), datetime(2021, 12, 31, 23, 59, 59))
+
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-11-01T00:00:00&end_date=2021-11-30T23:59:59>; rel="previous", ' \
+                                         '</sessions?start_date=2021-12-01T00:00:00&end_date=2021-12-31T23:59:59>; rel="current", ' \
+                                         '</sessions?start_date=2022-01-01T00:00:00&end_date=2022-01-31T23:59:59>; rel="next"'
+    first_classroom = classrooms[0]
+    assert result == [
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-02T10:00:00",
+                                  "2021-12-02T11:00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-09T10:00:00",
+                                  "2021-12-09T11:00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-16T10:00:00",
+                                  "2021-12-16T11:00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-23T10:00:00",
+                                  "2021-12-23T11:00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-30T10:00:00",
+                                  "2021-12-30T11:00:00", [])
+
+    ]

@@ -1,8 +1,10 @@
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 from http import HTTPStatus
 from typing import List, Tuple
 
+import arrow
+from arrow import Arrow
 from fastapi import status, APIRouter, Depends, Response, HTTPException
 
 from command.command_handler import Status
@@ -118,22 +120,26 @@ def __map_sessions(event):
 
 def __set_link_header(response, first_day_of_current_month, first_day_of_next_month, first_day_of_previous_month,
                       last_day_of_current_month, last_day_of_next_month, last_day_of_previous_month):
-    previous_header = f'</sessions?start_date={first_day_of_previous_month.isoformat()}&end_date={last_day_of_previous_month.isoformat()}>; rel="previous"'
-    current_header = f'</sessions?start_date={first_day_of_current_month.isoformat()}&end_date={last_day_of_current_month.isoformat()}>; rel="current"'
-    next_header = f'</sessions?start_date={first_day_of_next_month.isoformat()}&end_date={last_day_of_next_month.isoformat()}>; rel="next"'
+    previous_header = f'</sessions?start_date={first_day_of_previous_month}&end_date={last_day_of_previous_month}>; rel="previous"'
+    current_header = f'</sessions?start_date={first_day_of_current_month}&end_date={last_day_of_current_month}>; rel="current"'
+    next_header = f'</sessions?start_date={first_day_of_next_month}&end_date={last_day_of_next_month}>; rel="next"'
     response.headers["X-Link"] = f"{previous_header}, {current_header}, {next_header}"
 
 
 def __get_dates_for_period(start_date: datetime, end_date: datetime):
+    arrow_start: Arrow = Arrow(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second)
+    arrow_end: Arrow = Arrow(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second)
     if start_date.day == 1 and end_date.day == calendar.monthrange(start_date.year, start_date.month)[1]:
-        first_day_of_previous_period = start_date.replace(month=start_date.month - 1, day=1)
-        last_day_of_previous_period = first_day_of_previous_period.replace(day=calendar.monthrange(first_day_of_previous_period.year, first_day_of_previous_period.month)[1], hour=23, minute=59, second=59)
-        first_day_of_next_period = start_date.replace(month=start_date.month + 1, day=1)
-        last_day_of_next_period = first_day_of_next_period.replace(day=calendar.monthrange(first_day_of_next_period.year, first_day_of_next_period.month)[1], hour=23, minute=59, second=59)
+        first_day_of_previous_period = arrow_start.shift(months=-1).replace(day=1)
+        last_day_of_previous_period = arrow_start.shift(months=-1).replace(day=calendar.monthrange(first_day_of_previous_period.year, first_day_of_previous_period.month)[1], hour=23, minute=59, second=59)
+        first_day_of_next_period = arrow_start.shift(months=+1).replace(day=1)
+        last_day_of_next_period = arrow_start.shift(months=+1).replace(day=calendar.monthrange(first_day_of_next_period.year, first_day_of_next_period.month)[1], hour=23, minute=59, second=59)
     else:
-        delta = end_date.date() - start_date.date()
-        first_day_of_previous_period = start_date - delta
-        last_day_of_previous_period = end_date - delta - timedelta(days=1)
-        first_day_of_next_period = start_date + delta + timedelta(days=1)
-        last_day_of_next_period = end_date + delta + timedelta(days=1)
-    return start_date, first_day_of_next_period, first_day_of_previous_period, end_date, last_day_of_next_period, last_day_of_previous_period
+        number_of_days = len(list(arrow.Arrow.span_range('days', start_date, end_date)))
+        first_day_of_previous_period = arrow_start.shift(days=-number_of_days + 1)
+        last_day_of_previous_period = arrow_end.shift(days=-number_of_days)
+        first_day_of_next_period = arrow_start.shift(days=+number_of_days)
+        last_day_of_next_period = arrow_end.shift(days=+number_of_days)
+    date_format = 'YYYY-MM-DDTHH:mm:ss'
+    return arrow_start.format(date_format), first_day_of_next_period.format(date_format), first_day_of_previous_period.format(
+        date_format), arrow_end.format(date_format), last_day_of_next_period.format(date_format), last_day_of_previous_period.format(date_format)
