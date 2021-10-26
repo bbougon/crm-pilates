@@ -5,7 +5,7 @@ import pytest
 from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession, \
-    InvalidSessionStartDateException
+    InvalidSessionStartDateException, Session
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.exceptions import DomainException
 
@@ -108,3 +108,13 @@ def test_should_not_confirm_session_with_date_prior_to_classroom_start_date():
         classroom.confirm_session_at(datetime(2020, 5, 25, 10, 0))
 
     assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set before"
+
+
+def test_session_in_range_should_return_sessions_until_classroom_stops():
+    classroom: Classroom = Classroom.create("classroom", datetime(2020, 6, 1, 10), 2, datetime(2020, 7, 13, 10, 45), duration=Duration(MinuteTimeUnit(45)))
+
+    sessions: [Session] = classroom.sessions_in_range(datetime(2020, 7, 1), datetime(2020, 7, 31, 23, 59, 59))
+
+    assert len(sessions) == 2
+    assert sessions[-1].start == datetime(2020, 7, 13, 10)
+    assert sessions[-1].stop == datetime(2020, 7, 13, 10, 45)

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import calendar
 import uuid
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -8,6 +7,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import List
 from uuid import UUID
+
+import arrow
 
 from domain.classroom.date_time_comparator import DateTimeComparator, DateComparator
 from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
@@ -86,13 +87,14 @@ class Classroom(AggregateRoot):
         return ConfirmedSession.create(self, session_date)
 
     def sessions_in_range(self, start_date: datetime, end_date: datetime) -> List[Session]:
-        weeks: [] = calendar.Calendar().monthdatescalendar(start_date.year, start_date.month)
+        days: [datetime] = list(map(lambda day_range: day_range.date(), arrow.Arrow.range('day', start_date, end_date)))
         sessions: [Session] = []
         classroom_start_date = self.schedule.start
-        for week in weeks:
-            for day in week:
-                if DateComparator(classroom_start_date.date(), day).same_day().before().compare() and DateComparator(day, end_date.date()).before().compare():
-                    sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute), self.duration.time_unit, self.attendees))
+        for day in days:
+            if DateComparator(classroom_start_date.date(), day).same_day().before().compare() \
+                    and DateComparator(day, end_date.date()).before().compare() \
+                    and DateComparator(day, self.schedule.stop.date()).before().compare():
+                sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute), self.duration.time_unit, self.attendees))
         return sessions
 
 
