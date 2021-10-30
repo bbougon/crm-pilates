@@ -116,11 +116,11 @@ class ClassroomBuilderForTest(Builder):
         return self
 
     def starting_at(self, start_at: datetime) -> ClassroomBuilderForTest:
-        self.start_date = datetime(start_at.year, start_at.month, start_at.day, start_at.hour, start_at.minute, start_at.second, tzinfo=pytz.utc)
+        self.start_date = datetime(start_at.year, start_at.month, start_at.day, start_at.hour, start_at.minute, start_at.second, tzinfo=start_at.tzinfo or pytz.utc)
         return self
 
     def ending_at(self, ends_at: datetime) -> ClassroomBuilderForTest:
-        self.stop_date = datetime(ends_at.year, ends_at.month, ends_at.day, ends_at.hour, ends_at.minute, ends_at.second, tzinfo=pytz.utc)
+        self.stop_date = datetime(ends_at.year, ends_at.month, ends_at.day, ends_at.hour, ends_at.minute, ends_at.second, tzinfo=ends_at.tzinfo or pytz.utc)
         return self
 
     def with_duration(self, duration: Duration) -> ClassroomBuilderForTest:
@@ -293,7 +293,7 @@ class SessionCheckinJsonBuilderForTest(Builder):
         return self
 
     def at(self, date: datetime) -> SessionCheckinJsonBuilderForTest:
-        self.session_date = date.replace(tzinfo=pytz.utc)
+        self.session_date = date.replace(tzinfo=date.tzinfo or pytz.utc)
         return self
 
     def for_classroom_id(self, classroom_id) -> SessionCheckinJsonBuilderForTest:
@@ -330,6 +330,7 @@ class EventBuilderForTest(Builder):
         self.event_to_store = []
         self.classrooms = []
         self.clients = []
+        self.sessions = []
         self.sessions = []
 
     def build(self):

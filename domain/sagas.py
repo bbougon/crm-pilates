@@ -15,4 +15,4 @@ class SessionCheckinSaga(Saga):
 
     @property
     def session_date(self) -> datetime:
-        return self._session_date.astimezone(pytz.utc)
+        return self._session_date.astimezone(pytz.utc) if self._session_date.tzinfo is None else self._session_date

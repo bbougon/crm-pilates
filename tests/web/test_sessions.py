@@ -1,8 +1,11 @@
 import uuid
 from datetime import datetime
 
+import arrow
+import pytz
 from fastapi import Response, HTTPException, status
 from immobilus import immobilus
+from mock.mock import ANY
 
 from domain.classroom.classroom import Classroom
 from domain.exceptions import AggregateNotFoundException
@@ -189,3 +192,89 @@ def test_sessions_should_return_sessions_in_december_and_link_in_january():
                                   "2021-12-30T11:00:00+00:00", [])
 
     ]
+
+
+@immobilus("2021-09-05 08:24:15.230")
+def test_sessions_should_return_sessions_according_to_time_zone():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2021-09-02T10:00:00+03:00").datetime).ending_at(arrow.get("2022-06-25T11:00:00+03:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+
+    response = Response()
+    result = sessions(response, CommandBusProviderForTest().provide(), start_date=datetime(2021, 9, 2, tzinfo=pytz.timezone("Europe/Moscow")), end_date=datetime(2021, 9, 9, 23, 59, 59, tzinfo=pytz.timezone("Europe/Moscow")))
+
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-26T00:00:00+03:00&end_date=2021-09-01T23:59:59+03:00>; rel="previous", ' \
+                                         '</sessions?start_date=2021-09-02T00:00:00+03:00&end_date=2021-09-09T23:59:59+03:00>; rel="current", ' \
+                                         '</sessions?start_date=2021-09-10T00:00:00+03:00&end_date=2021-09-17T23:59:59+03:00>; rel="next"'
+    first_classroom = classrooms[0]
+    assert result == [
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-02T10:00:00+03:00",
+                                  "2021-09-02T11:00:00+03:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ]),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-09T10:00:00+03:00",
+                                  "2021-09-09T11:00:00+03:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ])
+    ]
+
+
+@immobilus("2020-03-19 08:24:15.230")
+def test_get_next_sessions_with_time_zone():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2020-03-19T10:00:00+03:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+
+    response = next_sessions(CommandBusProviderForTest().provide())
+
+    first_classroom = classrooms[0]
+    assert response == [
+        expected_session_response(None, first_classroom.id, first_classroom, "2020-03-19T10:00:00+03:00",
+                                  "2020-03-19T11:00:00+03:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED"),
+                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                       "REGISTERED")
+                                  ])
+    ]
+
+
+def test_confirm_session_on_timezone():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2019-05-07T10:00:00+05:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    classroom: Classroom = classrooms[0]
+    session_checkin_json = SessionCheckin.parse_obj(
+        SessionCheckinJsonBuilderForTest().for_classroom(classroom).for_attendee(clients[0].id).at(
+            arrow.get("2019-05-14T10:00:00+05:00").datetime).build())
+
+    response = session_checkin(session_checkin_json, Response(), CommandBusProviderForTest().provide())
+
+    assert response == expected_session_response(ANY, classroom.id, classroom, "2019-05-14T10:00:00+05:00",
+                                                 "2019-05-14T11:00:00+05:00", [
+                                                     DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                                      "CHECKED_IN"),
+                                                     DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                                      "REGISTERED")
+                                                 ])

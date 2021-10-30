@@ -128,8 +128,8 @@ def __set_link_header(response, first_day_of_current_month, first_day_of_next_mo
 
 
 def __get_dates_for_period(start_date: datetime, end_date: datetime):
-    arrow_start: Arrow = Arrow(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second)
-    arrow_end: Arrow = Arrow(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second)
+    arrow_start: Arrow = Arrow(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second, tzinfo=start_date.tzinfo)
+    arrow_end: Arrow = Arrow(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second, tzinfo=end_date.tzinfo)
     if start_date.day == 1 and end_date.day == calendar.monthrange(start_date.year, start_date.month)[1]:
         first_day_of_previous_period = arrow_start.shift(months=-1).replace(day=1)
         last_day_of_previous_period = arrow_start.shift(months=-1).replace(day=calendar.monthrange(first_day_of_previous_period.year, first_day_of_previous_period.month)[1], hour=23, minute=59, second=59)

@@ -45,7 +45,7 @@ class GetNextSessionsCommand(Command):
 
     @property
     def current_time(self) -> datetime:
-        return self._current_time.astimezone(pytz.utc)
+        return self._current_time.astimezone(pytz.utc) if self._current_time.tzinfo is None else self._current_time
 
 
 @dataclass
@@ -55,7 +55,7 @@ class SessionCreationCommand(Command):
 
     @property
     def session_date(self) -> datetime:
-        return self._session_date.astimezone(pytz.utc)
+        return self._session_date.astimezone(pytz.utc) if self._session_date.tzinfo is None else self._session_date
 
 
 @dataclass
@@ -65,8 +65,8 @@ class GetSessionsInRangeCommand(Command):
 
     @property
     def start_date(self) -> datetime:
-        return self._start_date.astimezone(pytz.utc)
+        return self._start_date.astimezone(pytz.utc) if self._start_date.tzinfo is None else self._start_date
 
     @property
     def end_date(self) -> datetime:
-        return self._end_date.astimezone(pytz.utc)
+        return self._end_date.astimezone(pytz.utc) if self._end_date.tzinfo is None else self._end_date
