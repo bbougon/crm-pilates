@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
+import pytz
+
 
 class Event:
 
@@ -12,8 +14,8 @@ class Event:
         self.id: UUID = uuid.uuid4()
         self.root_id: UUID = root_id
         self.type: str = self.__class__.__name__
-        self.timestamp: datetime = datetime.now()
-        self.payload = None
+        self.timestamp: datetime = datetime.now(tz=pytz.utc)
+        self.payload = self._to_payload()
 
     @abstractmethod
     def _to_payload(self):

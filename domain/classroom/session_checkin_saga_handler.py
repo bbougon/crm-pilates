@@ -15,9 +15,8 @@ from infrastructure.repository_provider import RepositoryProvider
 class SessionCheckedIn(Event):
 
     def __init__(self, root_id: UUID, attendee: Attendee) -> None:
-        super().__init__(root_id)
         self.checked_in_attendee = attendee
-        self.payload = self._to_payload()
+        super().__init__(root_id)
 
     def __map_attendee(self, attendee: Attendee) -> dict:
         return {"id": attendee.id, "attendance": attendee.attendance.value}

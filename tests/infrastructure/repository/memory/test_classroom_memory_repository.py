@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
 
+import pytz
 from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom
@@ -25,7 +26,7 @@ def test_get_classrooms_scheduled_at():
     classrooms: List[Classroom] = next(classroom_repository.get_next_classrooms_from(datetime.now()))
 
     assert len(classrooms) == 2
-    assert classrooms[0].schedule.start == datetime(2020, 6, 19, 10)
-    assert classrooms[0].schedule.stop == datetime(2020, 7, 19, 11)
-    assert classrooms[1].schedule.start == datetime(2020, 6, 19, 11, 15)
-    assert classrooms[1].schedule.stop == datetime(2020, 6, 19, 12, 15)
+    assert classrooms[0].schedule.start == datetime(2020, 6, 19, 10).replace(tzinfo=pytz.utc)
+    assert classrooms[0].schedule.stop == datetime(2020, 7, 19, 11).replace(tzinfo=pytz.utc)
+    assert classrooms[1].schedule.start == datetime(2020, 6, 19, 11, 15).replace(tzinfo=pytz.utc)
+    assert classrooms[1].schedule.stop == datetime(2020, 6, 19, 12, 15).replace(tzinfo=pytz.utc)

@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
+import pytz
+
 from command.command_handler import Command
 from web.schema.classroom_schemas import Duration
 
@@ -12,9 +14,17 @@ class ClassroomCreationCommand(Command):
     name: str
     position: int
     duration: Duration
-    start_date: datetime
-    stop_date: datetime = None
+    _start_date: datetime
+    _stop_date: datetime = None
     attendees: List[UUID] = field(default_factory=list)
+
+    @property
+    def start_date(self) -> datetime:
+        return self._start_date.replace(tzinfo=pytz.utc)
+
+    @property
+    def stop_date(self) -> datetime:
+        return self._stop_date.replace(tzinfo=pytz.utc) if self._stop_date else None
 
 
 @dataclass
@@ -31,16 +41,32 @@ class ClassroomPatchCommand(Command):
 
 @dataclass
 class GetNextSessionsCommand(Command):
-    current_time: datetime
+    _current_time: datetime
+
+    @property
+    def current_time(self) -> datetime:
+        return self._current_time.replace(tzinfo=pytz.utc)
 
 
 @dataclass
 class SessionCreationCommand(Command):
     classroom_id: UUID
-    session_date: datetime
+    _session_date: datetime
+
+    @property
+    def session_date(self) -> datetime:
+        return self._session_date.replace(tzinfo=pytz.utc)
 
 
 @dataclass
 class GetSessionsInRangeCommand(Command):
-    start_date: datetime
-    end_date: datetime
+    _start_date: datetime
+    _end_date: datetime
+
+    @property
+    def start_date(self) -> datetime:
+        return self._start_date.replace(tzinfo=pytz.utc)
+
+    @property
+    def end_date(self) -> datetime:
+        return self._end_date.replace(tzinfo=pytz.utc)

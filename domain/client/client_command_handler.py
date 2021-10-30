@@ -12,10 +12,9 @@ from infrastructure.repository_provider import RepositoryProvider
 class ClientCreated(Event):
 
     def __init__(self, root_id: UUID, firstname: str, lastname: str) -> None:
-        super().__init__(root_id)
         self.firstname = firstname
         self.lastname = lastname
-        self.payload = self._to_payload()
+        super().__init__(root_id)
 
     def _to_payload(self):
         return {

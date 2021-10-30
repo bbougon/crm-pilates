@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import pytest
+import pytz
 from fastapi import HTTPException
 from fastapi import Response
 
@@ -152,8 +153,8 @@ def assert_response_has_expected_values(response: dict, expected_name: str, expe
     assert response.items() >= {
         "name": expected_name,
         "schedule": {
-            "start": expected_start,
-            "stop": stop_date
+            "start": expected_start.replace(tzinfo=pytz.utc),
+            "stop": stop_date.replace(tzinfo=pytz.utc)
         },
         "position": expected_position,
         "duration": {

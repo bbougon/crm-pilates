@@ -5,6 +5,7 @@ pydantic
 colorlog
 ansible
 arrow
+pytz
 
 # test
 coverage

@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import Iterator, List
 from uuid import UUID
 
+import pytz
+
 from domain.classroom.classroom import Classroom
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.classroom.date_time_comparator import DateTimeComparator
@@ -32,13 +34,13 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
 
     def get_next_classrooms_from(self, at_date: datetime) -> Iterator[Classroom]:
         classrooms: List[Classroom] = next(self.__repository.get_all())
-        yield [classroom for classroom in classrooms if self.__in_between_dates(classroom, at_date)]
+        yield [classroom for classroom in classrooms if self.__in_between_dates(classroom, at_date.replace(tzinfo=pytz.utc))]
 
     def get_classrooms_in_range(self, start_date: datetime, end_date: datetime) -> List[Classroom]:
         classrooms: List[Classroom] = next(self.__repository.get_all())
         yield [classroom for classroom in classrooms if DateTimeComparator(classroom.schedule.start, end_date).before().compare() and DateTimeComparator(start_date, classroom.schedule.stop).before().compare()]
 
-    def __in_between_dates(self, classroom, at_date):
+    def __in_between_dates(self, classroom: Classroom, at_date: datetime) -> bool:
         logging.Logger("repository").debug(msg=f"classes: {self.__repository.get_all()}")
         if classroom.schedule.stop:
             return classroom.schedule.start.date() <= at_date.date() <= classroom.schedule.stop.date() and classroom.schedule.start.time() >= at_date.time()

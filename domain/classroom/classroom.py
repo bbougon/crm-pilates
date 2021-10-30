@@ -9,6 +9,7 @@ from typing import List
 from uuid import UUID
 
 import arrow
+import pytz
 
 from domain.classroom.date_time_comparator import DateTimeComparator, DateComparator
 from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
@@ -131,8 +132,8 @@ class Session:
         self.__name: str = name
         self.__position: int = position
         self.__attendees: List[Attendee] = attendees
-        self.__start: datetime = start
-        self.__stop: datetime = start + timedelta(minutes=classroom_duration.to_unit(MinuteTimeUnit).value)
+        self.__start: datetime = start.replace(tzinfo=pytz.utc)
+        self.__stop: datetime = start.replace(tzinfo=pytz.utc) + timedelta(minutes=classroom_duration.to_unit(MinuteTimeUnit).value)
         self.__classroom_id: UUID = classroom_id
 
     @property
@@ -207,8 +208,8 @@ class InvalidSessionStartDateException(DomainException):
         else:
             weekdays_difference = abs(classroom.schedule.start.date().weekday() - start_date.date().weekday())
             closest_prior_date = datetime.combine((start_date.date() - timedelta(days=weekdays_difference)),
-                                                  classroom.schedule.start.time())
+                                                  classroom.schedule.start.time()).replace(tzinfo=pytz.utc)
             closest_following_date = datetime.combine((start_date.date() + timedelta(days=7 - weekdays_difference)),
-                                                      classroom.schedule.start.time())
+                                                      classroom.schedule.start.time()).replace(tzinfo=pytz.utc)
             message = f"Classroom '{classroom.name}' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{start_date.isoformat()}', closest possible dates are '{closest_prior_date.isoformat()}' or '{closest_following_date.isoformat()}'"
         super().__init__(message, *args)

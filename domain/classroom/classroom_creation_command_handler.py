@@ -22,14 +22,13 @@ class ClassroomCreated(Event):
 
     def __init__(self, id: UUID, name: str, position: int, duration: Duration, schedule: Schedule,
                  attendees: List[Client]):
-        super().__init__(id)
         self.__root_id = id
         self.name = name
         self.position = position
         self.duration = duration
         self.schedule = schedule
         self.attendees = list(map(lambda attendee: {"id": attendee.id}, attendees))
-        self.payload = self._to_payload()
+        super().__init__(id)
 
     def _to_payload(self):
         return {

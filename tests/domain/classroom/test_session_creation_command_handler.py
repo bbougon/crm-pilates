@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Tuple
 
+import pytz
 from immobilus import immobilus
 
 from command.command_handler import Status
@@ -28,7 +29,7 @@ def test_session_creation_event_is_stored(memory_event_store):
     events = StoreLocator.store.get_all()
     assert len(events) == 1
     assert events[0].type == "ConfirmedSessionEvent"
-    assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
+    assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000).replace(tzinfo=pytz.utc)
     result = confirmed_session_result[0]
     assert events[0].payload == {
         "id": result.root_id,
@@ -36,8 +37,8 @@ def test_session_creation_event_is_stored(memory_event_store):
         "name": result.name,
         "position": result.position,
         "schedule": {
-            "start": datetime(2020, 4, 3, 11, 0),
-            "stop": datetime(2020, 4, 3, 12, 0)
+            "start": datetime(2020, 4, 3, 11, 0).replace(tzinfo=pytz.utc),
+            "stop": datetime(2020, 4, 3, 12, 0).replace(tzinfo=pytz.utc)
         },
         "attendees": [
             {

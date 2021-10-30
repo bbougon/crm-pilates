@@ -13,14 +13,13 @@ from infrastructure.repository_provider import RepositoryProvider
 class ConfirmedSessionEvent(Event):
 
     def __init__(self, root_id: UUID, classroom_id: UUID, name: str, position: int, start: datetime, stop: datetime, attendees: List[Attendee]) -> None:
-        super().__init__(root_id)
         self.classroom_id = classroom_id
         self.name = name
         self.position = position
         self.start = start
         self.stop = stop
         self.attendees = attendees
-        self.payload = self._to_payload()
+        super().__init__(root_id)
 
     def _to_payload(self):
         return {

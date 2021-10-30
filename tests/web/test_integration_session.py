@@ -36,13 +36,13 @@ def test_get_next_sessions(memory_repositories):
     second_classroom: Classroom = classrooms[1]
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
-        expected_session_response(ANY, str(str(first_classroom.id)), first_classroom, "2019-05-07T10:00:00", "2019-05-07T11:00:00", [
+        expected_session_response(ANY, str(str(first_classroom.id)), first_classroom, "2019-05-07T10:00:00+00:00", "2019-05-07T11:00:00+00:00", [
             {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
              "attendance": "REGISTERED"},
             {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
              "attendance": "REGISTERED"}
         ]),
-        expected_session_response(ANY, str(second_classroom.id), second_classroom, "2019-05-07T11:00:00", "2019-05-07T12:00:00", [
+        expected_session_response(ANY, str(second_classroom.id), second_classroom, "2019-05-07T11:00:00+00:00", "2019-05-07T12:00:00+00:00", [
             {"id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname,
              "attendance": "REGISTERED"}
         ])
@@ -67,7 +67,7 @@ def test_register_checkin(memory_repositories):
                                          clients[0]._id).build())
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-07T10:00:00", "2019-05-07T11:00:00", [
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-07T10:00:00+00:00", "2019-05-07T11:00:00+00:00", [
         {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
          "attendance": "CHECKED_IN"},
         {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
@@ -92,7 +92,7 @@ def test_updated_session_produces_ok_200(memory_event_store):
                                          clients[1]._id).at(datetime(2020, 3, 8, 11, 0)).build())
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2020-03-08T11:00:00", "2020-03-08T12:00:00", [
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2020-03-08T11:00:00+00:00", "2020-03-08T12:00:00+00:00", [
         {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
          "attendance": "CHECKED_IN"},
         {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
@@ -113,8 +113,8 @@ def test_sessions_should_return_all_sessions_in_range(memory_repositories):
                                          '</sessions?start_date=2021-09-02T00:00:00&end_date=2021-09-09T23:59:59>; rel="current", ' \
                                          '</sessions?start_date=2021-09-10T00:00:00&end_date=2021-09-17T23:59:59>; rel="next"'
     assert response.json() == [
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-02T10:00:00", "2021-09-02T11:00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00", "2021-09-09T11:00:00", [])
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-02T10:00:00+00:00", "2021-09-02T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00+00:00", "2021-09-09T11:00:00+00:00", [])
     ]
 
 
@@ -130,9 +130,9 @@ def test_sessions_should_return_all_sessions_from_classroom_for_current_month(me
                                          '</sessions?start_date=2021-10-01T00:00:00&end_date=2021-10-31T23:59:59>; rel="current", ' \
                                          '</sessions?start_date=2021-11-01T00:00:00&end_date=2021-11-30T23:59:59>; rel="next"'
     assert response.json() == [
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-01T10:00:00", "2021-10-01T11:00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-08T10:00:00", "2021-10-08T11:00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-15T10:00:00", "2021-10-15T11:00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-22T10:00:00", "2021-10-22T11:00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-29T10:00:00", "2021-10-29T11:00:00", [])
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-01T10:00:00+00:00", "2021-10-01T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-08T10:00:00+00:00", "2021-10-08T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-15T10:00:00+00:00", "2021-10-15T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-22T10:00:00+00:00", "2021-10-22T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-29T10:00:00+00:00", "2021-10-29T11:00:00+00:00", [])
     ]

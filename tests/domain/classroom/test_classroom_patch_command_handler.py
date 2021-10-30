@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 import pytest
+import pytz
 from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom
@@ -30,7 +31,7 @@ def test_classroom_patch_with_attendees(memory_event_store):
     assert attendees_set
     assert len(events) == 1
     assert events[0].type == "AllAttendeesAdded"
-    assert events[0].timestamp == datetime(2019, 3, 19, 10, 24, 15, 100000)
+    assert events[0].timestamp == datetime(2019, 3, 19, 10, 24, 15, 100000).replace(tzinfo=pytz.utc)
     assert events[0].root_id == classroom._id
     assert events[0].payload == {
         "attendees": [

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Tuple
 
+import pytz
 from immobilus import immobilus
 
 from command.command_handler import Status
@@ -32,7 +33,7 @@ def test_session_checkin_event_is_stored(memory_event_store):
     assert len(events) == 2
     assert events[0].type == "ConfirmedSessionEvent"
     assert events[1].type == "SessionCheckedIn"
-    assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000)
+    assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000).replace(tzinfo=pytz.utc)
     assert events[1].payload == {
         "session_id": result.root_id,
         "attendee":

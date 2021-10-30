@@ -6,7 +6,8 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from mimesis import Person, Text, Numbers, Datetime
+import pytz
+from mimesis import Person, Text, Numeric, Datetime
 
 from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
@@ -88,8 +89,8 @@ class ClassroomBuilderForTest(Builder):
     def __init__(self) -> None:
         super().__init__()
         self.name: str = Text().title()
-        self.position: int = Numbers().integer_number(1, 6)
-        self.start_date: datetime = Datetime().datetime()
+        self.position: int = Numeric().integer_number(1, 6)
+        self.start_date: datetime = Datetime().datetime().replace(tzinfo=pytz.utc)
         self.stop_date: datetime = None
         self.duration = Duration(HourTimeUnit(1))
         self.attendees = []
@@ -115,11 +116,11 @@ class ClassroomBuilderForTest(Builder):
         return self
 
     def starting_at(self, start_at: datetime) -> ClassroomBuilderForTest:
-        self.start_date = start_at
+        self.start_date = start_at.replace(tzinfo=pytz.utc)
         return self
 
     def ending_at(self, ends_at: datetime) -> ClassroomBuilderForTest:
-        self.stop_date = ends_at
+        self.stop_date = ends_at.replace(tzinfo=pytz.utc)
         return self
 
     def with_duration(self, duration: Duration) -> ClassroomBuilderForTest:
@@ -162,7 +163,7 @@ class ClassroomJsonBuilderForTest(Builder):
     def __init__(self) -> None:
         super().__init__()
         self.classroom_name: str = Text().title()
-        self.position: int = Numbers().integer_number(1, 6)
+        self.position: int = Numeric().integer_number(1, 6)
         self.start_date: datetime = Datetime().datetime()
         self.stop_date: datetime = None
         self.attendees: List[UUID] = []
@@ -209,7 +210,7 @@ class SessionContextBuilderForTest(Builder):
         super().__init__()
         self.classroom = ClassroomBuilderForTest().build()
         self.repository: ClassroomRepository = None
-        self.date: datetime = self.classroom.schedule.start
+        self.date: datetime = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
         self.client_checkin: UUID = None
         self.session_to_create = "confirm_session_at"
 
@@ -226,7 +227,7 @@ class SessionContextBuilderForTest(Builder):
         return self
 
     def at(self, date: datetime) -> SessionContextBuilderForTest:
-        self.date = date
+        self.date = date.replace(tzinfo=pytz.utc)
         return self
 
     def persist(self, repository: ClassroomRepository = None) -> SessionContextBuilderForTest:
@@ -305,19 +306,19 @@ class ConfirmedSessionBuilderForTest(Builder):
     def __init__(self) -> None:
         super().__init__()
         self.classroom = ClassroomBuilderForTest().build()
-        self.start_at = self.classroom.schedule.start
+        self.start_at = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
 
     def build(self):
         return ConfirmedSession.create(self.classroom, self.start_at)
 
     def starting_at(self, start_at: datetime) -> ConfirmedSessionBuilderForTest:
-        self.start_at = start_at
+        self.start_at = start_at.replace(tzinfo=pytz.utc)
         self.classroom = ClassroomBuilderForTest().starting_at(self.start_at).build()
         return self
 
     def for_classroom(self, classroom: Classroom) -> ConfirmedSessionBuilderForTest:
         self.classroom = classroom
-        self.start_at = self.classroom.schedule.start
+        self.start_at = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
         return self
 
 

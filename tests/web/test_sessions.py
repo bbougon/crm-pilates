@@ -36,7 +36,7 @@ def test_handle_domain_exception_on_invalid_confirmed_session():
         session_checkin(session_checkin_json, response, CommandBusProviderForTest().provide())
     except HTTPException as e:
         assert e.status_code == status.HTTP_400_BAD_REQUEST
-        assert e.detail == f"Classroom '{classroom.name}' starting at '2019-05-07T10:00:00' cannot be set at '2019-05-08T10:30:00', closest possible dates are '2019-05-07T10:00:00' or '2019-05-14T10:00:00'"
+        assert e.detail == f"Classroom '{classroom.name}' starting at '2019-05-07T10:00:00+00:00' cannot be set at '2019-05-08T10:30:00+00:00', closest possible dates are '2019-05-07T10:00:00+00:00' or '2019-05-14T10:00:00+00:00'"
 
 
 def test_handle_aggregate_not_found_exception(mocker):
@@ -74,15 +74,15 @@ def test_get_next_sessions_with_confirmed_sessions():
     first_classroom = classrooms[0]
     second_classroom = classrooms[1]
     assert response == [
-        expected_session_response(None, first_classroom.id, first_classroom, "2020-03-19T10:00:00",
-                                  "2020-03-19T11:00:00", [
+        expected_session_response(None, first_classroom.id, first_classroom, "2020-03-19T10:00:00+00:00",
+                                  "2020-03-19T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
                                                        "REGISTERED"),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                        "REGISTERED")
                                   ]),
-        expected_session_response(session.id, second_classroom.id, second_classroom, "2020-03-19T11:00:00",
-                                  "2020-03-19T12:00:00", [
+        expected_session_response(session.id, second_classroom.id, second_classroom, "2020-03-19T11:00:00+00:00",
+                                  "2020-03-19T12:00:00+00:00", [
                                       DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
                                                        "REGISTERED")
                                   ])
@@ -114,46 +114,46 @@ def test_sessions_should_return_sessions_in_current_month_range():
     first_classroom = classrooms[0]
     second_classroom = classrooms[1]
     assert result == [
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-02T10:00:00",
-                                  "2021-09-02T11:00:00", [
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-02T10:00:00+00:00",
+                                  "2021-09-02T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
                                                        "REGISTERED"),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                        "REGISTERED")
                                   ]),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-09T10:00:00",
-                                  "2021-09-09T11:00:00", [
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-09T10:00:00+00:00",
+                                  "2021-09-09T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
                                                        "REGISTERED"),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                        "REGISTERED")
                                   ]),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-16T10:00:00",
-                                  "2021-09-16T11:00:00", [
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-16T10:00:00+00:00",
+                                  "2021-09-16T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
                                                        "REGISTERED"),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                        "REGISTERED")
                                   ]),
-        expected_session_response(None, second_classroom.id, second_classroom, "2021-09-18T11:00:00",
-                                  "2021-09-18T12:00:00", [
+        expected_session_response(None, second_classroom.id, second_classroom, "2021-09-18T11:00:00+00:00",
+                                  "2021-09-18T12:00:00+00:00", [
                                       DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
                                                        "REGISTERED")
                                   ]),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-23T10:00:00",
-                                  "2021-09-23T11:00:00", [
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-23T10:00:00+00:00",
+                                  "2021-09-23T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
                                                        "REGISTERED"),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                        "REGISTERED")
                                   ]),
-        expected_session_response(confirmed_session.id, second_classroom.id, second_classroom, "2021-09-25T11:00:00",
-                                  "2021-09-25T12:00:00", [
+        expected_session_response(confirmed_session.id, second_classroom.id, second_classroom, "2021-09-25T11:00:00+00:00",
+                                  "2021-09-25T12:00:00+00:00", [
                                       DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
                                                        "REGISTERED")
                                   ]),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-30T10:00:00",
-                                  "2021-09-30T11:00:00", [
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-09-30T10:00:00+00:00",
+                                  "2021-09-30T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
                                                        "REGISTERED"),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
@@ -177,15 +177,15 @@ def test_sessions_should_return_sessions_in_december_and_link_in_january():
                                          '</sessions?start_date=2022-01-01T00:00:00&end_date=2022-01-31T23:59:59>; rel="next"'
     first_classroom = classrooms[0]
     assert result == [
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-02T10:00:00",
-                                  "2021-12-02T11:00:00", []),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-09T10:00:00",
-                                  "2021-12-09T11:00:00", []),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-16T10:00:00",
-                                  "2021-12-16T11:00:00", []),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-23T10:00:00",
-                                  "2021-12-23T11:00:00", []),
-        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-30T10:00:00",
-                                  "2021-12-30T11:00:00", [])
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-02T10:00:00+00:00",
+                                  "2021-12-02T11:00:00+00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-09T10:00:00+00:00",
+                                  "2021-12-09T11:00:00+00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-16T10:00:00+00:00",
+                                  "2021-12-16T11:00:00+00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-23T10:00:00+00:00",
+                                  "2021-12-23T11:00:00+00:00", []),
+        expected_session_response(None, first_classroom.id, first_classroom, "2021-12-30T10:00:00+00:00",
+                                  "2021-12-30T11:00:00+00:00", [])
 
     ]

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 import pytest
+import pytz
 
 from domain.classroom.classroom import Classroom, Session
 from domain.classroom.duration import Duration, MinuteTimeUnit
@@ -68,7 +69,7 @@ def test_load_confirmed_session(database):
     assert confirmed_session.name == payload["name"]
     assert confirmed_session.position == payload["position"]
     assert confirmed_session.start == payload["schedule"]["start"]
-    assert confirmed_session.stop == datetime(2021, 9, 14, 10) + timedelta(hours=1)
+    assert confirmed_session.stop == datetime(2021, 9, 14, 10).replace(tzinfo=pytz.utc) + timedelta(hours=1)
     assert len(confirmed_session.attendees) == 0
 
 
