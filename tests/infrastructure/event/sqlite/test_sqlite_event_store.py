@@ -35,5 +35,5 @@ def test_persist_event_in_store(database):
     assert isinstance(persisted_event.id, UUID)
     assert persisted_event.root_id == root_id
     assert persisted_event.type == "CustomEventEmitted"
-    assert persisted_event.timestamp == datetime.datetime(2021, 5, 20, 10, 5, 17, 245000).replace(tzinfo=pytz.utc)
+    assert persisted_event.timestamp == datetime.datetime(2021, 5, 20, 10, 5, 17, 245000, tzinfo=pytz.utc)
     assert persisted_event.payload == {"id": root_id.hex, "name": "custom_event"}

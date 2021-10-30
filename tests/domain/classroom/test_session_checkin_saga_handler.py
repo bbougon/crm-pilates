@@ -25,7 +25,7 @@ def test_session_checkin_event_is_stored(memory_event_store):
     classroom = classrooms[0]
 
     session_result: Tuple[SessionCheckedIn, Status] = SessionCheckinSagaHandler(CommandBusProviderForTest().provide().command_bus).execute(
-        SessionCheckinSaga(classroom.id, datetime(2020, 4, 3, 11, 0), clients[1].id))
+        SessionCheckinSaga(classroom.id, datetime(2020, 4, 3, 11, 0, tzinfo=pytz.utc), clients[1].id))
 
     result = session_result[0]
     assert session_result[1] == Status.CREATED
@@ -33,7 +33,7 @@ def test_session_checkin_event_is_stored(memory_event_store):
     assert len(events) == 2
     assert events[0].type == "ConfirmedSessionEvent"
     assert events[1].type == "SessionCheckedIn"
-    assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000).replace(tzinfo=pytz.utc)
+    assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc)
     assert events[1].payload == {
         "session_id": result.root_id,
         "attendee":
@@ -56,7 +56,7 @@ def test_session_checkin_on_already_confirmed_session(memory_event_store):
     SessionContextBuilderForTest().with_classroom(classroom).checkin(clients[0].id).at(datetime(2020, 8, 3, 11, 0)).persist(RepositoryProvider.write_repositories.session).build()
 
     session_result: Tuple[SessionCheckedIn, Status] = SessionCheckinSagaHandler(CommandBusProviderForTest().provide().command_bus).execute(
-        SessionCheckinSaga(classroom.id, datetime(2020, 8, 3, 11, 0), clients[1].id))
+        SessionCheckinSaga(classroom.id, datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), clients[1].id))
 
     result = session_result[0]
     assert session_result[1] == Status.UPDATED

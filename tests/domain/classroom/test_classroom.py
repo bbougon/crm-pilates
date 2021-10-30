@@ -49,8 +49,8 @@ def test_should_retrieve_next_classroom_session():
 
     assert session
     assert session.name == "next session"
-    assert session.start == datetime(2020, 9, 24, 10).replace(tzinfo=pytz.utc)
-    assert session.stop == datetime(2020, 9, 24, 11).replace(tzinfo=pytz.utc)
+    assert session.start == datetime(2020, 9, 24, 10, tzinfo=pytz.utc)
+    assert session.stop == datetime(2020, 9, 24, 11, tzinfo=pytz.utc)
     assert session.position == 2
     assert len(session.attendees) == 0
 
@@ -62,7 +62,7 @@ def test_should_retrieve_next_classroom_session_with_duration():
 
     session: ScheduledSession = classroom.next_session()
 
-    assert session.stop == datetime(2020, 9, 24, 10, 45).replace(tzinfo=pytz.utc)
+    assert session.stop == datetime(2020, 9, 24, 10, 45, tzinfo=pytz.utc)
 
 
 @immobilus("2020-9-23 08:24:15.230")
@@ -84,7 +84,7 @@ def test_should_confirm_session_with_scheduled_time():
 
     session: ConfirmedSession = classroom.confirm_session_at(datetime(2019, 6, 7, 10))
 
-    assert session.stop == datetime(2019, 6, 7, 10, 45).replace(tzinfo=pytz.utc)
+    assert session.stop == datetime(2019, 6, 7, 10, 45).astimezone(pytz.utc)
 
 
 def test_should_not_confirm_session_with_invalid_date():
@@ -92,7 +92,7 @@ def test_should_not_confirm_session_with_invalid_date():
         classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
         classroom.confirm_session_at(datetime(2019, 6, 8, 10))
 
-    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 8, 10).isoformat()}', closest possible dates are '{datetime(2019, 6, 7, 10).replace(tzinfo=pytz.utc).isoformat()}' or '{datetime(2019, 6, 14, 10).replace(tzinfo=pytz.utc).isoformat()}'"
+    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2019, 6, 8, 10).isoformat()}', closest possible dates are '{datetime(2019, 6, 7, 10, tzinfo=pytz.utc).isoformat()}' or '{datetime(2019, 6, 14, 10, tzinfo=pytz.utc).isoformat()}'"
 
 
 def test_should_not_confirm_session_with_invalid_date_and_time():
@@ -100,7 +100,7 @@ def test_should_not_confirm_session_with_invalid_date_and_time():
         classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2020, 6, 1, 10), 2, duration=Duration(MinuteTimeUnit(45)))
         classroom.confirm_session_at(datetime(2020, 6, 8, 10, 30))
 
-    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2020, 6, 8, 10, 30).isoformat()}', closest possible dates are '{datetime(2020, 6, 8, 10).replace(tzinfo=pytz.utc).isoformat()}' or '{datetime(2020, 6, 15, 10).replace(tzinfo=pytz.utc).isoformat()}'"
+    assert e.value.message == f"Classroom 'classroom to be confirmed' starting at '{classroom.schedule.start.isoformat()}' cannot be set at '{datetime(2020, 6, 8, 10, 30).isoformat()}', closest possible dates are '{datetime(2020, 6, 8, 10, tzinfo=pytz.utc).isoformat()}' or '{datetime(2020, 6, 15, 10, tzinfo=pytz.utc).isoformat()}'"
 
 
 def test_should_not_confirm_session_with_date_prior_to_classroom_start_date():
@@ -117,5 +117,5 @@ def test_session_in_range_should_return_sessions_until_classroom_stops():
     sessions: [Session] = classroom.sessions_in_range(datetime(2020, 7, 1), datetime(2020, 7, 31, 23, 59, 59))
 
     assert len(sessions) == 2
-    assert sessions[-1].start == datetime(2020, 7, 13, 10).replace(tzinfo=pytz.utc)
-    assert sessions[-1].stop == datetime(2020, 7, 13, 10, 45).replace(tzinfo=pytz.utc)
+    assert sessions[-1].start == datetime(2020, 7, 13, 10, tzinfo=pytz.utc)
+    assert sessions[-1].stop == datetime(2020, 7, 13, 10, 45, tzinfo=pytz.utc)

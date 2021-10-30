@@ -20,11 +20,11 @@ class ClassroomCreationCommand(Command):
 
     @property
     def start_date(self) -> datetime:
-        return self._start_date.replace(tzinfo=pytz.utc)
+        return self._start_date.astimezone(pytz.utc)
 
     @property
     def stop_date(self) -> datetime:
-        return self._stop_date.replace(tzinfo=pytz.utc) if self._stop_date else None
+        return self._stop_date.astimezone(pytz.utc) if self._stop_date else None
 
 
 @dataclass
@@ -45,7 +45,7 @@ class GetNextSessionsCommand(Command):
 
     @property
     def current_time(self) -> datetime:
-        return self._current_time.replace(tzinfo=pytz.utc)
+        return self._current_time.astimezone(pytz.utc)
 
 
 @dataclass
@@ -55,7 +55,7 @@ class SessionCreationCommand(Command):
 
     @property
     def session_date(self) -> datetime:
-        return self._session_date.replace(tzinfo=pytz.utc)
+        return self._session_date.astimezone(pytz.utc)
 
 
 @dataclass
@@ -65,8 +65,8 @@ class GetSessionsInRangeCommand(Command):
 
     @property
     def start_date(self) -> datetime:
-        return self._start_date.replace(tzinfo=pytz.utc)
+        return self._start_date.astimezone(pytz.utc)
 
     @property
     def end_date(self) -> datetime:
-        return self._end_date.replace(tzinfo=pytz.utc)
+        return self._end_date.astimezone(pytz.utc)

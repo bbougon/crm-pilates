@@ -71,7 +71,7 @@ class Classroom(AggregateRoot):
     def next_session(self) -> ScheduledSession:
         if self.__has_session_today() or (self.__today_is_sunday() and self.__next_session_on_monday()):
             start: datetime = datetime.now().replace(hour=self._schedule.start.hour, minute=self._schedule.start.minute,
-                                                     second=0, microsecond=0)
+                                                     second=0, microsecond=0, tzinfo=pytz.utc)
             return ScheduledSession.create(self, start)
 
     def __has_session_today(self) -> bool:
@@ -95,7 +95,7 @@ class Classroom(AggregateRoot):
             if DateComparator(classroom_start_date.date(), day).same_day().before().compare() \
                     and DateComparator(day, end_date.date()).before().compare() \
                     and DateComparator(day, self.schedule.stop.date()).before().compare():
-                sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute), self.duration.time_unit, self.attendees))
+                sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute, tzinfo=pytz.utc), self.duration.time_unit, self.attendees))
         return sessions
 
 
@@ -132,8 +132,8 @@ class Session:
         self.__name: str = name
         self.__position: int = position
         self.__attendees: List[Attendee] = attendees
-        self.__start: datetime = start.replace(tzinfo=pytz.utc)
-        self.__stop: datetime = start.replace(tzinfo=pytz.utc) + timedelta(minutes=classroom_duration.to_unit(MinuteTimeUnit).value)
+        self.__start: datetime = start.astimezone(pytz.utc)
+        self.__stop: datetime = start.astimezone(pytz.utc) + timedelta(minutes=classroom_duration.to_unit(MinuteTimeUnit).value)
         self.__classroom_id: UUID = classroom_id
 
     @property

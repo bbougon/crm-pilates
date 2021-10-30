@@ -4,6 +4,7 @@ from http import HTTPStatus
 from typing import List, Tuple
 
 import arrow
+import pytz
 from arrow import Arrow
 from fastapi import status, APIRouter, Depends, Response, HTTPException
 
@@ -28,7 +29,7 @@ router = APIRouter()
 def next_sessions(command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     from command.response import Response
     next_sessions_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
-        GetNextSessionsCommand(datetime.now()))
+        GetNextSessionsCommand(datetime.utcnow()))
     return __map_sessions(next_sessions_result[0].event)
 
 
@@ -55,7 +56,7 @@ def sessions(response: Response, command_bus_provider: CommandBusProvider = Depe
     if start_date and end_date:
         command = GetSessionsInRangeCommand(start_date, end_date)
     else:
-        start_date: datetime = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        start_date: datetime = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
         end_date: datetime = start_date.replace(
             day=calendar.monthrange(start_date.year, start_date.month)[1], hour=23, minute=59, second=59, microsecond=0)
         command = GetSessionsInRangeCommand(start_date, end_date)
@@ -140,6 +141,6 @@ def __get_dates_for_period(start_date: datetime, end_date: datetime):
         last_day_of_previous_period = arrow_end.shift(days=-number_of_days)
         first_day_of_next_period = arrow_start.shift(days=+number_of_days)
         last_day_of_next_period = arrow_end.shift(days=+number_of_days)
-    date_format = 'YYYY-MM-DDTHH:mm:ss'
+    date_format = 'YYYY-MM-DDTHH:mm:ssZZ'
     return arrow_start.format(date_format), first_day_of_next_period.format(date_format), first_day_of_previous_period.format(
         date_format), arrow_end.format(date_format), last_day_of_next_period.format(date_format), last_day_of_previous_period.format(date_format)

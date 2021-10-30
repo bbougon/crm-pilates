@@ -106,12 +106,12 @@ def test_sessions_should_return_all_sessions_in_range(memory_repositories):
         ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10, 0)).ending_at(datetime(2021, 9, 16, 10, 0))).persist(
         RepositoryProvider.write_repositories.classroom).build()
 
-    response: Response = client.get("/sessions?start_date=2021-09-02T00:00:00&end_date=2021-09-09T23:59:59")
+    response: Response = client.get("/sessions?start_date=2021-09-02T00:00:00Z&end_date=2021-09-09T23:59:59Z")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-26T00:00:00&end_date=2021-09-01T23:59:59>; rel="previous", ' \
-                                         '</sessions?start_date=2021-09-02T00:00:00&end_date=2021-09-09T23:59:59>; rel="current", ' \
-                                         '</sessions?start_date=2021-09-10T00:00:00&end_date=2021-09-17T23:59:59>; rel="next"'
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-26T00:00:00+00:00&end_date=2021-09-01T23:59:59+00:00>; rel="previous", ' \
+                                         '</sessions?start_date=2021-09-02T00:00:00+00:00&end_date=2021-09-09T23:59:59+00:00>; rel="current", ' \
+                                         '</sessions?start_date=2021-09-10T00:00:00+00:00&end_date=2021-09-17T23:59:59+00:00>; rel="next"'
     assert response.json() == [
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-02T10:00:00+00:00", "2021-09-02T11:00:00+00:00", []),
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00+00:00", "2021-09-09T11:00:00+00:00", [])
@@ -126,9 +126,9 @@ def test_sessions_should_return_all_sessions_from_classroom_for_current_month(me
 
     response: Response = client.get("/sessions?start_date=2021-10-01T00:00:00&end_date=2021-10-31T23:59:59")
 
-    assert response.headers["X-Link"] == '</sessions?start_date=2021-09-01T00:00:00&end_date=2021-09-30T23:59:59>; rel="previous", ' \
-                                         '</sessions?start_date=2021-10-01T00:00:00&end_date=2021-10-31T23:59:59>; rel="current", ' \
-                                         '</sessions?start_date=2021-11-01T00:00:00&end_date=2021-11-30T23:59:59>; rel="next"'
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-09-01T00:00:00+00:00&end_date=2021-09-30T23:59:59+00:00>; rel="previous", ' \
+                                         '</sessions?start_date=2021-10-01T00:00:00+00:00&end_date=2021-10-31T23:59:59+00:00>; rel="current", ' \
+                                         '</sessions?start_date=2021-11-01T00:00:00+00:00&end_date=2021-11-30T23:59:59+00:00>; rel="next"'
     assert response.json() == [
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-01T10:00:00+00:00", "2021-10-01T11:00:00+00:00", []),
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-08T10:00:00+00:00", "2021-10-08T11:00:00+00:00", []),

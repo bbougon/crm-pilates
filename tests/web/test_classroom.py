@@ -32,8 +32,8 @@ def test_should_create_classroom(memory_event_store):
 
 
 def test_should_create_scheduled_classroom(memory_event_store):
-    start_date = datetime(2020, 2, 11, 10, 0)
-    stop_date = datetime(2020, 3, 11, 10, 0)
+    start_date = datetime(2020, 2, 11, 10, 0).astimezone(pytz.timezone('Europe/Paris'))
+    stop_date = datetime(2020, 3, 11, 10, 0).astimezone(pytz.timezone('Europe/Paris'))
     classroom_json = ClassroomJsonBuilderForTest().with_start_date(start_date).with_stop_date(stop_date).build()
     RepositoryProviderForTest().for_classroom().provide()
 
@@ -153,8 +153,8 @@ def assert_response_has_expected_values(response: dict, expected_name: str, expe
     assert response.items() >= {
         "name": expected_name,
         "schedule": {
-            "start": expected_start.replace(tzinfo=pytz.utc),
-            "stop": stop_date.replace(tzinfo=pytz.utc)
+            "start": expected_start.astimezone(pytz.utc),
+            "stop": stop_date.astimezone(pytz.utc)
         },
         "position": expected_position,
         "duration": {

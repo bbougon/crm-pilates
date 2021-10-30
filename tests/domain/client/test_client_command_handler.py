@@ -18,7 +18,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
     events = StoreLocator.store.get_all()
     assert len(events) == 1
     assert events[0].type == "ClientCreated"
-    assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000).replace(tzinfo=pytz.utc)
+    assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc)
     assert events[0].payload == {
         "id": result[0].root_id,
         "firstname": "John",

@@ -23,10 +23,10 @@ def test_get_classrooms_scheduled_at():
         .persist(write_repository) \
         .build()
 
-    classrooms: List[Classroom] = next(classroom_repository.get_next_classrooms_from(datetime.now()))
+    classrooms: List[Classroom] = next(classroom_repository.get_next_classrooms_from(datetime.now(tz=pytz.utc)))
 
     assert len(classrooms) == 2
-    assert classrooms[0].schedule.start == datetime(2020, 6, 19, 10).replace(tzinfo=pytz.utc)
-    assert classrooms[0].schedule.stop == datetime(2020, 7, 19, 11).replace(tzinfo=pytz.utc)
-    assert classrooms[1].schedule.start == datetime(2020, 6, 19, 11, 15).replace(tzinfo=pytz.utc)
-    assert classrooms[1].schedule.stop == datetime(2020, 6, 19, 12, 15).replace(tzinfo=pytz.utc)
+    assert classrooms[0].schedule.start == datetime(2020, 6, 19, 10, tzinfo=pytz.utc)
+    assert classrooms[0].schedule.stop == datetime(2020, 7, 19, 11, tzinfo=pytz.utc)
+    assert classrooms[1].schedule.start == datetime(2020, 6, 19, 11, 15, tzinfo=pytz.utc)
+    assert classrooms[1].schedule.stop == datetime(2020, 6, 19, 12, 15, tzinfo=pytz.utc)

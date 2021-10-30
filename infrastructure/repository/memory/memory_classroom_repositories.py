@@ -34,7 +34,7 @@ class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):
 
     def get_next_classrooms_from(self, at_date: datetime) -> Iterator[Classroom]:
         classrooms: List[Classroom] = next(self.__repository.get_all())
-        yield [classroom for classroom in classrooms if self.__in_between_dates(classroom, at_date.replace(tzinfo=pytz.utc))]
+        yield [classroom for classroom in classrooms if self.__in_between_dates(classroom, at_date.astimezone(pytz.utc))]
 
     def get_classrooms_in_range(self, start_date: datetime, end_date: datetime) -> List[Classroom]:
         classrooms: List[Classroom] = next(self.__repository.get_all())
