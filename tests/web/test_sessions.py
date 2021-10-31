@@ -111,9 +111,9 @@ def test_sessions_should_return_sessions_in_current_month_range():
     response = Response()
     result = sessions(response, CommandBusProviderForTest().provide())
 
-    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-01T00:00:00+00:00&end_date=2021-08-31T23:59:59+00:00>; rel="previous", ' \
-                                         '</sessions?start_date=2021-09-01T00:00:00+00:00&end_date=2021-09-30T23:59:59+00:00>; rel="current", ' \
-                                         '</sessions?start_date=2021-10-01T00:00:00+00:00&end_date=2021-10-31T23:59:59+00:00>; rel="next"'
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-01T00%3A00%3A00%2B00%3A00&end_date=2021-08-31T23%3A59%3A59%2B00%3A00>; rel="previous", ' \
+                                         '</sessions?start_date=2021-09-01T00%3A00%3A00%2B00%3A00&end_date=2021-09-30T23%3A59%3A59%2B00%3A00>; rel="current", ' \
+                                         '</sessions?start_date=2021-10-01T00%3A00%3A00%2B00%3A00&end_date=2021-10-31T23%3A59%3A59%2B00%3A00>; rel="next"'
     first_classroom = classrooms[0]
     second_classroom = classrooms[1]
     assert result == [
@@ -175,9 +175,9 @@ def test_sessions_should_return_sessions_in_december_and_link_in_january():
     response = Response()
     result = sessions(response, CommandBusProviderForTest().provide(), datetime(2021, 12, 1), datetime(2021, 12, 31, 23, 59, 59))
 
-    assert response.headers["X-Link"] == '</sessions?start_date=2021-11-01T00:00:00+00:00&end_date=2021-11-30T23:59:59+00:00>; rel="previous", ' \
-                                         '</sessions?start_date=2021-12-01T00:00:00+00:00&end_date=2021-12-31T23:59:59+00:00>; rel="current", ' \
-                                         '</sessions?start_date=2022-01-01T00:00:00+00:00&end_date=2022-01-31T23:59:59+00:00>; rel="next"'
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-11-01T00%3A00%3A00%2B00%3A00&end_date=2021-11-30T23%3A59%3A59%2B00%3A00>; rel="previous", ' \
+                                         '</sessions?start_date=2021-12-01T00%3A00%3A00%2B00%3A00&end_date=2021-12-31T23%3A59%3A59%2B00%3A00>; rel="current", ' \
+                                         '</sessions?start_date=2022-01-01T00%3A00%3A00%2B00%3A00&end_date=2022-01-31T23%3A59%3A59%2B00%3A00>; rel="next"'
     first_classroom = classrooms[0]
     assert result == [
         expected_session_response(None, first_classroom.id, first_classroom, "2021-12-02T10:00:00+00:00",
@@ -208,9 +208,9 @@ def test_sessions_should_return_sessions_according_to_time_zone():
     response = Response()
     result = sessions(response, CommandBusProviderForTest().provide(), start_date=datetime(2021, 9, 2, tzinfo=pytz.timezone("Europe/Moscow")), end_date=datetime(2021, 9, 9, 23, 59, 59, tzinfo=pytz.timezone("Europe/Moscow")))
 
-    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-26T00:00:00+03:00&end_date=2021-09-01T23:59:59+03:00>; rel="previous", ' \
-                                         '</sessions?start_date=2021-09-02T00:00:00+03:00&end_date=2021-09-09T23:59:59+03:00>; rel="current", ' \
-                                         '</sessions?start_date=2021-09-10T00:00:00+03:00&end_date=2021-09-17T23:59:59+03:00>; rel="next"'
+    assert response.headers["X-Link"] == '</sessions?start_date=2021-08-26T00%3A00%3A00%2B03%3A00&end_date=2021-09-01T23%3A59%3A59%2B03%3A00>; rel="previous", ' \
+                                         '</sessions?start_date=2021-09-02T00%3A00%3A00%2B03%3A00&end_date=2021-09-09T23%3A59%3A59%2B03%3A00>; rel="current", ' \
+                                         '</sessions?start_date=2021-09-10T00%3A00%3A00%2B03%3A00&end_date=2021-09-17T23%3A59%3A59%2B03%3A00>; rel="next"'
     first_classroom = classrooms[0]
     assert result == [
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-02T10:00:00+03:00",

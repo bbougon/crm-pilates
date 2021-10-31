@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timedelta
 
+import arrow
 import pytest
 import pytz
 from fastapi import HTTPException
@@ -42,6 +43,19 @@ def test_should_create_scheduled_classroom(memory_event_store):
 
     assert_response_has_expected_values(response, classroom_json["name"], start_date, classroom_json["position"],
                                         stop_date=stop_date)
+
+
+def test_should_create_classroom_with_timezone(memory_event_store):
+    repository = MemoryClassroomRepository()
+    classroom_json = ClassroomJsonBuilderForTest().with_name("advanced classroom").with_start_date(
+        arrow.get("2020-02-11T10:00:00-07:00").datetime).with_position(3).with_duration(45, TimeUnit.MINUTE).build()
+    RepositoryProviderForTest().for_classroom(repository).provide()
+
+    response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
+                                CommandBusProviderForTest().provide())
+
+    assert_response_has_expected_values(response, "advanced classroom", arrow.get("2020-02-11T10:00:00-07:00").datetime, 3, 45, "MINUTE", arrow.get("2020-02-11T10:45:00-07:00").datetime)
+    assert repository.get_by_id(response["id"])
 
 
 def test_should_create_classroom_with_attendees(memory_event_store):

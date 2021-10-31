@@ -2,6 +2,7 @@ import calendar
 from datetime import datetime
 from http import HTTPStatus
 from typing import List, Tuple
+from urllib.parse import urlencode
 
 import arrow
 import pytz
@@ -121,9 +122,9 @@ def __map_sessions(event):
 
 def __set_link_header(response, first_day_of_current_month, first_day_of_next_month, first_day_of_previous_month,
                       last_day_of_current_month, last_day_of_next_month, last_day_of_previous_month):
-    previous_header = f'</sessions?start_date={first_day_of_previous_month}&end_date={last_day_of_previous_month}>; rel="previous"'
-    current_header = f'</sessions?start_date={first_day_of_current_month}&end_date={last_day_of_current_month}>; rel="current"'
-    next_header = f'</sessions?start_date={first_day_of_next_month}&end_date={last_day_of_next_month}>; rel="next"'
+    previous_header = f'</sessions?{ urlencode({"start_date": first_day_of_previous_month, "end_date": last_day_of_previous_month})}>; rel="previous"'
+    current_header = f'</sessions?{urlencode({"start_date": first_day_of_current_month, "end_date": last_day_of_current_month})}>; rel="current"'
+    next_header = f'</sessions?{urlencode({"start_date":first_day_of_next_month, "end_date": last_day_of_next_month}) }>; rel="next"'
     response.headers["X-Link"] = f"{previous_header}, {current_header}, {next_header}"
 
 
