@@ -5,6 +5,7 @@ pydantic
 colorlog
 ansible
 arrow
+psycopg[binary]
 pytz
 
 # test

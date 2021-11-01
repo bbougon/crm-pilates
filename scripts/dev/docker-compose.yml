@@ -11,6 +11,8 @@ services:
     build:
       context: .
       shm_size: '512mb'
+    ports:
+    - 5432:5432
 
   adminer:
     image: adminer

@@ -4,6 +4,7 @@ import immobilus  # noqa
 import pytest
 
 from event.event_store import StoreLocator
+from infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
@@ -26,6 +27,11 @@ def sqlite_event_store(tmpdir):
     connect.close()
     StoreLocator.store = SQLiteEventStore(database_file)
     return database_file
+
+
+@pytest.fixture
+def postgres_event_store():
+    StoreLocator.store = PostgresSQLEventStore({"host": "localhost", "port": "5432", "dbname": "crm-pilates", "user": "crm-pilates", "password": "example"})
 
 
 @pytest.fixture(autouse=True)
