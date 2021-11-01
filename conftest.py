@@ -4,6 +4,7 @@ import immobilus  # noqa
 import pytest
 
 from event.event_store import StoreLocator
+from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
     MemoryClassRoomReadRepository
@@ -16,13 +17,14 @@ from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
 
 @pytest.fixture
-def database(tmpdir):
+def sqlite_event_store(tmpdir):
     database_file = tmpdir.join("event_store.db")
     connect = sqlite3.connect(database_file)
     cursor = connect.cursor()
     cursor.execute('''CREATE TABLE event (id text, root_id text, type text, timestamp text, payload text)''')
     connect.commit()
     connect.close()
+    StoreLocator.store = SQLiteEventStore(database_file)
     return database_file
 
 

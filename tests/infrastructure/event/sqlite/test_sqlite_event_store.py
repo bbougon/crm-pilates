@@ -5,8 +5,7 @@ from uuid import UUID
 import pytz
 from immobilus import immobilus
 
-from event.event_store import Event, EventSourced
-from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
+from event.event_store import Event, EventSourced, StoreLocator
 
 
 @EventSourced
@@ -24,12 +23,11 @@ class CustomEventEmitted(Event):
 
 
 @immobilus("2021-05-20 10:05:17.245")
-def test_persist_event_in_store(database):
+def test_persist_event_in_store(sqlite_event_store):
     root_id = uuid.uuid4()
     event_emitted: Event = CustomEventEmitted(root_id)
-    SQLiteEventStore(database).persist(event_emitted)
 
-    persisted_event: Event = SQLiteEventStore(database.realpath()).get_by_id(event_emitted.id)
+    persisted_event: Event = StoreLocator.store.get_by_id(event_emitted.id)
 
     assert persisted_event
     assert isinstance(persisted_event.id, UUID)

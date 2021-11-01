@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres:13-alpine
+    container_name: crm-pilates-postgres
+    environment:
+      POSTGRES_USER: crm-pilates
+      POSTGRES_PASSWORD: example
+    build:
+      context: .
+      shm_size: '512mb'
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

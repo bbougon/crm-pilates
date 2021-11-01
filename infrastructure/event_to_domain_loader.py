@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import uuid
 from abc import abstractmethod
-from datetime import datetime
 from typing import List
+
+import arrow
 
 from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
@@ -36,7 +37,7 @@ class EventToClassroomMapper(EventToDomainMapper):
     def map(self, event: ClassroomCreated) -> EventToDomainMapper:
         schedule_stop = event.payload["schedule"]["stop"]
         schedule_start = event.payload["schedule"]["start"]
-        schedule = Schedule(datetime.fromisoformat(schedule_start), datetime.fromisoformat(schedule_stop) if schedule_stop else None)
+        schedule = Schedule(arrow.get(schedule_start).datetime, arrow.get(schedule_stop).datetime if schedule_stop else None)
         duration = event.payload["duration"]
         time_unit = MinuteTimeUnit(duration["duration"]) if duration["time_unit"] else HourTimeUnit(duration["duration"])
         self.classroom = Classroom(event.payload["name"], event.payload["position"], schedule, Duration(time_unit))
@@ -68,8 +69,8 @@ class EventToConfirmedSessionMapper(EventToDomainMapper):
     def map(self, event: Event) -> EventToDomainMapper:
         self.session = None
         payload = event.payload
-        start = datetime.fromisoformat(payload["schedule"]["start"])
-        stop = datetime.fromisoformat(payload["schedule"]["stop"])
+        start = arrow.get(payload["schedule"]["start"]).datetime
+        stop = arrow.get(payload["schedule"]["stop"]).datetime
         attendees = list(map(lambda attendee: Attendee(uuid.UUID(attendee["id"])), payload["attendees"])) if "attendees" in payload else []
         self.session = ConfirmedSession(uuid.UUID(payload["classroom_id"]), payload["name"], payload["position"], start, MinuteTimeUnit(divmod((stop - start).seconds, 60)[0]), attendees)
         self.session._id = uuid.UUID(payload["id"])

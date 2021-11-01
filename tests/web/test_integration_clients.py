@@ -4,8 +4,6 @@ from fastapi import status, Response
 from fastapi.testclient import TestClient
 
 from domain.client.client import Client
-from event.event_store import StoreLocator
-from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientContextBuilderForTest
@@ -13,18 +11,14 @@ from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientCon
 http_client = TestClient(app)
 
 
-def test_should_create_client(database):
-    StoreLocator.store = SQLiteEventStore(database)
-
+def test_should_create_client(sqlite_event_store):
     response = http_client.post("/clients", json=ClientJsonBuilderForTest().build())
 
     assert response.status_code == 201
     assert response.headers["Location"] == f"/clients/{response.json()['id']}"
 
 
-def test_should_not_create_client_with_empty_lastname_or_firstname(database):
-    StoreLocator.store = SQLiteEventStore(database)
-
+def test_should_not_create_client_with_empty_lastname_or_firstname(sqlite_event_store):
     response = http_client.post("/clients", json={"firstname": "", "lastname": ""})
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

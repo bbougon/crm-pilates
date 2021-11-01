@@ -2,8 +2,6 @@ from fastapi import status, Response
 from fastapi.testclient import TestClient
 
 from domain.classroom.classroom import Classroom
-from event.event_store import StoreLocator
-from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest, \
@@ -12,16 +10,14 @@ from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, Client
 client = TestClient(app)
 
 
-def test_create_classroom(database):
-    StoreLocator.store = SQLiteEventStore(database)
+def test_create_classroom(sqlite_event_store):
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().build())
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
 
 
-def test_create_classroom_with_attendees(database):
-    StoreLocator.store = SQLiteEventStore(database)
+def test_create_classroom_with_attendees(sqlite_event_store):
     repository, clients = ClientContextBuilderForTest().with_one_client().persist(
         RepositoryProvider.write_repositories.client).build()
 
