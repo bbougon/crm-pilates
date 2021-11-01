@@ -38,9 +38,9 @@ class DateTimeEncoder(json.JSONEncoder):
 
 class PostgresSQLEventStore(EventStore):
 
-    def __init__(self, connection_info: dict) -> None:
+    def __init__(self, db_url: str) -> None:
         super().__init__()
-        self.connection_url = f"postgresql://{connection_info['user']}:{connection_info['password']}@{connection_info['host']}:{connection_info['port']}/{connection_info['dbname']}"
+        self.connection_url = db_url
         with psycopg.connect(self.connection_url) as connection:
             connection.execute("CREATE TABLE IF NOT EXISTS event (id uuid, root_id uuid, type varchar(100), timestamp_ timestamp, payload jsonb)")
             connection.commit()

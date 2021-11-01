@@ -1,11 +1,11 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 import settings
 from api import api_router
 from event.event_store import StoreLocator
-from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
+from infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
 from infrastructure.event_to_domain_loader import EventToDomainLoader
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="CRM Pilates",
@@ -26,5 +26,5 @@ app.add_middleware(
 
 
 app.include_router(api_router)
-StoreLocator.store = SQLiteEventStore(settings.EVENT_STORE_PATH)
+StoreLocator.store = PostgresSQLEventStore(settings.DATABASE_URL)
 EventToDomainLoader().load()

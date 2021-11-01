@@ -39,3 +39,4 @@ config = Config()
 
 EVENT_STORE_PATH = config("EVENT_STORE_PATH")
 CORS_ALLOW_ORIGINS = config("CORS.CORS_ALLOW_ORIGINS").split(",")
+DATABASE_URL = os.environ.get("DATABASE_URL", config("DATABASE.DATABASE_URL"))
