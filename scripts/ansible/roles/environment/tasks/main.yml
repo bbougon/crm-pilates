@@ -1,7 +1,0 @@
-- name: set environment variables
-  environment:
-    USER: crm-pilates
-    PASSWORD: example
-    HOST: localhost
-    PORT: 5432
-    DBNAME: crm-pilates
