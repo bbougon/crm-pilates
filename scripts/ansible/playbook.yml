@@ -5,12 +5,8 @@
 
 - name: Configure test environment variable
   hosts: test
-  environment:
-    USER: crm-pilates
-    PASSWORD: example
-    HOST: localhost
-    PORT: 5432
-    DBNAME: crm-pilates
+  roles:
+    - role: environment
 
 - name: Deploy
   hosts:
