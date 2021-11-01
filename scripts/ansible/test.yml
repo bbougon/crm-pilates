@@ -4,10 +4,3 @@ test:
   vars:
     ansible_connection: local
     gather_facts: false
-
-  environment:
-    USER: crm-pilates
-    PASSWORD: example
-    HOST: localhost
-    PORT: 5432
-    DBNAME: crm-pilates
