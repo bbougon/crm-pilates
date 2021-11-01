@@ -1,6 +1,5 @@
 import datetime
 import uuid
-import pytest
 from uuid import UUID
 
 import pytz
@@ -23,17 +22,33 @@ class CustomEventEmitted(Event):
         }
 
 
-@pytest.mark.skip(reason="not ready to run on github actions")
 @immobilus("2021-05-20 10:05:17.245")
-def test_persist_event_in_store(postgres_event_store):
+def test_should_persist_event_in_store(postgres_event_store):
     root_id = uuid.uuid4()
     event_emitted: Event = CustomEventEmitted(root_id)
 
     persisted_event: Event = StoreLocator.store.get_by_id(event_emitted.id)
 
-    assert persisted_event
-    assert isinstance(persisted_event.id, UUID)
-    assert persisted_event.root_id == root_id
-    assert persisted_event.type == "CustomEventEmitted"
-    assert persisted_event.timestamp == datetime.datetime(2021, 5, 20, 10, 5, 17, 245000, tzinfo=pytz.utc)
-    assert persisted_event.payload == {"id": str(root_id), "name": "custom_event"}
+    assert_event(persisted_event, root_id)
+
+
+@immobilus("2021-05-20 10:05:17.245")
+def test_should_retrieve_all_events_in_store(postgres_event_store):
+    first_event_root_id = uuid.uuid4()
+    CustomEventEmitted(first_event_root_id)
+    second_event_root_id = uuid.uuid4()
+    CustomEventEmitted(second_event_root_id)
+
+    persisted_events: [Event] = StoreLocator.store.get_all()
+
+    assert len(persisted_events) == 2
+    assert_event(persisted_events[0], first_event_root_id)
+    assert_event(persisted_events[1], second_event_root_id)
+
+
+def assert_event(event: Event, root_id: UUID):
+    assert isinstance(event.id, UUID)
+    assert event.root_id == root_id
+    assert event.type == "CustomEventEmitted"
+    assert event.timestamp == datetime.datetime(2021, 5, 20, 10, 5, 17, 245000, tzinfo=pytz.utc)
+    assert event.payload == {"id": str(root_id), "name": "custom_event"}

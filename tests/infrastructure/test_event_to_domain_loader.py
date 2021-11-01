@@ -12,8 +12,8 @@ from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuild
     ConfirmedSessionBuilderForTest
 
 
-def test_load_classroom(sqlite_event_store):
-    events = EventBuilderForTest().classroom().persist(sqlite_event_store).build()
+def test_load_classroom(persisted_event_store):
+    events = EventBuilderForTest().classroom().persist(persisted_event_store).build()
     expected_uuid = events[0].payload["id"]
     start_date = events[0].payload["schedule"]["start"]
     stop_date = events[0].payload["schedule"]["stop"]
@@ -26,8 +26,8 @@ def test_load_classroom(sqlite_event_store):
     assert classroom.schedule.stop == stop_date
 
 
-def test_load_clients_and_classroom_with_attendees(sqlite_event_store):
-    events = EventBuilderForTest().client(3).classroom_with_attendees(2).persist(sqlite_event_store).build()
+def test_load_clients_and_classroom_with_attendees(persisted_event_store):
+    events = EventBuilderForTest().client(3).classroom_with_attendees(2).persist(persisted_event_store).build()
     first_client_id: UUID = events[0].root_id
     second_client_id: UUID = events[1].root_id
     third_client_id: UUID = events[2].root_id
@@ -45,8 +45,8 @@ def test_load_clients_and_classroom_with_attendees(sqlite_event_store):
     assert RepositoryProvider.read_repositories.client.get_by_id(third_client_id)
 
 
-def test_load_classroom_with_50_minutes_duration(sqlite_event_store):
-    events = EventBuilderForTest().classroom(ClassroomBuilderForTest().with_duration(Duration(MinuteTimeUnit(50))).build()).persist(sqlite_event_store).build()
+def test_load_classroom_with_50_minutes_duration(persisted_event_store):
+    events = EventBuilderForTest().classroom(ClassroomBuilderForTest().with_duration(Duration(MinuteTimeUnit(50))).build()).persist(persisted_event_store).build()
     expected_uuid = events[0].payload["id"]
 
     EventToDomainLoader().load()
@@ -57,8 +57,8 @@ def test_load_classroom_with_50_minutes_duration(sqlite_event_store):
     assert isinstance(classroom.duration.time_unit, MinuteTimeUnit)
 
 
-def test_load_confirmed_session(sqlite_event_store):
-    events = EventBuilderForTest().confirmed_session(ConfirmedSessionBuilderForTest().starting_at(datetime(2021, 9, 14, 10)).build()).persist(sqlite_event_store).build()
+def test_load_confirmed_session(persisted_event_store):
+    events = EventBuilderForTest().confirmed_session(ConfirmedSessionBuilderForTest().starting_at(datetime(2021, 9, 14, 10)).build()).persist(persisted_event_store).build()
     payload = events[0].payload
     session_id = payload["id"]
 
@@ -73,8 +73,8 @@ def test_load_confirmed_session(sqlite_event_store):
     assert len(confirmed_session.attendees) == 0
 
 
-def test_load_confirmed_session_with_attendees(sqlite_event_store):
-    events = EventBuilderForTest().client(3).classroom_with_attendees(2).confirmed_session().persist(sqlite_event_store).build()
+def test_load_confirmed_session_with_attendees(persisted_event_store):
+    events = EventBuilderForTest().client(3).classroom_with_attendees(2).confirmed_session().persist(persisted_event_store).build()
     payload = events[-1].payload
     session_id = payload["id"]
 
@@ -85,8 +85,8 @@ def test_load_confirmed_session_with_attendees(sqlite_event_store):
     assert len(confirmed_session.attendees) == 2
 
 
-def test_load_attendees_added_to_classroom(sqlite_event_store):
-    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).persist(sqlite_event_store).build()
+def test_load_attendees_added_to_classroom(persisted_event_store):
+    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).persist(persisted_event_store).build()
     payload = events[3].payload
     classroom_id = payload["id"]
 
@@ -98,8 +98,8 @@ def test_load_attendees_added_to_classroom(sqlite_event_store):
 
 
 @pytest.mark.skip("Refacto first attendee check in => big mess")
-def test_load_checkin_session(sqlite_event_store):
-    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).checked_in(1).persist(sqlite_event_store).build()
+def test_load_checkin_session(persisted_event_store):
+    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).checked_in(1).persist(persisted_event_store).build()
     payload = events[4].payload
     session_id = payload["id"]
 

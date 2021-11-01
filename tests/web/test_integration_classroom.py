@@ -10,14 +10,14 @@ from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, Client
 client = TestClient(app)
 
 
-def test_create_classroom(sqlite_event_store):
+def test_create_classroom(persisted_event_store):
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().build())
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
 
 
-def test_create_classroom_with_attendees(sqlite_event_store):
+def test_create_classroom_with_attendees(persisted_event_store):
     repository, clients = ClientContextBuilderForTest().with_one_client().persist(
         RepositoryProvider.write_repositories.client).build()
 

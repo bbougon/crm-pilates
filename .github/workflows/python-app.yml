@@ -10,9 +10,18 @@ on:
       - main
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_USER: crm-pilates
+          POSTGRES_PASSWORD: example
+        ports:
+          - 5432:5432
 
     steps:
     - uses: actions/checkout@v2
@@ -28,9 +37,6 @@ jobs:
     - name: Configure settings
       run: |
         ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/test.yml --diff
-    - name: Create database
-      run: |
-        python scripts/create_database.py -f tests/ci/test_event_store.db
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -39,4 +45,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        pytest --db-type postgres

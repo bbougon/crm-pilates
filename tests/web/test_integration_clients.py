@@ -11,14 +11,14 @@ from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientCon
 http_client = TestClient(app)
 
 
-def test_should_create_client(sqlite_event_store):
+def test_should_create_client(persisted_event_store):
     response = http_client.post("/clients", json=ClientJsonBuilderForTest().build())
 
     assert response.status_code == 201
     assert response.headers["Location"] == f"/clients/{response.json()['id']}"
 
 
-def test_should_not_create_client_with_empty_lastname_or_firstname(sqlite_event_store):
+def test_should_not_create_client_with_empty_lastname_or_firstname(persisted_event_store):
     response = http_client.post("/clients", json={"firstname": "", "lastname": ""})
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

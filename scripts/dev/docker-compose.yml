@@ -8,9 +8,6 @@ services:
     environment:
       POSTGRES_USER: crm-pilates
       POSTGRES_PASSWORD: example
-    build:
-      context: .
-      shm_size: '512mb'
     ports:
     - 5432:5432
 

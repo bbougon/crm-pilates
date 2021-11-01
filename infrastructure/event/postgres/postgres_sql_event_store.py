@@ -1,13 +1,17 @@
 import json
+from datetime import datetime
+from enum import Enum
 from functools import partial
 from typing import List, Any
 from uuid import UUID
 
 import psycopg
 import arrow
+from psycopg.rows import Row
 from psycopg.types.json import Jsonb
 
 from event.event_store import EventStore, Event
+from infrastructure.event.sqlite.sqlite_event_store import MultipleJsonEncoders
 
 
 class UUIDEncoder(json.JSONEncoder):
@@ -15,6 +19,20 @@ class UUIDEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Any:
         if isinstance(o, UUID):
             return str(o)
+        return super().default(o)
+
+
+class EnumEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if isinstance(o, Enum):
+            return o.value
+        return super().default(o)
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if isinstance(o, datetime):
+            return o.isoformat()
         return super().default(o)
 
 
@@ -29,7 +47,7 @@ class PostgresSQLEventStore(EventStore):
 
     def persist(self, event: Event):
         with psycopg.connect(self.connection_url) as connection:
-            uuid_dumps = partial(json.dumps, cls=UUIDEncoder)
+            uuid_dumps = partial(json.dumps, cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder))
             connection.execute("INSERT INTO event VALUES (%(id)s, %(root_id)s, %(type)s, %(timestamp_)s, %(payload)s)", {
                 "id": event.id,
                 "root_id": event.root_id,
@@ -40,7 +58,10 @@ class PostgresSQLEventStore(EventStore):
             connection.commit()
 
     def get_all(self) -> List[Event]:
-        pass
+        with psycopg.connect(self.connection_url) as connection:
+            rows: List[Row] = connection.execute("SELECT * FROM EVENT").fetchall()
+            events: List[Event] = list(map(lambda event: self.__map(event), rows))
+            return events
 
     def get_by_id(self, id: UUID) -> Event:
         with psycopg.connect(self.connection_url) as connection:

@@ -19,8 +19,7 @@ from domain.classroom.session_creation_command_handler import ConfirmedSessionEv
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
 from domain.repository import Repository
-from event.event_store import StoreLocator, Event
-from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
+from event.event_store import Event
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from infrastructure.repository_provider import RepositoryProvider
@@ -383,7 +382,7 @@ class EventBuilderForTest(Builder):
         return self
 
     def persist(self, database) -> EventBuilderForTest:
-        StoreLocator.store = SQLiteEventStore(database)
+        # StoreLocator.store = SQLiteEventStore(database)
         return self
 
     def __to_event(self, _call, _args):

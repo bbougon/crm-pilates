@@ -1,6 +1,7 @@
 import sqlite3
 
 import immobilus  # noqa
+import psycopg
 import pytest
 
 from event.event_store import StoreLocator
@@ -17,6 +18,39 @@ from infrastructure.repository_provider import RepositoryProvider
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
 
+def pytest_addoption(parser):
+    parser.addoption("--db-type", action="store", default="sqlite")
+
+
+@pytest.fixture
+def persisted_event_store(request, tmpdir):
+    if request.config.getoption("--db-type") == "sqlite":
+        database_file = tmpdir.join("event_store.db")
+        connect = sqlite3.connect(database_file)
+        cursor = connect.cursor()
+        cursor.execute('''CREATE TABLE event (id text, root_id text, type text, timestamp text, payload text)''')
+        connect.commit()
+        connect.close()
+        StoreLocator.store = SQLiteEventStore(database_file)
+        yield database_file
+
+    if request.config.getoption("--db-type") == "postgres":
+        StoreLocator.store = PostgresSQLEventStore({"host": "localhost", "port": "5432", "dbname": "crm-pilates", "user": "crm-pilates", "password": "example"})
+        yield
+        with psycopg.connect(StoreLocator.store.connection_url) as connection:
+            connection.execute("DELETE FROM event")
+            connection.commit()
+
+
+@pytest.fixture
+def postgres_event_store():
+    StoreLocator.store = PostgresSQLEventStore({"host": "localhost", "port": "5432", "dbname": "crm-pilates", "user": "crm-pilates", "password": "example"})
+    yield
+    with psycopg.connect(StoreLocator.store.connection_url) as connection:
+        connection.execute("DELETE FROM event")
+        connection.commit()
+
+
 @pytest.fixture
 def sqlite_event_store(tmpdir):
     database_file = tmpdir.join("event_store.db")
@@ -26,12 +60,7 @@ def sqlite_event_store(tmpdir):
     connect.commit()
     connect.close()
     StoreLocator.store = SQLiteEventStore(database_file)
-    return database_file
-
-
-@pytest.fixture
-def postgres_event_store():
-    StoreLocator.store = PostgresSQLEventStore({"host": "localhost", "port": "5432", "dbname": "crm-pilates", "user": "crm-pilates", "password": "example"})
+    yield database_file
 
 
 @pytest.fixture(autouse=True)
