@@ -5,8 +5,8 @@ from functools import partial
 from typing import List, Any
 from uuid import UUID
 
-import psycopg
 import arrow
+import psycopg
 from psycopg.rows import Row
 from psycopg.types.json import Jsonb
 

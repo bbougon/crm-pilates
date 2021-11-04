@@ -13,7 +13,7 @@ COPY . .
 
 RUN make install-docker-local
 
-CMD [ "/app/local.virtualenv/bin/gunicorn", "--config", "/app/local.persistent/gunicorn.py" ]
+CMD [ "/app/local.virtualenv/bin/gunicorn", "--config", "/app/local.persistent/gunicorn.py", "--reload"]
 
 FROM python:3.9.7-slim-buster AS production
 
