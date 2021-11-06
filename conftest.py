@@ -35,7 +35,7 @@ def persisted_event_store(request, tmpdir):
         yield database_file
 
     if request.config.getoption("--db-type") == "postgres":
-        StoreLocator.store = PostgresSQLEventStore("postgresql://crm-pilates:example@localhost:5432/crm-pilates")
+        StoreLocator.store = PostgresSQLEventStore("postgresql://crm-pilates-test:example@localhost:5433/crm-pilates-test")
         yield
         with psycopg.connect(StoreLocator.store.connection_url) as connection:
             connection.execute("DELETE FROM event")
@@ -44,7 +44,7 @@ def persisted_event_store(request, tmpdir):
 
 @pytest.fixture
 def postgres_event_store():
-    StoreLocator.store = PostgresSQLEventStore("postgresql://crm-pilates:example@localhost:5432/crm-pilates")
+    StoreLocator.store = PostgresSQLEventStore("postgresql://crm-pilates-test:example@localhost:5433/crm-pilates-test")
     yield
     with psycopg.connect(StoreLocator.store.connection_url) as connection:
         connection.execute("DELETE FROM event")

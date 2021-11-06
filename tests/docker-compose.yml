@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres:13-alpine
+    container_name: crm-pilates-postgres-test
+    environment:
+      POSTGRES_USER: crm-pilates-test
+      POSTGRES_PASSWORD: example
+    ports:
+      - 5433:5432
+    volumes:
+      - "./volumes/tests/db/data:/var/lib/postgresql/data"
+    build:
+      context: ..
+      target: development

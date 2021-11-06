@@ -98,11 +98,11 @@ class EventToAttendeesAddedMapper(EventToDomainMapper):
 class EventToSessionCheckedInMapper(EventToDomainMapper):
     def map(self, event: Event) -> EventToDomainMapper:
         payload = event.payload
-        session_id = event.root_id
-        attendee = Attendee(uuid.UUID(payload["attendee"]["id"]))
-        attendee.attendance = Attendance[payload["attendee"]["attendance"]]
-        session: Session = RepositoryProvider.write_repositories.session.get_by_id(session_id)
-        session._attendees = [attendee if _attendee.id == attendee.id else _attendee for _attendee in session.attendees]
+        attendee_id = uuid.UUID(payload["attendee"]["id"])
+        session: Session = RepositoryProvider.write_repositories.session.get_by_id(event.root_id)
+        for _attendee in session.attendees:
+            if _attendee.id == attendee_id:
+                _attendee.attendance = Attendance[payload["attendee"]["attendance"]]
         return self
 
     def and_persist(self) -> None:

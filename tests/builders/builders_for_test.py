@@ -379,7 +379,7 @@ class EventBuilderForTest(Builder):
         confirmed_session: ConfirmedSession = self.sessions[0]
         for i in range(nb_attendees_checked_in):
             attendee = confirmed_session.attendees[i - 1]
-            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, attendee)))
+            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.checkin(attendee))))
         return self
 
     def __to_event(self, _call, _args):

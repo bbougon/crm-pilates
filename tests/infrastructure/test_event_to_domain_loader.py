@@ -3,7 +3,7 @@ from uuid import UUID
 
 import pytz
 
-from domain.classroom.classroom import Classroom, Session
+from domain.classroom.classroom import Classroom, Session, Attendance
 from domain.classroom.duration import Duration, MinuteTimeUnit
 from infrastructure.event_to_domain_loader import EventToDomainLoader
 from infrastructure.repository_provider import RepositoryProvider
@@ -97,7 +97,7 @@ def test_load_attendees_added_to_classroom(persisted_event_store):
 
 
 def test_load_checkin_session(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).confirmed_session().checked_in(1).build()
+    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).confirmed_session().checked_in(2).build()
     payload = events[6].payload
     session_id = payload["session_id"]
 
@@ -106,3 +106,5 @@ def test_load_checkin_session(persisted_event_store):
     confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
     assert confirmed_session
     assert len(confirmed_session.attendees) == 2
+    assert confirmed_session.attendees[0].attendance == Attendance.CHECKED_IN
+    assert confirmed_session.attendees[1].attendance == Attendance.CHECKED_IN

@@ -18,10 +18,10 @@ jobs:
       postgres:
         image: postgres:13-alpine
         env:
-          POSTGRES_USER: crm-pilates
+          POSTGRES_USER: crm-pilates-test
           POSTGRES_PASSWORD: example
         ports:
-          - 5432:5432
+          - 5433:5432
 
     steps:
     - uses: actions/checkout@v2

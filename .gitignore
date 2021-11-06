@@ -6,3 +6,5 @@ local.persistent/
 .coverage
 htmlcov
 /settings.ini
+volumes/
+tests/volumes

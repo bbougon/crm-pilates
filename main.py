@@ -26,5 +26,7 @@ app.add_middleware(
 
 
 app.include_router(api_router)
-StoreLocator.store = PostgresSQLEventStore(settings.DATABASE_URL)
-EventToDomainLoader().load()
+
+if __name__ == "__main__":
+    StoreLocator.store = PostgresSQLEventStore(settings.DATABASE_URL)
+    EventToDomainLoader().load()

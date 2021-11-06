@@ -5,7 +5,7 @@ from fastapi import status, Response
 from fastapi.testclient import TestClient
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, ScheduledSession
+from domain.classroom.classroom import Classroom, ScheduledSession, Attendance
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientContextBuilderForTest, \
@@ -66,6 +66,7 @@ def test_register_checkin(memory_repositories):
                                      json=SessionCheckinJsonBuilderForTest().for_session(session).for_attendee(
                                          clients[0]._id).build())
 
+    assert classroom.attendees[0].attendance == Attendance.REGISTERED
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-07T10:00:00+00:00", "2019-05-07T11:00:00+00:00", [
         {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,

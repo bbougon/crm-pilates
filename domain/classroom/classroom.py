@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from abc import abstractmethod
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -130,7 +131,7 @@ class Session:
     def __init__(self, classroom_id: UUID, name: str, position: int, start: datetime, classroom_duration: TimeUnit, attendees: [Attendee]) -> None:
         self.__name: str = name
         self.__position: int = position
-        self.__attendees: List[Attendee] = attendees
+        self.__attendees: List[Attendee] = deepcopy(attendees)
         self.__start: datetime = start.astimezone(pytz.utc) if start.tzinfo is None else start
         self.__stop: datetime = self.__start + timedelta(minutes=classroom_duration.to_unit(MinuteTimeUnit).value)
         self.__classroom_id: UUID = classroom_id
