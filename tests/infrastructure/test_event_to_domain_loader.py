@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from uuid import UUID
 
-import pytest
 import pytz
 
 from domain.classroom.classroom import Classroom, Session
@@ -13,7 +12,7 @@ from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuild
 
 
 def test_load_classroom(persisted_event_store):
-    events = EventBuilderForTest().classroom().persist(persisted_event_store).build()
+    events = EventBuilderForTest().classroom().build()
     expected_uuid = events[0].payload["id"]
     start_date = events[0].payload["schedule"]["start"]
     stop_date = events[0].payload["schedule"]["stop"]
@@ -27,7 +26,7 @@ def test_load_classroom(persisted_event_store):
 
 
 def test_load_clients_and_classroom_with_attendees(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom_with_attendees(2).persist(persisted_event_store).build()
+    events = EventBuilderForTest().client(3).classroom_with_attendees(2).build()
     first_client_id: UUID = events[0].root_id
     second_client_id: UUID = events[1].root_id
     third_client_id: UUID = events[2].root_id
@@ -46,7 +45,7 @@ def test_load_clients_and_classroom_with_attendees(persisted_event_store):
 
 
 def test_load_classroom_with_50_minutes_duration(persisted_event_store):
-    events = EventBuilderForTest().classroom(ClassroomBuilderForTest().with_duration(Duration(MinuteTimeUnit(50))).build()).persist(persisted_event_store).build()
+    events = EventBuilderForTest().classroom(ClassroomBuilderForTest().with_duration(Duration(MinuteTimeUnit(50))).build()).build()
     expected_uuid = events[0].payload["id"]
 
     EventToDomainLoader().load()
@@ -58,7 +57,7 @@ def test_load_classroom_with_50_minutes_duration(persisted_event_store):
 
 
 def test_load_confirmed_session(persisted_event_store):
-    events = EventBuilderForTest().confirmed_session(ConfirmedSessionBuilderForTest().starting_at(datetime(2021, 9, 14, 10)).build()).persist(persisted_event_store).build()
+    events = EventBuilderForTest().confirmed_session(ConfirmedSessionBuilderForTest().starting_at(datetime(2021, 9, 14, 10)).build()).build()
     payload = events[0].payload
     session_id = payload["id"]
 
@@ -74,7 +73,7 @@ def test_load_confirmed_session(persisted_event_store):
 
 
 def test_load_confirmed_session_with_attendees(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom_with_attendees(2).confirmed_session().persist(persisted_event_store).build()
+    events = EventBuilderForTest().client(3).classroom_with_attendees(2).confirmed_session().build()
     payload = events[-1].payload
     session_id = payload["id"]
 
@@ -86,7 +85,7 @@ def test_load_confirmed_session_with_attendees(persisted_event_store):
 
 
 def test_load_attendees_added_to_classroom(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).persist(persisted_event_store).build()
+    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).build()
     payload = events[3].payload
     classroom_id = payload["id"]
 
@@ -97,13 +96,13 @@ def test_load_attendees_added_to_classroom(persisted_event_store):
     assert len(classroom.attendees) == 2
 
 
-@pytest.mark.skip("Refacto first attendee check in => big mess")
 def test_load_checkin_session(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).checked_in(1).persist(persisted_event_store).build()
-    payload = events[4].payload
-    session_id = payload["id"]
+    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).confirmed_session().checked_in(1).build()
+    payload = events[6].payload
+    session_id = payload["session_id"]
+
+    EventToDomainLoader().load()
 
     confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
-
     assert confirmed_session
     assert len(confirmed_session.attendees) == 2

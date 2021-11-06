@@ -6,10 +6,11 @@ from typing import List
 
 import arrow
 
-from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession
+from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession, Attendance, Session
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
+from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
@@ -94,13 +95,28 @@ class EventToAttendeesAddedMapper(EventToDomainMapper):
         pass
 
 
+class EventToSessionCheckedInMapper(EventToDomainMapper):
+    def map(self, event: Event) -> EventToDomainMapper:
+        payload = event.payload
+        session_id = event.root_id
+        attendee = Attendee(uuid.UUID(payload["attendee"]["id"]))
+        attendee.attendance = Attendance[payload["attendee"]["attendance"]]
+        session: Session = RepositoryProvider.write_repositories.session.get_by_id(session_id)
+        session._attendees = [attendee if _attendee.id == attendee.id else _attendee for _attendee in session.attendees]
+        return self
+
+    def and_persist(self) -> None:
+        pass
+
+
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
             ClassroomCreated.event.__name__: EventToClassroomMapper,
             ClientCreated.event.__name__: EventToClientMapper,
             ConfirmedSessionEvent.event.__name__: EventToConfirmedSessionMapper,
-            AllAttendeesAdded.event.__name__: EventToAttendeesAddedMapper
+            AllAttendeesAdded.event.__name__: EventToAttendeesAddedMapper,
+            SessionCheckedIn.event.__name__: EventToSessionCheckedInMapper
         }
 
     def load(self) -> None:

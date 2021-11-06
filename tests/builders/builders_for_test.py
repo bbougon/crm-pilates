@@ -371,18 +371,15 @@ class EventBuilderForTest(Builder):
         clients: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.client(nb_attendees).clients
         attendees = list(map(lambda client: Attendee(client.id), clients))
         classroom: Classroom = self.classrooms[0]
+        classroom._attendees = attendees
         self.event_to_store.append((AllAttendeesAdded, (classroom.id, attendees)))
         return self
 
     def checked_in(self, nb_attendees_checked_in: int) -> EventBuilderForTest:
         confirmed_session: ConfirmedSession = self.sessions[0]
         for i in range(nb_attendees_checked_in):
-            confirmed_session.attendees[i]
-            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.name, confirmed_session.classroom_id, confirmed_session.position, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
-        return self
-
-    def persist(self, database) -> EventBuilderForTest:
-        # StoreLocator.store = SQLiteEventStore(database)
+            attendee = confirmed_session.attendees[i - 1]
+            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, attendee)))
         return self
 
     def __to_event(self, _call, _args):
