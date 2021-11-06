@@ -19,10 +19,15 @@ ADR index is kept [here](./adr/README.md)
   
   `make install` will install the virtual env, all needed dependencies, setup your local environment and setup local sqlite database
 
-### Test
+### Tests
 
-1. `make test` will run all the tests
+1. in tests folder run `docker-compose up` in order to boot a postgres database for tests
+1. `make test` will run all the tests (you can specify `args="--db-type sqlite"` or `args="--db-type postgres"` to run tests under sqlite (by default) or postgres)
 1. `make coverage` will run coverage
+
+**NB:**
+
+Postgres event store test use the postgres test connection
 
 ### Run the API
 
@@ -34,8 +39,10 @@ There is a `Dockerfile` within root directory. It builds the api then creates an
 
 There is also a `docker-compose.yml` file
 
-1. `docker build -t crm-pilates-api .`
-1. `docker-compese up`
+- `docker-compose up` will:
+    1. boot a postgres database container named `crm-pilates-postgres` (login: `crm-pilates`, password: `example`)
+    2. boot an adminer container
+    3. boot the `crm-pilates-api` and load the events persisted in database 
 
 ### API
 
