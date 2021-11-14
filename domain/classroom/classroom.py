@@ -198,10 +198,9 @@ class ConfirmedSession(Session, AggregateRoot):
         return self._id
 
     def checkin(self, attendee: Attendee) -> Attendee:
-        for registered_attendee in self.attendees:
-            if registered_attendee == attendee:
-                registered_attendee.checkin()
-                return registered_attendee
+        registered_attendee = next(filter(lambda current_attendee: current_attendee == attendee, self.attendees))
+        registered_attendee.checkin()
+        return registered_attendee
 
     def checkout(self, attendee_id: UUID) -> Attendee:
         retrieved_attendee: Attendee = next(filter(lambda attendee: attendee.id == attendee_id, self.attendees))
