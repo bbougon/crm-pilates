@@ -70,3 +70,9 @@ class GetSessionsInRangeCommand(Command):
     @property
     def end_date(self) -> datetime:
         return self._end_date.astimezone(pytz.utc) if self._end_date.tzinfo is None else self._end_date
+
+
+@dataclass
+class SessionCheckoutCommand(Command):
+    session_id: UUID
+    attendee: UUID

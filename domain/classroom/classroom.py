@@ -102,6 +102,7 @@ class Classroom(AggregateRoot):
 class Attendance(Enum):
     REGISTERED = "REGISTERED"
     CHECKED_IN = "CHECKED_IN"
+    CHECKED_OUT = "CHECKED_OUT"
 
 
 class Attendee:
@@ -121,6 +122,9 @@ class Attendee:
 
     def checkin(self):
         self.attendance = Attendance.CHECKED_IN
+
+    def checkout(self):
+        self.attendance = Attendance.CHECKED_OUT
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Attendee) and self.id == o.id
@@ -198,6 +202,11 @@ class ConfirmedSession(Session, AggregateRoot):
             if registered_attendee == attendee:
                 registered_attendee.checkin()
                 return registered_attendee
+
+    def checkout(self, attendee_id: UUID) -> Attendee:
+        retrieved_attendee: Attendee = next(filter(lambda attendee: attendee.id == attendee_id, self.attendees))
+        retrieved_attendee.checkout()
+        return retrieved_attendee
 
 
 class InvalidSessionStartDateException(DomainException):

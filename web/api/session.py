@@ -3,6 +3,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import List, Tuple
 from urllib.parse import urlencode
+from uuid import UUID
 
 import arrow
 import pytz
@@ -12,14 +13,15 @@ from fastapi import status, APIRouter, Depends, Response, HTTPException
 from command.command_handler import Status
 from domain.classroom.classroom import Session
 from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
-from domain.commands import GetNextSessionsCommand, GetSessionsInRangeCommand
+from domain.classroom.session_checkout_command_handler import SessionCheckedOut
+from domain.commands import GetNextSessionsCommand, GetSessionsInRangeCommand, SessionCheckoutCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
 from domain.sagas import SessionCheckinSaga
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
 from web.presentation.service.classroom_service import to_detailed_attendee
 from web.schema.session_response import SessionResponse
-from web.schema.session_schemas import SessionCheckin
+from web.schema.session_schemas import SessionCheckin, SessionCheckout
 
 router = APIRouter()
 
@@ -82,23 +84,35 @@ def session_checkin(session_checkin: SessionCheckin, response: Response,
         session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
         if checkin_event_result[1] == Status.UPDATED:
             response.status_code = status.HTTP_200_OK
-        return {
-            "id": result.root_id,
-            "name": session.name,
-            "classroom_id": session.classroom_id,
-            "position": session.position,
-            "schedule": {
-                "start": session.start.isoformat(),
-                "stop": session.stop.isoformat()
-            },
-            "attendees": list(
-                map(lambda attendee: to_detailed_attendee(attendee.id, attendee.attendance.value), session.attendees))
-        }
+        return __map_session(result.root_id, session)
     except AggregateNotFoundException as e:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND,
                             detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found")
     except DomainException as e:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
+
+
+def session_checkout(session_id: UUID, session_checkout: SessionCheckout, response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+    from command.response import Response
+    checkout_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(SessionCheckoutCommand(session_id, session_checkout.attendee))
+    result: SessionCheckedOut = checkout_event_result[0].event
+    session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
+    return __map_session(result.root_id, session)
+
+
+def __map_session(root_id: UUID, session: Session):
+    return {
+        "id": root_id,
+        "name": session.name,
+        "classroom_id": session.classroom_id,
+        "position": session.position,
+        "schedule": {
+            "start": session.start.isoformat(),
+            "stop": session.stop.isoformat()
+        },
+        "attendees": list(
+            map(lambda attendee: to_detailed_attendee(attendee.id, attendee.attendance.value), session.attendees))
+    }
 
 
 def __map_sessions(event):
@@ -111,7 +125,7 @@ def __map_sessions(event):
             "position": session.position,
             "schedule": {
                 "start": session.start.isoformat(),
-                "stop": session.stop.isoformat() if session.stop else None
+                "stop": session.stop.isoformat()
             },
             "attendees": list(
                 map(lambda attendee: to_detailed_attendee(attendee["id"], attendee["attendance"]), session.attendees))

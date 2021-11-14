@@ -15,12 +15,12 @@ from tests.builders.builders_for_test import SessionCheckinJsonBuilderForTest, C
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionContextBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
 from tests.helpers.helpers import expected_session_response
-from web.api.session import session_checkin, next_sessions, sessions
+from web.api.session import session_checkin, next_sessions, sessions, session_checkout
 from web.presentation.domain.detailed_attendee import DetailedAttendee
-from web.schema.session_schemas import SessionCheckin
+from web.schema.session_schemas import SessionCheckin, SessionCheckout
 
 
-def test_handle_domain_exception_on_invalid_confirmed_session():
+def test_should_handle_domain_exception_on_invalid_confirmed_session():
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
@@ -42,7 +42,7 @@ def test_handle_domain_exception_on_invalid_confirmed_session():
         assert e.detail == f"Classroom '{classroom.name}' starting at '2019-05-07T10:00:00+00:00' cannot be set at '2019-05-08T10:30:00+00:00', closest possible dates are '2019-05-07T10:00:00+00:00' or '2019-05-14T10:00:00+00:00'"
 
 
-def test_handle_aggregate_not_found_exception(mocker):
+def test_should_handle_aggregate_not_found_exception_on_checkin(mocker):
     classroom_id = uuid.uuid4()
     mocker.patch.object(MemoryClassroomRepository, "get_by_id",
                         side_effect=AggregateNotFoundException(classroom_id, "Classroom"))
@@ -275,6 +275,35 @@ def test_confirm_session_on_timezone():
                                                  "2019-05-14T11:00:00+05:00", [
                                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
                                                                       "CHECKED_IN"),
+                                                     DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                                      "REGISTERED")
+                                                 ])
+
+
+def test_should_checkout_attendee():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2019-05-07T10:00:00+05:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    classroom: Classroom = classrooms[0]
+    repository, session = SessionContextBuilderForTest().with_classroom(classroom)\
+        .checkin(clients[0].id)\
+        .at(arrow.get("2019-05-14T10:00:00+05:00").datetime)\
+        .persist(RepositoryProvider.write_repositories.session)\
+        .build()
+
+    session_checkout_json = SessionCheckout.parse_obj({"attendee": clients[0].id})
+
+    response = session_checkout(session.id, session_checkout_json, Response(), CommandBusProviderForTest().provide())
+
+    assert response == expected_session_response(session.id, classroom.id, classroom, "2019-05-14T10:00:00+05:00",
+                                                 "2019-05-14T11:00:00+05:00", [
+                                                     DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                                      "CHECKED_OUT"),
                                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                                       "REGISTERED")
                                                  ])
