@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from domain.classroom.classroom import Session
-from domain.classroom.session_repository import SessionRepository
+from domain.classroom.session.session_repository import SessionRepository
 from domain.repository import AggregateRoot
 from infrastructure.repository.memory.memory_repository import MemoryRepository
 

@@ -4,7 +4,7 @@ from uuid import UUID
 from command.command_handler import Status
 from command.saga_handler import SagaHandler
 from domain.classroom.classroom import ConfirmedSession, Attendee
-from domain.classroom.session_creation_command_handler import ConfirmedSessionEvent
+from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.commands import SessionCreationCommand
 from domain.sagas import SessionCheckinSaga
 from event.event_store import Event, EventSourced

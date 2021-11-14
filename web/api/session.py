@@ -12,8 +12,8 @@ from fastapi import status, APIRouter, Depends, Response, HTTPException
 
 from command.command_handler import Status
 from domain.classroom.classroom import Session
-from domain.classroom.session_checkin_saga_handler import SessionCheckedIn
-from domain.classroom.session_checkout_command_handler import SessionCheckedOut
+from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
+from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.commands import GetNextSessionsCommand, GetSessionsInRangeCommand, SessionCheckoutCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
 from domain.sagas import SessionCheckinSaga
@@ -118,18 +118,7 @@ def __map_session(root_id: UUID, session: Session):
 def __map_sessions(event):
     result = []
     for session in event.sessions:
-        next_session = {
-            "id": session.root_id,
-            "name": session.name,
-            "classroom_id": session.classroom_id,
-            "position": session.position,
-            "schedule": {
-                "start": session.start.isoformat(),
-                "stop": session.stop.isoformat()
-            },
-            "attendees": list(
-                map(lambda attendee: to_detailed_attendee(attendee["id"], attendee["attendance"]), session.attendees))
-        }
+        next_session = __map_session(session.root_id, session)
         result.append(next_session)
     return result
 
