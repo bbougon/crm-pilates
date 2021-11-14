@@ -92,7 +92,11 @@ def session_checkin(session_checkin: SessionCheckin, response: Response,
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
 
 
-def session_checkout(session_id: UUID, session_checkout: SessionCheckout, response: Response,
+@router.post("/sessions/{session_id}/checkout",
+             status_code=status.HTTP_200_OK,
+             response_model=SessionResponse
+             )
+def session_checkout(session_id: UUID, session_checkout: SessionCheckout,
                      command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     try:
         from command.response import Response

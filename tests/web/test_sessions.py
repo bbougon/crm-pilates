@@ -299,7 +299,7 @@ def test_should_checkout_attendee():
         .build()
     session_checkout_json = SessionCheckout.parse_obj({"attendee": clients[0].id})
 
-    response = session_checkout(session.id, session_checkout_json, Response(), CommandBusProviderForTest().provide())
+    response = session_checkout(session.id, session_checkout_json, CommandBusProviderForTest().provide())
 
     assert response == expected_session_response(session.id, classroom.id, classroom, "2019-05-14T10:00:00+05:00",
                                                  "2019-05-14T11:00:00+05:00", [
@@ -315,7 +315,7 @@ def test_should_handle_unexisting_session():
     session_id = uuid.uuid4()
 
     with pytest.raises(HTTPException) as e:
-        session_checkout(session_id, session_checkout_json, Response(), CommandBusProviderForTest().provide())
+        session_checkout(session_id, session_checkout_json, CommandBusProviderForTest().provide())
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
     assert e.value.detail == f"Session with id '{str(session_id)}' not found"
@@ -340,7 +340,7 @@ def test_should_handle_domain_exception():
     session_checkout_json = SessionCheckout.parse_obj({"attendee": unknown_attendee_id})
 
     with pytest.raises(HTTPException) as e:
-        session_checkout(session.id, session_checkout_json, Response(), CommandBusProviderForTest().provide())
+        session_checkout(session.id, session_checkout_json, CommandBusProviderForTest().provide())
 
     assert e.value.status_code == HTTPStatus.BAD_REQUEST
     assert e.value.detail == f"Attendee with id {str(unknown_attendee_id)} could not be checked out"

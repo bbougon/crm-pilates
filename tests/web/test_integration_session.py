@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest.mock import ANY
 
+import arrow
 from fastapi import status, Response
 from fastapi.testclient import TestClient
 from immobilus import immobilus
@@ -137,3 +138,31 @@ def test_sessions_should_return_all_sessions_from_classroom_for_current_month(me
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-22T10:00:00+00:00", "2021-10-22T11:00:00+00:00", []),
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-29T10:00:00+00:00", "2021-10-29T11:00:00+00:00", [])
     ]
+
+
+def test_register_checkout(memory_repositories):
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2019-05-07T10:00:00+05:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    classroom: Classroom = classrooms[0]
+    repository, session = SessionContextBuilderForTest().with_classroom(classroom) \
+        .checkin(clients[0].id) \
+        .at(arrow.get("2019-05-14T10:00:00+05:00").datetime) \
+        .persist(RepositoryProvider.write_repositories.session) \
+        .build()
+
+    response: Response = client.post(f"/sessions/{str(session.id)}/checkout",
+                                     json={"attendee": str(clients[0].id)})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == expected_session_response(str(session.id), str(classroom.id), classroom, "2019-05-14T10:00:00+05:00", "2019-05-14T11:00:00+05:00", [
+        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
+         "attendance": "CHECKED_OUT"},
+        {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+         "attendance": "REGISTERED"}
+    ])
