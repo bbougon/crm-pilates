@@ -92,12 +92,19 @@ def session_checkin(session_checkin: SessionCheckin, response: Response,
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
 
 
-def session_checkout(session_id: UUID, session_checkout: SessionCheckout, response: Response, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
-    from command.response import Response
-    checkout_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(SessionCheckoutCommand(session_id, session_checkout.attendee))
-    result: SessionCheckedOut = checkout_event_result[0].event
-    session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
-    return __map_session(result.root_id, session)
+def session_checkout(session_id: UUID, session_checkout: SessionCheckout, response: Response,
+                     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+    try:
+        from command.response import Response
+        checkout_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(SessionCheckoutCommand(session_id, session_checkout.attendee))
+        result: SessionCheckedOut = checkout_event_result[0].event
+        session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
+        return __map_session(result.root_id, session)
+    except AggregateNotFoundException as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND,
+                            detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found")
+    except DomainException as e:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
 
 
 def __map_session(root_id: UUID, session: Session):

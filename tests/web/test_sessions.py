@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
+from http import HTTPStatus
 
 import arrow
+import pytest
 import pytz
 from fastapi import Response, HTTPException, status
 from immobilus import immobilus
@@ -295,7 +297,6 @@ def test_should_checkout_attendee():
         .at(arrow.get("2019-05-14T10:00:00+05:00").datetime)\
         .persist(RepositoryProvider.write_repositories.session)\
         .build()
-
     session_checkout_json = SessionCheckout.parse_obj({"attendee": clients[0].id})
 
     response = session_checkout(session.id, session_checkout_json, Response(), CommandBusProviderForTest().provide())
@@ -307,3 +308,39 @@ def test_should_checkout_attendee():
                                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                                       "REGISTERED")
                                                  ])
+
+
+def test_should_handle_unexisting_session():
+    session_checkout_json = SessionCheckout.parse_obj({"attendee": uuid.uuid4()})
+    session_id = uuid.uuid4()
+
+    with pytest.raises(HTTPException) as e:
+        session_checkout(session_id, session_checkout_json, Response(), CommandBusProviderForTest().provide())
+
+    assert e.value.status_code == HTTPStatus.NOT_FOUND
+    assert e.value.detail == f"Session with id '{str(session_id)}' not found"
+
+
+def test_should_handle_domain_exception():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2019-05-07T10:00:00+05:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    classroom: Classroom = classrooms[0]
+    repository, session = SessionContextBuilderForTest().with_classroom(classroom) \
+        .checkin(clients[0].id) \
+        .at(arrow.get("2019-05-14T10:00:00+05:00").datetime) \
+        .persist(RepositoryProvider.write_repositories.session) \
+        .build()
+    unknown_attendee_id = uuid.uuid4()
+    session_checkout_json = SessionCheckout.parse_obj({"attendee": unknown_attendee_id})
+
+    with pytest.raises(HTTPException) as e:
+        session_checkout(session.id, session_checkout_json, Response(), CommandBusProviderForTest().provide())
+
+    assert e.value.status_code == HTTPStatus.BAD_REQUEST
+    assert e.value.detail == f"Attendee with id {str(unknown_attendee_id)} could not be checked out"
