@@ -119,3 +119,25 @@ def test_session_in_range_should_return_sessions_until_classroom_stops():
     assert len(sessions) == 2
     assert sessions[-1].start == datetime(2020, 7, 13, 10, tzinfo=pytz.utc)
     assert sessions[-1].stop == datetime(2020, 7, 13, 10, 45, tzinfo=pytz.utc)
+
+
+def test_checkin_unknown_attendee_should_be_handled():
+    classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
+    session: ConfirmedSession = classroom.confirm_session_at(datetime(2019, 6, 7, 10))
+    unknown_attendee_id = uuid.uuid4()
+
+    with pytest.raises(DomainException) as e:
+        session.checkin(Attendee.create(unknown_attendee_id))
+
+    assert e.value.message == f"Attendee with id {str(unknown_attendee_id)} could not be checked in"
+
+
+def test_checkout_unknown_attendee_should_be_handled():
+    classroom: Classroom = Classroom.create("classroom to be confirmed", datetime(2019, 6, 7, 10), 2, duration=Duration(MinuteTimeUnit(45)))
+    session: ConfirmedSession = classroom.confirm_session_at(datetime(2019, 6, 7, 10))
+    unknown_attendee_id = uuid.uuid4()
+
+    with pytest.raises(DomainException) as e:
+        session.checkout(unknown_attendee_id)
+
+    assert e.value.message == f"Attendee with id {str(unknown_attendee_id)} could not be checked out"
