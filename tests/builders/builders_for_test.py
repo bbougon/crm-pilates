@@ -15,6 +15,7 @@ from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.classroom.duration import Duration, HourTimeUnit
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
+from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
@@ -385,6 +386,13 @@ class EventBuilderForTest(Builder):
         for i in range(nb_attendees_checked_in):
             attendee = confirmed_session.attendees[i - 1]
             self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.checkin(attendee))))
+        return self
+
+    def checked_out(self, session_id: UUID, attendees_ids: [int]) -> EventBuilderForTest:
+        for id in attendees_ids:
+            attendee = Attendee.create(id)
+            attendee.checkout()
+            self.event_to_store.append((SessionCheckedOut, (session_id, attendee)))
         return self
 
     def __to_event(self, _call, _args):

@@ -11,6 +11,7 @@ from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
+from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
@@ -109,6 +110,10 @@ class EventToSessionCheckedInMapper(EventToDomainMapper):
         pass
 
 
+class EventToSessionCheckedOutMapper(EventToSessionCheckedInMapper):
+    pass
+
+
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
@@ -116,7 +121,8 @@ class EventToDomainLoader:
             ClientCreated.event.__name__: EventToClientMapper,
             ConfirmedSessionEvent.event.__name__: EventToConfirmedSessionMapper,
             AllAttendeesAdded.event.__name__: EventToAttendeesAddedMapper,
-            SessionCheckedIn.event.__name__: EventToSessionCheckedInMapper
+            SessionCheckedIn.event.__name__: EventToSessionCheckedInMapper,
+            SessionCheckedOut.event.__name__: EventToSessionCheckedOutMapper
         }
 
     def load(self) -> None:

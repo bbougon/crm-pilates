@@ -16,7 +16,10 @@ class SessionCheckedOut(Event):
         super().__init__(root_id)
 
     def _to_payload(self):
-        pass
+        return {
+            "session_id": self.root_id,
+            "attendee": {"id": self.checked_out_attendee.id, "attendance": self.checked_out_attendee.attendance.value}
+        }
 
 
 class SessionCheckoutCommandHandler(CommandHandler):

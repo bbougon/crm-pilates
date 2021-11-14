@@ -108,3 +108,20 @@ def test_load_checkin_session(persisted_event_store):
     assert len(confirmed_session.attendees) == 2
     assert confirmed_session.attendees[0].attendance == Attendance.CHECKED_IN
     assert confirmed_session.attendees[1].attendance == Attendance.CHECKED_IN
+
+
+def test_load_checkout_session(persisted_event_store):
+    checked_in_builder = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
+        2).confirmed_session().checked_in(1)
+    checked_in_builder.build()
+    events = EventBuilderForTest().checked_out(checked_in_builder.sessions[0].id, [checked_in_builder.sessions[0].attendees[1].id]).build()
+    payload = events[0].payload
+    session_id = payload["session_id"]
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
+    assert confirmed_session
+    assert len(confirmed_session.attendees) == 2
+    assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
+    assert confirmed_session.attendees[1].attendance == Attendance.CHECKED_OUT
