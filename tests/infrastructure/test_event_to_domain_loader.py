@@ -124,4 +124,4 @@ def test_load_checkout_session(persisted_event_store):
     assert confirmed_session
     assert len(confirmed_session.attendees) == 2
     assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
-    assert confirmed_session.attendees[1].attendance == Attendance.CHECKED_OUT
+    assert confirmed_session.attendees[1].attendance == Attendance.REGISTERED

@@ -304,7 +304,7 @@ def test_should_checkout_attendee():
     assert response == expected_session_response(session.id, classroom.id, classroom, "2019-05-14T10:00:00+05:00",
                                                  "2019-05-14T11:00:00+05:00", [
                                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                                      "CHECKED_OUT"),
+                                                                      "REGISTERED"),
                                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                                       "REGISTERED")
                                                  ])

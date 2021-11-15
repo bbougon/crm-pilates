@@ -102,7 +102,6 @@ class Classroom(AggregateRoot):
 class Attendance(Enum):
     REGISTERED = "REGISTERED"
     CHECKED_IN = "CHECKED_IN"
-    CHECKED_OUT = "CHECKED_OUT"
 
 
 class Attendee:
@@ -124,7 +123,7 @@ class Attendee:
         self.attendance = Attendance.CHECKED_IN
 
     def checkout(self):
-        self.attendance = Attendance.CHECKED_OUT
+        self.attendance = Attendance.REGISTERED
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Attendee) and self.id == o.id
