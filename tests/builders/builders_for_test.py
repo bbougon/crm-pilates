@@ -303,7 +303,7 @@ class SessionCheckinJsonBuilderForTest(Builder):
         return self
 
 
-class SessionRevokeJsonBuilderForTest(Builder):
+class AttendeeSessionCancellationJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
         super().__init__()
@@ -319,11 +319,11 @@ class SessionRevokeJsonBuilderForTest(Builder):
             "session_date": self.session_date.isoformat()
         }
 
-    def for_classroom(self, classroom: Classroom) -> SessionRevokeJsonBuilderForTest:
+    def for_classroom(self, classroom: Classroom) -> AttendeeSessionCancellationJsonBuilderForTest:
         self.classroom_id = classroom.id
         return self
 
-    def at(self, date: datetime) -> SessionRevokeJsonBuilderForTest:
+    def at(self, date: datetime) -> AttendeeSessionCancellationJsonBuilderForTest:
         self.session_date = date.replace(tzinfo=date.tzinfo or pytz.utc)
         return self
 

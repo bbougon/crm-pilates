@@ -11,7 +11,7 @@ from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionCheckinJsonBuilderForTest, \
-    SessionContextBuilderForTest, SessionRevokeJsonBuilderForTest
+    SessionContextBuilderForTest, AttendeeSessionCancellationJsonBuilderForTest
 from tests.helpers.helpers import expected_session_response
 
 client = TestClient(app)
@@ -169,7 +169,7 @@ def test_register_checkout(memory_repositories):
 
 
 @immobilus("2019-05-07 08:24:15.230")
-def test_register_revocation(memory_repositories):
+def test_register_cancellation(memory_repositories):
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
@@ -180,8 +180,8 @@ def test_register_revocation(memory_repositories):
         .build()
 
     classroom: Classroom = classrooms[0]
-    response: Response = client.post(f"/sessions/revoke/{clients[1].id}",
-                                     json=SessionRevokeJsonBuilderForTest().for_classroom(classroom).at(arrow.get("2019-05-21T10:00:00+00:00").datetime).build())
+    response: Response = client.post(f"/sessions/cancellation/{clients[1].id}",
+                                     json=AttendeeSessionCancellationJsonBuilderForTest().for_classroom(classroom).at(arrow.get("2019-05-21T10:00:00+00:00").datetime).build())
 
     assert classroom.attendees[0].attendance == Attendance.REGISTERED
     assert response.status_code == status.HTTP_201_CREATED

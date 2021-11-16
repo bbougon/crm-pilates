@@ -5,12 +5,12 @@ from domain.classroom.session.session_checkin_saga_handler import SessionCheckin
 from domain.classroom.session.session_checkout_command_handler import SessionCheckoutCommandHandler
 from domain.classroom.session.session_creation_command_handler import SessionCreationCommandHandler
 from domain.classroom.session.session_in_range_command_handler import SessionInRangeCommandHandler
-from domain.classroom.session.session_revoke_saga_handler import SessionRevokeSagaHandler
+from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancellationSagaHandler
 from domain.client.client_command_handler import ClientCreationCommandHandler
 from domain.commands import ClassroomCreationCommand, ClientCreationCommand, ClassroomPatchCommand, \
     GetNextSessionsCommand, SessionCreationCommand, GetSessionsInRangeCommand, SessionCheckoutCommand
 from domain.classroom.session.next_sessions_command_handler import NextSessionsCommandHandler
-from domain.sagas import SessionCheckinSaga, SessionRevokeSaga
+from domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
 
 
 class CommandBusProvider:
@@ -29,7 +29,7 @@ command_handlers = {
 
 saga_handlers = {
     SessionCheckinSaga.__name__: SessionCheckinSagaHandler,
-    SessionRevokeSaga.__name__: SessionRevokeSagaHandler
+    AttendeeSessionCancellationSaga.__name__: AttendeeSessionCancellationSagaHandler
 }
 
 CommandBusProvider.command_bus = CommandBus(command_handlers, saga_handlers)

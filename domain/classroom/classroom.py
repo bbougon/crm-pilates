@@ -212,7 +212,7 @@ class ConfirmedSession(Session, AggregateRoot):
         except StopIteration:
             raise DomainException(f"Attendee with id {str(attendee_id)} could not be checked out")
 
-    def revoke(self, attendee: Attendee) -> None:
+    def cancel(self, attendee: Attendee) -> None:
         self.attendees.remove(attendee)
 
 

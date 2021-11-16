@@ -20,7 +20,7 @@ class SessionCheckinSaga(Saga):
 
 
 @dataclass
-class SessionRevokeSaga(Command):
+class AttendeeSessionCancellationSaga(Command):
     attendee_id: UUID
     classroom_id: UUID
     _session_date: datetime
