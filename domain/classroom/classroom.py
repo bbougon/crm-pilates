@@ -206,11 +206,14 @@ class ConfirmedSession(Session, AggregateRoot):
 
     def checkout(self, attendee_id: UUID) -> Attendee:
         try:
-            retrieved_attendee: Attendee = next(filter(lambda attendee: attendee.id == attendee_id, self.attendees))
-            retrieved_attendee.checkout()
-            return retrieved_attendee
+            checkedout_attendee: Attendee = next(filter(lambda attendee: attendee.id == attendee_id, self.attendees))
+            checkedout_attendee.checkout()
+            return checkedout_attendee
         except StopIteration:
             raise DomainException(f"Attendee with id {str(attendee_id)} could not be checked out")
+
+    def revoke(self, attendee: Attendee) -> None:
+        self.attendees.remove(attendee)
 
 
 class InvalidSessionStartDateException(DomainException):

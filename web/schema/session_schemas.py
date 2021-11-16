@@ -12,3 +12,8 @@ class SessionCheckin(BaseModel):
 
 class SessionCheckout(BaseModel):
     attendee: UUID
+
+
+class SessionRevoke(BaseModel):
+    classroom_id: UUID
+    session_date: datetime

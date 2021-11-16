@@ -303,6 +303,31 @@ class SessionCheckinJsonBuilderForTest(Builder):
         return self
 
 
+class SessionRevokeJsonBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.session_date: datetime = None
+        repository, classrooms = ClassroomContextBuilderForTest().persist(
+            RepositoryProvider.write_repositories.classroom).build()
+        self.classroom: Classroom = classrooms[0]
+        self.classroom_id = self.classroom.id
+
+    def build(self):
+        return {
+            "classroom_id": str(self.classroom_id),
+            "session_date": self.session_date.isoformat()
+        }
+
+    def for_classroom(self, classroom: Classroom) -> SessionRevokeJsonBuilderForTest:
+        self.classroom_id = classroom.id
+        return self
+
+    def at(self, date: datetime) -> SessionRevokeJsonBuilderForTest:
+        self.session_date = date.replace(tzinfo=date.tzinfo or pytz.utc)
+        return self
+
+
 class ConfirmedSessionBuilderForTest(Builder):
 
     def __init__(self) -> None:

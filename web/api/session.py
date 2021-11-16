@@ -14,14 +14,15 @@ from command.command_handler import Status
 from domain.classroom.classroom import Session
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
+from domain.classroom.session.session_revoke_saga_handler import SessionRevoked
 from domain.commands import GetNextSessionsCommand, GetSessionsInRangeCommand, SessionCheckoutCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
-from domain.sagas import SessionCheckinSaga
+from domain.sagas import SessionCheckinSaga, SessionRevokeSaga
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
 from web.presentation.service.classroom_service import to_detailed_attendee
 from web.schema.session_response import SessionResponse
-from web.schema.session_schemas import SessionCheckin, SessionCheckout
+from web.schema.session_schemas import SessionCheckin, SessionCheckout, SessionRevoke
 
 router = APIRouter()
 
@@ -109,6 +110,15 @@ def session_checkout(session_id: UUID, session_checkout: SessionCheckout,
                             detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found")
     except DomainException as e:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
+
+
+def session_revoke(attendee_id: UUID, session_revoke: SessionRevoke, response: Response,
+                   command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+    from command.response import Response
+    checkout_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(SessionRevokeSaga(attendee_id, session_revoke.classroom_id, session_revoke.session_date))
+    result: SessionRevoked = checkout_event_result[0].event
+    session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
+    return __map_session(result.root_id, session)
 
 
 def __map_session(root_id: UUID, session: Session):

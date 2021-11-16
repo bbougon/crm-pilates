@@ -14,12 +14,13 @@ from domain.exceptions import AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import SessionCheckinJsonBuilderForTest, ClientContextBuilderForTest, \
-    ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionContextBuilderForTest
+    ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionContextBuilderForTest, \
+    SessionRevokeJsonBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
 from tests.helpers.helpers import expected_session_response
-from web.api.session import session_checkin, next_sessions, sessions, session_checkout
+from web.api.session import session_checkin, next_sessions, sessions, session_checkout, session_revoke
 from web.presentation.domain.detailed_attendee import DetailedAttendee
-from web.schema.session_schemas import SessionCheckin, SessionCheckout
+from web.schema.session_schemas import SessionCheckin, SessionCheckout, SessionRevoke
 
 
 def test_should_handle_domain_exception_on_invalid_confirmed_session():
@@ -344,3 +345,26 @@ def test_should_handle_domain_exception():
 
     assert e.value.status_code == HTTPStatus.BAD_REQUEST
     assert e.value.detail == f"Attendee with id {str(unknown_attendee_id)} could not be checked out"
+
+
+def test_should_revoke_attendee():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2020-05-12T10:00:00+00:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    classroom: Classroom = classrooms[0]
+    session_checkin_json = SessionRevoke.parse_obj(
+        SessionRevokeJsonBuilderForTest().for_classroom(classroom).at(
+            arrow.get("2020-05-19T10:00:00+00:00").datetime).build())
+
+    response = session_revoke(clients[0].id, session_checkin_json, Response(), CommandBusProviderForTest().provide())
+
+    assert response == expected_session_response(ANY, classroom.id, classroom, "2020-05-19T10:00:00+00:00",
+                                                 "2020-05-19T11:00:00+00:00", [
+                                                     DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
+                                                                      "REGISTERED")
+                                                 ])
