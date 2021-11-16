@@ -311,7 +311,7 @@ def test_should_checkout_attendee():
                                                  ])
 
 
-def test_should_handle_unexisting_session():
+def test_should_handle_unexisting_session_on_checkout():
     session_checkout_json = SessionCheckout.parse_obj({"attendee": uuid.uuid4()})
     session_id = uuid.uuid4()
 
@@ -322,7 +322,7 @@ def test_should_handle_unexisting_session():
     assert e.value.detail == f"Session with id '{str(session_id)}' not found"
 
 
-def test_should_handle_domain_exception():
+def test_should_handle_attendee_that_cannot_checkout():
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
@@ -368,3 +368,23 @@ def test_should_cancel_attendee():
                                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
                                                                       "REGISTERED")
                                                  ])
+
+
+def test_should_handle_unexisting_session_on_attendee_cancellation():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2020-05-12T10:00:00+00:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    classroom: Classroom = classrooms[0]
+    session_cancellation_json = AttendeeSessionCancellation.parse_obj(AttendeeSessionCancellationJsonBuilderForTest().for_classroom(classroom).at(
+        arrow.get("2020-05-19T10:00:30+00:00").datetime).build())
+
+    with pytest.raises(HTTPException) as e:
+        attendee_session_cancellation(clients[0].id, session_cancellation_json, Response(), CommandBusProviderForTest().provide())
+
+    assert e.value.status_code == HTTPStatus.NOT_FOUND
+    assert e.value.detail == "Cannot cancel attendee for the session starting at 2020-05-19T10:00:30+00:00. Session could not be found"

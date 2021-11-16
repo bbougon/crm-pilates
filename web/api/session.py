@@ -116,13 +116,16 @@ def session_checkout(session_id: UUID, session_checkout: SessionCheckout,
              status_code=status.HTTP_201_CREATED,
              response_model=SessionResponse
              )
-def attendee_session_cancellation(attendee_id: UUID, session_revoke: AttendeeSessionCancellation, response: Response,
+def attendee_session_cancellation(attendee_id: UUID, session_cancellation: AttendeeSessionCancellation, response: Response,
                                   command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
-    from command.response import Response
-    checkout_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(AttendeeSessionCancellationSaga(attendee_id, session_revoke.classroom_id, session_revoke.session_date))
-    result: AttendeeSessionCancelled = checkout_event_result[0].event
-    session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
-    return __map_session(result.root_id, session)
+    try:
+        from command.response import Response
+        checkout_event_result: Tuple[Response, Status] = command_bus_provider.command_bus.send(AttendeeSessionCancellationSaga(attendee_id, session_cancellation.classroom_id, session_cancellation.session_date))
+        result: AttendeeSessionCancelled = checkout_event_result[0].event
+        session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
+        return __map_session(result.root_id, session)
+    except DomainException:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Cannot cancel attendee for the session starting at {arrow.get(session_cancellation.session_date)}. Session could not be found")
 
 
 def __map_session(root_id: UUID, session: Session):
