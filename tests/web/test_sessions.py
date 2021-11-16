@@ -388,3 +388,19 @@ def test_should_handle_unexisting_session_on_attendee_cancellation():
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
     assert e.value.detail == "Cannot cancel attendee for the session starting at 2020-05-19T10:00:30+00:00. Session could not be found"
+
+
+def test_should_handle_unexisting_classroom_on_attendee_cancellation():
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    classroom: Classroom = ClassroomBuilderForTest().starting_at(arrow.get("2020-05-12T10:00:00+00:00").datetime)\
+        .with_attendee(clients[0]._id).build()
+    session_cancellation_json = AttendeeSessionCancellation.parse_obj(AttendeeSessionCancellationJsonBuilderForTest().for_classroom(classroom).at(
+        arrow.get("2020-05-19T10:00:00+00:00").datetime).build())
+
+    with pytest.raises(HTTPException) as e:
+        attendee_session_cancellation(clients[0].id, session_cancellation_json, Response(), CommandBusProviderForTest().provide())
+
+    assert e.value.status_code == HTTPStatus.NOT_FOUND
+    assert e.value.detail == f"Aggregate 'Classroom' with id '{classroom.id}' not found"

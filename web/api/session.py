@@ -124,6 +124,8 @@ def attendee_session_cancellation(attendee_id: UUID, session_cancellation: Atten
         result: AttendeeSessionCancelled = checkout_event_result[0].event
         session: Session = RepositoryProvider.read_repositories.session.get_by_id(result.root_id)
         return __map_session(result.root_id, session)
+    except AggregateNotFoundException as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=e.message)
     except DomainException:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Cannot cancel attendee for the session starting at {arrow.get(session_cancellation.session_date)}. Session could not be found")
 
