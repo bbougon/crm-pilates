@@ -11,7 +11,7 @@ from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionCheckinJsonBuilderForTest, \
-    SessionContextBuilderForTest
+    SessionContextBuilderForTest, SessionRevokeJsonBuilderForTest
 from tests.helpers.helpers import expected_session_response
 
 client = TestClient(app)
@@ -164,5 +164,28 @@ def test_register_checkout(memory_repositories):
         {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
          "attendance": "REGISTERED"},
         {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
+         "attendance": "REGISTERED"}
+    ])
+
+
+@immobilus("2019-05-07 08:24:15.230")
+def test_register_revocation(memory_repositories):
+    repository, clients = ClientContextBuilderForTest().with_clients(3) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2019-05-07T10:00:00+00:00").datetime)
+                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+
+    classroom: Classroom = classrooms[0]
+    response: Response = client.post(f"/sessions/revoke/{clients[1].id}",
+                                     json=SessionRevokeJsonBuilderForTest().for_classroom(classroom).at(arrow.get("2019-05-21T10:00:00+00:00").datetime).build())
+
+    assert classroom.attendees[0].attendance == Attendance.REGISTERED
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-21T10:00:00+00:00", "2019-05-21T11:00:00+00:00", [
+        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
          "attendance": "REGISTERED"}
     ])

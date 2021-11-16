@@ -112,6 +112,10 @@ def session_checkout(session_id: UUID, session_checkout: SessionCheckout,
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
 
 
+@router.post("/sessions/revoke/{attendee_id}",
+             status_code=status.HTTP_201_CREATED,
+             response_model=SessionResponse
+             )
 def session_revoke(attendee_id: UUID, session_revoke: SessionRevoke, response: Response,
                    command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     from command.response import Response
