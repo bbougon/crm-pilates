@@ -6,8 +6,8 @@ from uuid import UUID
 from command.command_handler import CommandHandler, Status
 from domains.classes.classroom.classroom import Classroom, Schedule, Attendee
 from domains.classes.classroom.duration import Duration, TimeUnits, MinuteTimeUnit
-from domains.classes.client.client import Client
 from domains.classes.commands import ClassroomCreationCommand
+from domains.client.client import Client
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
 

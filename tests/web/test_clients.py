@@ -1,6 +1,6 @@
 from fastapi import Response
 
-from domains.classes.client.client import Client
+from domains.client.client import Client
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientBuilderForTest

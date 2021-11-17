@@ -3,7 +3,7 @@ import uuid
 from fastapi import status, Response
 from fastapi.testclient import TestClient
 
-from domains.classes.client.client import Client
+from domains.client.client import Client
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientContextBuilderForTest

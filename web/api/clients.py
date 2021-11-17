@@ -4,9 +4,9 @@ from uuid import UUID
 from fastapi import status, APIRouter, Response, Depends, HTTPException
 
 from command.command_handler import Status
-from domains.classes.client.client import Client
-from domains.classes.client.client_command_handler import ClientCreated
-from domains.classes.commands import ClientCreationCommand
+from domains.client.client import Client
+from domains.client.client_command_handler import ClientCreated
+from domains.client.commands import ClientCreationCommand
 from domains.exceptions import AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider

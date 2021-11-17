@@ -5,8 +5,8 @@ import pytz
 from immobilus import immobilus
 
 from command.command_handler import Status
-from domains.classes.client.client_command_handler import ClientCreated, ClientCreationCommandHandler
-from domains.classes.commands import ClientCreationCommand
+from domains.client.client_command_handler import ClientCreated, ClientCreationCommandHandler
+from domains.client.commands import ClientCreationCommand
 from event.event_store import StoreLocator
 
 

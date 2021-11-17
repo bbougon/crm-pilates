@@ -1,4 +1,4 @@
-from domains.classes.client.client import Client
+from domains.client.client import Client
 from domains.repository import Repository
 
 

@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from domains.classes.client.client_repository import ClientRepository
+from domains.client.client_repository import ClientRepository
 from domains.repository import AggregateRoot
 from infrastructure.repository.memory.memory_repository import MemoryRepository
 

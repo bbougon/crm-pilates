@@ -6,9 +6,10 @@ from domains.classes.classroom.session.session_checkout_command_handler import S
 from domains.classes.classroom.session.session_creation_command_handler import SessionCreationCommandHandler
 from domains.classes.classroom.session.session_in_range_command_handler import SessionInRangeCommandHandler
 from domains.classes.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancellationSagaHandler
-from domains.classes.client.client_command_handler import ClientCreationCommandHandler
-from domains.classes.commands import ClassroomCreationCommand, ClientCreationCommand, ClassroomPatchCommand, \
+from domains.classes.commands import ClassroomCreationCommand, ClassroomPatchCommand, \
     GetNextSessionsCommand, SessionCreationCommand, GetSessionsInRangeCommand, SessionCheckoutCommand
+from domains.client.client_command_handler import ClientCreationCommandHandler
+from domains.client.commands import ClientCreationCommand
 from domains.classes.classroom.session.next_sessions_command_handler import NextSessionsCommandHandler
 from domains.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
 

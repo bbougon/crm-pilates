@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from fastapi import Response
 
 from domains.classes.classroom.classroom import Classroom
-from domains.classes.client.client import Client
+from domains.client.client import Client
 from domains.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository

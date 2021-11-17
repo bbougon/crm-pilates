@@ -28,12 +28,6 @@ class ClassroomCreationCommand(Command):
 
 
 @dataclass
-class ClientCreationCommand(Command):
-    firstname: str
-    lastname: str
-
-
-@dataclass
 class ClassroomPatchCommand(Command):
     classroom_id: UUID
     attendees: List[UUID] = field(default_factory=list)
