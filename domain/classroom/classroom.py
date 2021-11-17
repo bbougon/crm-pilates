@@ -204,13 +204,13 @@ class ConfirmedSession(Session, AggregateRoot):
         except StopIteration:
             raise DomainException(f"Attendee with id {str(attendee.id)} could not be checked in")
 
-    def checkout(self, attendee_id: UUID) -> Attendee:
+    def checkout(self, attendee: Attendee) -> Attendee:
         try:
-            checkedout_attendee: Attendee = next(filter(lambda attendee: attendee.id == attendee_id, self.attendees))
+            checkedout_attendee: Attendee = next(filter(lambda current_attendee: current_attendee == attendee, self.attendees))
             checkedout_attendee.checkout()
             return checkedout_attendee
         except StopIteration:
-            raise DomainException(f"Attendee with id {str(attendee_id)} could not be checked out")
+            raise DomainException(f"Attendee with id {str(attendee.id)} could not be checked out")
 
     def cancel(self, attendee: Attendee) -> None:
         self.attendees.remove(attendee)

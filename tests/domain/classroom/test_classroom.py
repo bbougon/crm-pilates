@@ -138,6 +138,6 @@ def test_checkout_unknown_attendee_should_be_handled():
     unknown_attendee_id = uuid.uuid4()
 
     with pytest.raises(DomainException) as e:
-        session.checkout(unknown_attendee_id)
+        session.checkout(Attendee.create(unknown_attendee_id))
 
     assert e.value.message == f"Attendee with id {str(unknown_attendee_id)} could not be checked out"

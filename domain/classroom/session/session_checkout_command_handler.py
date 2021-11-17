@@ -25,5 +25,5 @@ class SessionCheckedOut(Event):
 class SessionCheckoutCommandHandler(CommandHandler):
     def execute(self, command: SessionCheckoutCommand) -> Tuple[SessionCheckedOut, Status]:
         session: ConfirmedSession = RepositoryProvider.write_repositories.session.get_by_id(command.session_id)
-        attendee: Attendee = session.checkout(command.attendee)
+        attendee: Attendee = session.checkout(Attendee.create(command.attendee))
         return SessionCheckedOut(session.id, attendee), Status.CREATED
