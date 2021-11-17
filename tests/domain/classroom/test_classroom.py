@@ -5,10 +5,10 @@ import pytest
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession, \
+from domains.classes.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession, \
     InvalidSessionStartDateException, Session
-from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
-from domain.exceptions import DomainException
+from domains.classes.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
+from domains.exceptions import DomainException
 
 
 def test_create_should_create_a_classroom_with_1_hour_duration():

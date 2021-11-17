@@ -2,8 +2,8 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import List
 
-from domain.classroom.classroom import Classroom
-from domain.repository import Repository
+from domains.classes.classroom.classroom import Classroom
+from domains.repository import Repository
 
 
 class ClassroomRepository(Repository):

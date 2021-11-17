@@ -4,10 +4,10 @@ from typing import List, Tuple
 from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
-from domain.classroom.classroom import Classroom, Schedule, Attendee
-from domain.classroom.duration import Duration, TimeUnits, MinuteTimeUnit
-from domain.client.client import Client
-from domain.commands import ClassroomCreationCommand
+from domains.classes.classroom.classroom import Classroom, Schedule, Attendee
+from domains.classes.classroom.duration import Duration, TimeUnits, MinuteTimeUnit
+from domains.classes.client.client import Client
+from domains.classes.commands import ClassroomCreationCommand
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
 

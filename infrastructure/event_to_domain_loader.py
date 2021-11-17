@@ -6,15 +6,15 @@ from typing import List
 
 import arrow
 
-from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession, Attendance, Session
-from domain.classroom.classroom_creation_command_handler import ClassroomCreated
-from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
-from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
-from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
-from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
-from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
-from domain.client.client import Client
-from domain.client.client_command_handler import ClientCreated
+from domains.classes.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession, Attendance, Session
+from domains.classes.classroom.classroom_creation_command_handler import ClassroomCreated
+from domains.classes.classroom.classroom_patch_command_handler import AllAttendeesAdded
+from domains.classes.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
+from domains.classes.classroom.session.session_checkin_saga_handler import SessionCheckedIn
+from domains.classes.classroom.session.session_checkout_command_handler import SessionCheckedOut
+from domains.classes.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
+from domains.classes.client.client import Client
+from domains.classes.client.client_command_handler import ClientCreated
 from event.event_store import StoreLocator, Event
 from infrastructure.repository_provider import RepositoryProvider
 

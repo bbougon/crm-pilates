@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic.main import BaseModel
 
-from domain.classroom.duration import Duration
+from domains.classes.classroom.duration import Duration
 from web.presentation.domain.units import Units
 from web.schema.classroom_schemas import TimeUnit, AttendeeSchema
 

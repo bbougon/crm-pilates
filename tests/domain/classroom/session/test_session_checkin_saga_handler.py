@@ -5,8 +5,8 @@ import pytz
 from immobilus import immobilus
 
 from command.command_handler import Status
-from domain.classroom.session.session_checkin_saga_handler import SessionCheckinSagaHandler, SessionCheckedIn
-from domain.sagas import SessionCheckinSaga
+from domains.classes.classroom.session.session_checkin_saga_handler import SessionCheckinSagaHandler, SessionCheckedIn
+from domains.sagas import SessionCheckinSaga
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClientContextBuilderForTest, ClassroomContextBuilderForTest, \

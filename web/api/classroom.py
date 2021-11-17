@@ -5,9 +5,9 @@ from uuid import UUID
 from fastapi import status, APIRouter, Response, Depends, HTTPException
 
 from command.command_handler import Status
-from domain.classroom.classroom_creation_command_handler import ClassroomCreated
-from domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
-from domain.exceptions import DomainException, AggregateNotFoundException
+from domains.classes.classroom.classroom_creation_command_handler import ClassroomCreated
+from domains.classes.commands import ClassroomCreationCommand, ClassroomPatchCommand
+from domains.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from web.presentation.domain.detailed_classroom import DetailedClassroom
 from web.presentation.service.classroom_service import get_detailed_classroom

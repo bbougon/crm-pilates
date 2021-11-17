@@ -1,8 +1,8 @@
 from typing import List
 from uuid import UUID
 
-from domain.exceptions import AggregateNotFoundException
-from domain.repository import Repository, AggregateRoot
+from domains.exceptions import AggregateNotFoundException
+from domains.repository import Repository, AggregateRoot
 
 
 class MemoryRepository(Repository):

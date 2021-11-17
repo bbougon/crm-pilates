@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from domain.repository import AggregateRoot
+from domains.repository import AggregateRoot
 
 
 class Client(AggregateRoot):

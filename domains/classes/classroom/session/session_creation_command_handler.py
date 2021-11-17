@@ -3,8 +3,8 @@ from typing import List, Tuple
 from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
-from domain.classroom.classroom import Classroom, ConfirmedSession, Attendee
-from domain.commands import SessionCreationCommand
+from domains.classes.classroom.classroom import Classroom, ConfirmedSession, Attendee
+from domains.classes.commands import SessionCreationCommand
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
 

@@ -1,4 +1,4 @@
-from domain.classroom.classroom import Classroom
+from domains.classes.classroom.classroom import Classroom
 
 
 def expected_session_response(session_id, classroom_id, classroom: Classroom, start_date: str, end_date: str,

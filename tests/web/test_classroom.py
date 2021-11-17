@@ -7,9 +7,9 @@ import pytz
 from fastapi import HTTPException
 from fastapi import Response
 
-from domain.classroom.classroom import Classroom
-from domain.client.client import Client
-from domain.exceptions import DomainException, AggregateNotFoundException
+from domains.classes.classroom.classroom import Classroom
+from domains.classes.client.client import Client
+from domains.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest, \

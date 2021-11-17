@@ -2,8 +2,8 @@ from typing import Tuple
 from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
-from domain.client.client import Client
-from domain.commands import ClientCreationCommand
+from domains.classes.client.client import Client
+from domains.classes.commands import ClientCreationCommand
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
 

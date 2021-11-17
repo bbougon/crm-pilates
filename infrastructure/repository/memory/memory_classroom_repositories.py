@@ -5,10 +5,10 @@ from uuid import UUID
 
 import pytz
 
-from domain.classroom.classroom import Classroom
-from domain.classroom.classroom_repository import ClassroomRepository
-from domain.classroom.date_time_comparator import DateTimeComparator
-from domain.repository import AggregateRoot
+from domains.classes.classroom.classroom import Classroom
+from domains.classes.classroom.classroom_repository import ClassroomRepository
+from domains.classes.classroom.date_time_comparator import DateTimeComparator
+from domains.repository import AggregateRoot
 from infrastructure.repository.memory.memory_repository import MemoryRepository
 
 

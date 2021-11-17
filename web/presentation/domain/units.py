@@ -1,4 +1,4 @@
-from domain.classroom.duration import HourTimeUnit, MinuteTimeUnit
+from domains.classes.classroom.duration import HourTimeUnit, MinuteTimeUnit
 
 
 class Units:

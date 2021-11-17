@@ -1,9 +1,9 @@
 from typing import Tuple, List
 
 from command.command_handler import CommandHandler, Status
-from domain.classroom.classroom import Classroom, Session
-from domain.classroom.session.existing_sessions import ExistingSessions, ExistingSession
-from domain.commands import GetSessionsInRangeCommand
+from domains.classes.classroom.classroom import Classroom, Session
+from domains.classes.classroom.session.existing_sessions import ExistingSessions, ExistingSession
+from domains.classes.commands import GetSessionsInRangeCommand
 from event.event_store import Event
 from infrastructure.repository_provider import RepositoryProvider
 

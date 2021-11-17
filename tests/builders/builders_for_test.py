@@ -9,17 +9,17 @@ from uuid import UUID
 import pytz
 from mimesis import Person, Text, Numeric, Datetime
 
-from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
-from domain.classroom.classroom_creation_command_handler import ClassroomCreated
-from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
-from domain.classroom.classroom_repository import ClassroomRepository
-from domain.classroom.duration import Duration, HourTimeUnit
-from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
-from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
-from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
-from domain.client.client import Client
-from domain.client.client_command_handler import ClientCreated
-from domain.repository import Repository
+from domains.classes.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
+from domains.classes.classroom.classroom_creation_command_handler import ClassroomCreated
+from domains.classes.classroom.classroom_patch_command_handler import AllAttendeesAdded
+from domains.classes.classroom.classroom_repository import ClassroomRepository
+from domains.classes.classroom.duration import Duration, HourTimeUnit
+from domains.classes.classroom.session.session_checkin_saga_handler import SessionCheckedIn
+from domains.classes.classroom.session.session_checkout_command_handler import SessionCheckedOut
+from domains.classes.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
+from domains.classes.client.client import Client
+from domains.classes.client.client_command_handler import ClientCreated
+from domains.repository import Repository
 from event.event_store import Event
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository

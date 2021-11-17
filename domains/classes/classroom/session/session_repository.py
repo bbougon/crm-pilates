@@ -2,8 +2,8 @@ from abc import abstractmethod
 from datetime import datetime
 from uuid import UUID
 
-from domain.classroom.classroom import Session
-from domain.repository import Repository
+from domains.classes.classroom.classroom import Session
+from domains.repository import Repository
 
 
 class SessionRepository(Repository):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from uuid import UUID
 
-from domain.classroom.classroom import Session
+from domains.classes.classroom.classroom import Session
 from event.event_store import Event
 
 

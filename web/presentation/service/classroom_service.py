@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from domain.classroom.classroom import Classroom
+from domains.classes.classroom.classroom import Classroom
 from infrastructure.repository_provider import RepositoryProvider
 from web.presentation.domain.detailed_attendee import DetailedAttendee
 from web.presentation.domain.detailed_classroom import DetailedClassroom

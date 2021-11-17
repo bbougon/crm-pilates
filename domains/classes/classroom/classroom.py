@@ -12,11 +12,11 @@ from uuid import UUID
 import arrow
 import pytz
 
-from domain.classroom.date_time_comparator import DateTimeComparator, DateComparator
-from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
-from domain.datetimes import Weekdays
-from domain.exceptions import DomainException
-from domain.repository import AggregateRoot
+from domains.classes.classroom.date_time_comparator import DateTimeComparator, DateComparator
+from domains.classes.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
+from domains.classes.classroom.datetimes import Weekdays
+from domains.exceptions import DomainException
+from domains.repository import AggregateRoot
 
 
 @dataclass

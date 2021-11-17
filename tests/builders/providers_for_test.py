@@ -3,8 +3,8 @@ from __future__ import annotations
 from abc import abstractmethod
 
 from command.command_bus import CommandBus
-from domain.classroom.classroom_repository import ClassroomRepository
-from domain.client.client_repository import ClientRepository
+from domains.classes.classroom.classroom_repository import ClassroomRepository
+from domains.classes.client.client_repository import ClientRepository
 from infrastructure.command_bus_provider import CommandBusProvider, command_handlers, saga_handlers
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository

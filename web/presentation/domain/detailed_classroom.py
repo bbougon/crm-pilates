@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from domain.classroom.classroom import Classroom
+from domains.classes.classroom.classroom import Classroom
 from web.presentation.domain.detailed_attendee import DetailedAttendee
 from web.presentation.domain.units import Units
 

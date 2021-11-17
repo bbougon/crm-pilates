@@ -3,8 +3,8 @@ from uuid import UUID
 
 import pytz
 
-from domain.classroom.classroom import Classroom, Session, Attendance
-from domain.classroom.duration import Duration, MinuteTimeUnit
+from domains.classes.classroom.classroom import Classroom, Session, Attendance
+from domains.classes.classroom.duration import Duration, MinuteTimeUnit
 from infrastructure.event_to_domain_loader import EventToDomainLoader
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuilderForTest, \

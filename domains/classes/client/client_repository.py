@@ -1,5 +1,5 @@
-from domain.client.client import Client
-from domain.repository import Repository
+from domains.classes.client.client import Client
+from domains.repository import Repository
 
 
 class ClientRepository(Repository):

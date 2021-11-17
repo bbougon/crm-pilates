@@ -5,10 +5,10 @@ import pytest
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom
-from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
-from domain.commands import ClassroomPatchCommand
-from domain.exceptions import AggregateNotFoundException
+from domains.classes.classroom.classroom import Classroom
+from domains.classes.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
+from domains.classes.commands import ClassroomPatchCommand
+from domains.exceptions import AggregateNotFoundException
 from event.event_store import StoreLocator
 from tests.builders.builders_for_test import ClassroomContextBuilderForTest, ClientContextBuilderForTest, \
     ClassroomBuilderForTest

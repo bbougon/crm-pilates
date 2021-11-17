@@ -5,8 +5,8 @@ import pytz
 from immobilus import immobilus
 
 from command.command_handler import Status
-from domain.classroom.session.session_creation_command_handler import SessionCreationCommandHandler, ConfirmedSessionEvent
-from domain.commands import SessionCreationCommand
+from domains.classes.classroom.session.session_creation_command_handler import SessionCreationCommandHandler, ConfirmedSessionEvent
+from domains.classes.commands import SessionCreationCommand
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClassroomBuilderForTest, ClassroomContextBuilderForTest, \

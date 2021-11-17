@@ -9,8 +9,8 @@ from fastapi import Response, HTTPException, status
 from immobilus import immobilus
 from mock.mock import ANY
 
-from domain.classroom.classroom import Classroom
-from domain.exceptions import AggregateNotFoundException
+from domains.classes.classroom.classroom import Classroom
+from domains.exceptions import AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import SessionCheckinJsonBuilderForTest, ClientContextBuilderForTest, \

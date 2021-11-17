@@ -4,7 +4,7 @@ from typing import List
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom
+from domains.classes.classroom.classroom import Classroom
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
     MemoryClassRoomReadRepository
 from tests.builders.builders_for_test import ClassroomContextBuilderForTest, ClassroomBuilderForTest

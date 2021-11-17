@@ -2,8 +2,8 @@ import uuid
 
 import pytest
 
-from domain.exceptions import AggregateNotFoundException
-from domain.repository import Repository
+from domains.exceptions import AggregateNotFoundException
+from domains.repository import Repository
 from infrastructure.repository.memory.memory_repository import MemoryRepository
 
 

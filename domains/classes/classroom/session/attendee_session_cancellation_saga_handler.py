@@ -3,10 +3,10 @@ from uuid import UUID
 
 from command.command_handler import Status
 from command.saga_handler import SagaHandler
-from domain.classroom.classroom import ConfirmedSession, Attendee
-from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
-from domain.commands import SessionCreationCommand
-from domain.sagas import AttendeeSessionCancellationSaga
+from domains.classes.classroom.classroom import ConfirmedSession, Attendee
+from domains.classes.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
+from domains.classes.commands import SessionCreationCommand
+from domains.sagas import AttendeeSessionCancellationSaga
 from event.event_store import Event
 from infrastructure.repository_provider import RepositoryProvider
 

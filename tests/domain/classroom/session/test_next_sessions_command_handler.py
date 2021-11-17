@@ -4,9 +4,9 @@ from typing import Tuple
 from immobilus import immobilus
 
 from command.command_handler import Status
-from domain.classroom.session.next_sessions_command_handler import NextSessionsCommandHandler
-from domain.classroom.session.existing_sessions import ExistingSessions
-from domain.commands import GetNextSessionsCommand
+from domains.classes.classroom.session.next_sessions_command_handler import NextSessionsCommandHandler
+from domains.classes.classroom.session.existing_sessions import ExistingSessions
+from domains.classes.commands import GetNextSessionsCommand
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClassroomBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, SessionContextBuilderForTest

@@ -11,13 +11,13 @@ from arrow import Arrow
 from fastapi import status, APIRouter, Depends, Response, HTTPException
 
 from command.command_handler import Status
-from domain.classroom.classroom import Session
-from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
-from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
-from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
-from domain.commands import GetNextSessionsCommand, GetSessionsInRangeCommand, SessionCheckoutCommand
-from domain.exceptions import DomainException, AggregateNotFoundException
-from domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
+from domains.classes.classroom.classroom import Session
+from domains.classes.classroom.session.session_checkin_saga_handler import SessionCheckedIn
+from domains.classes.classroom.session.session_checkout_command_handler import SessionCheckedOut
+from domains.classes.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
+from domains.classes.commands import GetNextSessionsCommand, GetSessionsInRangeCommand, SessionCheckoutCommand
+from domains.exceptions import DomainException, AggregateNotFoundException
+from domains.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
 from web.presentation.service.classroom_service import to_detailed_attendee
