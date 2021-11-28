@@ -6,6 +6,7 @@ from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom, Session, Attendance
 from domain.classroom.duration import Duration, MinuteTimeUnit
+from domain.client.client import Client
 from infrastructure.event_to_domain_loader import EventToDomainLoader
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuilderForTest, \
@@ -179,3 +180,21 @@ def test_should_load_session_with_already_performed_cancelled_attendee_removal(p
     assert confirmed_session
     assert len(confirmed_session.attendees) == 1
     assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
+
+
+def test_missing_mapper_should_not_stop_execution(persisted_event_store):
+    EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).unknown_event().attendees_added(
+        2).confirmed_session().build()
+
+    EventToDomainLoader().load()
+
+    clients: [Client] = RepositoryProvider.read_repositories.client.get_all()
+    assert len(next(clients)) == 3
+    classroom_generator: [Classroom] = RepositoryProvider.read_repositories.classroom.get_all()
+    classrooms = next(classroom_generator)
+    assert len(classrooms) == 1
+    assert len(classrooms[0].attendees) == 2
+    sessions_generator: [Session] = RepositoryProvider.read_repositories.session.get_all()
+    sessions = next(sessions_generator)
+    assert len(sessions) == 1
+    assert len(sessions[0].attendees) == 2

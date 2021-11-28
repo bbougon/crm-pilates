@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 from uuid import UUID
 
 from domain.classroom.classroom import Session
@@ -26,6 +27,9 @@ class MemorySessionReadRepository(SessionRepository, MemoryRepository):
 
     def get_by_id(self, id: UUID) -> Session:
         return self.repository.get_by_id(id)
+
+    def get_all(self) -> List:
+        return self.repository.get_all()
 
     def persist(self, entity: AggregateRoot):
         raise NotImplementedError

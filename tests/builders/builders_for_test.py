@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+import uuid
 from abc import abstractmethod
 from datetime import datetime
 from typing import List
@@ -21,7 +22,7 @@ from domain.classroom.session.session_creation_command_handler import ConfirmedS
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
 from domain.repository import Repository
-from event.event_store import Event
+from event.event_store import Event, EventSourced
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from infrastructure.repository_provider import RepositoryProvider
@@ -357,6 +358,17 @@ class ConfirmedSessionBuilderForTest(Builder):
         return self
 
 
+@EventSourced
+class UnknownEvent(Event):
+
+    def __init__(self, root_id: UUID, value: str) -> None:
+        self.value = value
+        super().__init__(root_id)
+
+    def _to_payload(self):
+        return {"event": self.value}
+
+
 class EventBuilderForTest(Builder):
 
     def __init__(self) -> None:
@@ -432,6 +444,10 @@ class EventBuilderForTest(Builder):
         for id in cancel_attendees_ids:
             attendee = Attendee.create(id)
             self.event_to_store.append((AttendeeSessionCancelled, (session_id, attendee)))
+        return self
+
+    def unknown_event(self):
+        self.event_to_store.append((UnknownEvent, (uuid.uuid4(), "unknown")))
         return self
 
     def __to_event(self, _call, _args):
