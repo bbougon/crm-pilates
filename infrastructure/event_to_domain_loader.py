@@ -10,6 +10,7 @@ from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedS
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
+from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
@@ -114,6 +115,21 @@ class EventToSessionCheckedOutMapper(EventToSessionCheckedInMapper):
     pass
 
 
+class EventToAttendeeSessionCancelledMapper(EventToDomainMapper):
+
+    def map(self, event: Event) -> EventToDomainMapper:
+        payload = event.payload
+        attendee_id = uuid.UUID(payload["attendee"]["id"])
+        session: Session = RepositoryProvider.write_repositories.session.get_by_id(event.root_id)
+        filtered_attendee: Attendee = next(filter(lambda attendee: attendee.id == attendee_id, session.attendees), None)
+        if filtered_attendee:
+            session.attendees.remove(Attendee.create(attendee_id))
+        return self
+
+    def and_persist(self) -> None:
+        pass
+
+
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
@@ -122,7 +138,8 @@ class EventToDomainLoader:
             ConfirmedSessionEvent.event.__name__: EventToConfirmedSessionMapper,
             AllAttendeesAdded.event.__name__: EventToAttendeesAddedMapper,
             SessionCheckedIn.event.__name__: EventToSessionCheckedInMapper,
-            SessionCheckedOut.event.__name__: EventToSessionCheckedOutMapper
+            SessionCheckedOut.event.__name__: EventToSessionCheckedOutMapper,
+            AttendeeSessionCancelled.event.__name__: EventToAttendeeSessionCancelledMapper
         }
 
     def load(self) -> None:

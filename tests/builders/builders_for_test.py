@@ -14,6 +14,7 @@ from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository
 from domain.classroom.duration import Duration, HourTimeUnit
+from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
@@ -215,11 +216,14 @@ class SessionContextBuilderForTest(Builder):
         self.date: datetime = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
         self.client_checkin: UUID = None
         self.session_to_create = "confirm_session_at"
+        self.cancelled_attendee: UUID = None
 
     def build(self):
         session: ConfirmedSession = getattr(self.classroom, self.session_to_create)(self.date)
         if self.client_checkin:
             session.checkin(Attendee.create(self.client_checkin))
+        if self.cancelled_attendee:
+            session.cancel(Attendee.create(self.cancelled_attendee))
         if self.repository:
             self.repository.persist(session)
         return self.repository, session
@@ -242,6 +246,10 @@ class SessionContextBuilderForTest(Builder):
 
     def confirm(self) -> SessionContextBuilderForTest:
         self.session_to_create = "confirm_session_at"
+        return self
+
+    def cancel(self, client_id: UUID):
+        self.cancelled_attendee = client_id
         return self
 
 
@@ -418,6 +426,12 @@ class EventBuilderForTest(Builder):
             attendee = Attendee.create(id)
             attendee.checkout()
             self.event_to_store.append((SessionCheckedOut, (session_id, attendee)))
+        return self
+
+    def cancel_attendee(self, session_id: UUID, cancel_attendees_ids: [int]):
+        for id in cancel_attendees_ids:
+            attendee = Attendee.create(id)
+            self.event_to_store.append((AttendeeSessionCancelled, (session_id, attendee)))
         return self
 
     def __to_event(self, _call, _args):

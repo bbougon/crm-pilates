@@ -125,3 +125,36 @@ def test_load_checkout_session(persisted_event_store):
     assert len(confirmed_session.attendees) == 2
     assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
     assert confirmed_session.attendees[1].attendance == Attendance.REGISTERED
+
+
+def test_should_load_session_with_cancelled_attendee_removed(persisted_event_store):
+    confirmed_session_builder = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
+        2).confirmed_session()
+    confirmed_session_builder.build()
+    events = EventBuilderForTest().cancel_attendee(confirmed_session_builder.sessions[0].id, [confirmed_session_builder.sessions[0].attendees[1].id]).build()
+    payload = events[0].payload
+    session_id = payload["session_id"]
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
+    assert confirmed_session
+    assert len(confirmed_session.attendees) == 1
+    assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
+
+
+def test_should_load_session_with_already_performed_cancelled_attendee_removal(persisted_event_store):
+    confirmed_session_builder = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
+        2).confirmed_session()
+    confirmed_session_builder.build()
+    EventBuilderForTest().cancel_attendee(confirmed_session_builder.sessions[0].id, [confirmed_session_builder.sessions[0].attendees[1].id]).build()
+    events = EventBuilderForTest().cancel_attendee(confirmed_session_builder.sessions[0].id, [confirmed_session_builder.sessions[0].attendees[1].id]).build()
+    payload = events[0].payload
+    session_id = payload["session_id"]
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(session_id)
+    assert confirmed_session
+    assert len(confirmed_session.attendees) == 1
+    assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
