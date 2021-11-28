@@ -59,7 +59,7 @@ class PostgresSQLEventStore(EventStore):
 
     def get_all(self) -> List[Event]:
         with psycopg.connect(self.connection_url) as connection:
-            rows: List[Row] = connection.execute("SELECT * FROM EVENT").fetchall()
+            rows: List[Row] = connection.execute("SELECT * FROM EVENT ORDER BY event.timestamp_ ASC").fetchall()
             events: List[Event] = list(map(lambda event: self.__map(event), rows))
             return events
 

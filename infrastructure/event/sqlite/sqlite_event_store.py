@@ -70,7 +70,7 @@ class SQLiteEventStore(EventStore):
 
     def get_all(self) -> List[Event]:
         connect, cursor = self.__connect_and_get_cursor()
-        cursor.execute("SELECT * FROM event")
+        cursor.execute("SELECT * FROM event ORDER BY event.timestamp ASC")
         rows = cursor.fetchall()
         events: List[Event] = list(map(lambda event: self.__map(event), rows))
         return events

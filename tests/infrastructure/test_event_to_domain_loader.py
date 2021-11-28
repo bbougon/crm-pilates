@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 import pytz
+from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom, Session, Attendance
 from domain.classroom.duration import Duration, MinuteTimeUnit
@@ -70,6 +71,26 @@ def test_load_confirmed_session(persisted_event_store):
     assert confirmed_session.start == payload["schedule"]["start"]
     assert confirmed_session.stop == datetime(2021, 9, 14, 10, tzinfo=pytz.utc) + timedelta(hours=1)
     assert len(confirmed_session.attendees) == 0
+
+
+def test_should_load_events_by_date_ascending(persisted_event_store):
+    with immobilus("2020-10-09 10:05:00"):
+        clients_events = EventBuilderForTest().client(3).build()
+        clients = list(map(lambda event: event.payload["id"], clients_events))
+        classroom_builder = EventBuilderForTest().classroom(ClassroomBuilderForTest().starting_at(datetime.now()).with_attendees([clients[0], clients[1]]).build())
+        classroom_builder.build()
+    classroom: Classroom = classroom_builder.classrooms[0]
+    confirmed_session_builder = EventBuilderForTest().confirmed_session(
+        classroom.confirm_session_at(datetime(2020, 10, 16, 10, 5, tzinfo=pytz.utc)))
+    with immobilus("2020-10-15 10:01:00"):
+        EventBuilderForTest().cancel_attendee(confirmed_session_builder.sessions[0].id, [confirmed_session_builder.sessions[0].attendees[0].id]).build()
+    with immobilus("2020-10-15 10:00:00"):
+        events = confirmed_session_builder.build()
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(events[0].payload["id"])
+    assert confirmed_session
 
 
 def test_load_confirmed_session_with_attendees(persisted_event_store):
