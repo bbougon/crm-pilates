@@ -5,8 +5,9 @@ import pytest
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession, \
+from domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession, \
     InvalidSessionStartDateException, Session
+from domain.classroom.attendee import Attendee
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.exceptions import DomainException
 

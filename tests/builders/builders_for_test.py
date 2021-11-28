@@ -10,7 +10,8 @@ from uuid import UUID
 import pytz
 from mimesis import Person, Text, Numeric, Datetime
 
-from domain.classroom.classroom import Classroom, Attendee, ScheduledSession, ConfirmedSession
+from domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession
+from domain.classroom.attendee import Attendee
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository

@@ -12,9 +12,6 @@ services:
       - 5432:5432
     volumes:
       - "./volumes/db/data:/var/lib/postgresql/data"
-    build:
-      context: .
-      target: development
 
   adminer:
     image: adminer

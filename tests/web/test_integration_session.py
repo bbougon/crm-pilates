@@ -6,7 +6,8 @@ from fastapi import status, Response
 from fastapi.testclient import TestClient
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, ScheduledSession, Attendance
+from domain.classroom.classroom import Classroom, ScheduledSession
+from domain.classroom.attendee import Attendance
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientContextBuilderForTest, \

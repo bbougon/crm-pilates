@@ -7,8 +7,8 @@ import pytz
 from fastapi import HTTPException
 from fastapi import Response
 
+from domain.classroom.attendee import Attendee
 from domain.classroom.classroom import Classroom
-from domain.client.client import Client
 from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
@@ -87,7 +87,7 @@ def test_should_handle_business_exception_on_classroom_creation(memory_event_sto
 def test_handle_aggregate_not_found_exception_on_classroom_creation(memory_event_store, mocker):
     unknown_uuid = uuid.uuid4()
     mocker.patch.object(MemoryClientRepository, "get_by_id",
-                        side_effect=AggregateNotFoundException(unknown_uuid, Client.__name__))
+                        side_effect=AggregateNotFoundException(unknown_uuid, Attendee.__name__))
     classroom_json = ClassroomJsonBuilderForTest().with_attendees([unknown_uuid]).build()
 
     try:
@@ -119,7 +119,7 @@ def test_add_attendee_to_classroom(memory_event_store):
 def test_handle_aggregate_not_found_on_classroom_patch(mocker):
     unknown_uuid = uuid.uuid4()
     mocker.patch.object(MemoryClientRepository, "get_by_id",
-                        side_effect=AggregateNotFoundException(unknown_uuid, Client.__name__))
+                        side_effect=AggregateNotFoundException(unknown_uuid, Attendee.__name__))
     classroom_repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
         ClassroomBuilderForTest().with_position(2)) \
         .persist() \

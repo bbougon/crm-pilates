@@ -6,7 +6,8 @@ from typing import List
 
 import arrow
 
-from domain.classroom.classroom import Classroom, Schedule, Attendee, ConfirmedSession, Attendance, Session
+from domain.classroom.classroom import Classroom, Schedule, ConfirmedSession, Session
+from domain.classroom.attendee import Attendee, Attendance
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit

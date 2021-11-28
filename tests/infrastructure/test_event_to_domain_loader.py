@@ -4,7 +4,8 @@ from uuid import UUID
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, Session, Attendance
+from domain.classroom.classroom import Classroom, Session
+from domain.classroom.attendee import Attendance
 from domain.classroom.duration import Duration, MinuteTimeUnit
 from domain.client.client import Client
 from infrastructure.event_to_domain_loader import EventToDomainLoader

@@ -8,6 +8,7 @@ from event.event_store import StoreLocator
 from infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
 from infrastructure.repositories import Repositories
+from infrastructure.repository.memory.memory_attendee_repository import MemoryAttendeeRepository
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
     MemoryClassRoomReadRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository, \
@@ -73,11 +74,13 @@ def memory_event_store():
 def memory_repositories():
     classroom_repository = MemoryClassroomRepository()
     client_repository = MemoryClientRepository()
+    attendee_repository = MemoryAttendeeRepository(client_repository)
     session_repository = MemorySessionRepository()
     RepositoryProvider.write_repositories = Repositories({
         "classroom": classroom_repository,
         "client": client_repository,
-        "session": session_repository
+        "session": session_repository,
+        "attendee": attendee_repository
     })
     RepositoryProvider.read_repositories = Repositories({
         "classroom": MemoryClassRoomReadRepository(classroom_repository),

@@ -5,13 +5,13 @@ from abc import abstractmethod
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from enum import Enum
 from typing import List
 from uuid import UUID
 
 import arrow
 import pytz
 
+from domain.classroom.attendee import Attendee
 from domain.classroom.date_time_comparator import DateTimeComparator, DateComparator
 from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
 from domain.datetimes import Weekdays
@@ -97,36 +97,6 @@ class Classroom(AggregateRoot):
                     and DateComparator(day, self.schedule.stop.date()).before().compare():
                 sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute, tzinfo=pytz.utc if classroom_start_date.tzinfo is None else classroom_start_date.tzinfo), self.duration.time_unit, self.attendees))
         return sessions
-
-
-class Attendance(Enum):
-    REGISTERED = "REGISTERED"
-    CHECKED_IN = "CHECKED_IN"
-
-
-class Attendee:
-
-    def __init__(self, id: UUID) -> None:
-        super().__init__()
-        self._id: UUID = id
-        self.attendance: Attendance = Attendance.REGISTERED
-
-    @property
-    def id(self) -> UUID:
-        return self._id
-
-    @staticmethod
-    def create(id: UUID) -> Attendee:
-        return Attendee(id)
-
-    def checkin(self):
-        self.attendance = Attendance.CHECKED_IN
-
-    def checkout(self):
-        self.attendance = Attendance.REGISTERED
-
-    def __eq__(self, o: object) -> bool:
-        return isinstance(o, Attendee) and self.id == o.id
 
 
 class Session:

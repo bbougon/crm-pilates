@@ -4,9 +4,9 @@ from typing import List, Tuple
 from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
-from domain.classroom.classroom import Classroom, Schedule, Attendee
+from domain.classroom.attendee import Attendee
+from domain.classroom.classroom import Classroom, Schedule
 from domain.classroom.duration import Duration, TimeUnits, MinuteTimeUnit
-from domain.client.client import Client
 from domain.commands import ClassroomCreationCommand
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
@@ -21,7 +21,7 @@ class ClassroomCreated(Event):
     schedule: Schedule
 
     def __init__(self, id: UUID, name: str, position: int, duration: Duration, schedule: Schedule,
-                 attendees: List[Client]):
+                 attendees: List[Attendee]):
         self.__root_id = id
         self.name = name
         self.position = position
@@ -53,9 +53,9 @@ class ClassroomCreationCommandHandler(CommandHandler):
         classroom = Classroom.create(command.name, command.start_date, command.position, stop_date=command.stop_date,
                                      duration=Duration(TimeUnits.from_duration(command.duration.unit.value,
                                                                                command.duration.duration)))
-        clients: List[Client] = list(
-            map(lambda id: RepositoryProvider.write_repositories.client.get_by_id(id), command.attendees))
-        classroom.all_attendees(list(map(lambda client: Attendee.create(client._id), clients)))
+        attendees: List[Attendee] = list(
+            map(lambda id: RepositoryProvider.write_repositories.attendee.get_by_id(id), command.attendees))
+        classroom.all_attendees(attendees)
         RepositoryProvider.write_repositories.classroom.persist(classroom)
         return ClassroomCreated(id=classroom.id, name=classroom.name, position=classroom.position,
-                                duration=classroom.duration, schedule=classroom.schedule, attendees=clients), Status.CREATED
+                                duration=classroom.duration, schedule=classroom.schedule, attendees=attendees), Status.CREATED

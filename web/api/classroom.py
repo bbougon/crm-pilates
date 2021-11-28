@@ -44,7 +44,7 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
         command = ClassroomCreationCommand(classroom_creation.name, classroom_creation.position,
                                            classroom_creation.duration,
                                            classroom_creation.start_date, classroom_creation.stop_date,
-                                           list(map(lambda client: client.id, classroom_creation.attendees)))
+                                           list(map(lambda attendee: attendee.id, classroom_creation.attendees)))
         from command.response import Response
         result: Tuple[Response, Status] = command_bus_provider.command_bus.send(command)
         event: ClassroomCreated = result[0].event

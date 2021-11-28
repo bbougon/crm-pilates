@@ -2,7 +2,8 @@ from typing import Tuple
 from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
-from domain.classroom.classroom import ConfirmedSession, Attendee
+from domain.classroom.classroom import ConfirmedSession
+from domain.classroom.attendee import Attendee
 from domain.commands import SessionCheckoutCommand
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
