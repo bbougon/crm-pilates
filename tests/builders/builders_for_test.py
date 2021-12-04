@@ -80,6 +80,10 @@ class ClientContextBuilderForTest(Builder):
     def with_one_client(self) -> ClientContextBuilderForTest:
         return self.with_clients(1)
 
+    def with_client(self, client: Client) -> ClientContextBuilderForTest:
+        self.clients.append(client)
+        return self
+
 
 class ClientJsonBuilderForTest(Builder):
 

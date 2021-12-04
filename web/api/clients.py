@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Union
 from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends, HTTPException
@@ -39,10 +39,7 @@ def create_client(client_creation: ClientCreation, response: Response,
         ClientCreationCommand(client_creation.firstname, client_creation.lastname, client_credits))
     event: ClientCreated = result[0].event
     response.headers["location"] = f"/clients/{event.root_id}"
-    client = {"id": event.root_id, "firstname": event.firstname, "lastname": event.lastname}
-    if event.credits:
-        client["credits"] = list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, event.credits))
-    return client
+    return __map_client(event)
 
 
 @router.get("/clients/{id}",
@@ -60,11 +57,7 @@ def create_client(client_creation: ClientCreation, response: Response,
 def get_client(id: UUID):
     try:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(id)
-        return {
-            "id": client._id,
-            "firstname": client.firstname,
-            "lastname": client.lastname
-        }
+        return __map_client(client)
     except AggregateNotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Client with id '{e.unknown_id}' not found")
 
@@ -79,8 +72,11 @@ def get_client(id: UUID):
             })
 def get_clients():
     clients = RepositoryProvider.read_repositories.client.get_all()
-    return __map_client(next(clients))
+    return list(map(lambda client: __map_client(client), next(clients)))
 
 
-def __map_client(clients: List[Client]) -> List[dict]:
-    return [{"id": client.id, "firstname": client.firstname, "lastname": client.lastname} for client in clients]
+def __map_client(client: Union[Client, ClientCreated] ) -> dict:
+    payload = {"id": client.root_id if hasattr(client, "root_id") else client.id, "firstname": client.firstname, "lastname": client.lastname}
+    if client.credits:
+        payload["credits"] = list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, client.credits))
+    return payload
