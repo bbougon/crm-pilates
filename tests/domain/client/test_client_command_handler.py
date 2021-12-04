@@ -6,7 +6,7 @@ from immobilus import immobilus
 
 from command.command_handler import Status
 from domain.classroom.classroom_type import ClassroomType
-from domain.client.client_command_handler import ClientCreated, ClientCreationCommandHandler
+from domain.client.client_command_handlers import ClientCreated, ClientCreationCommandHandler
 from domain.commands import ClientCreationCommand, ClientCredits
 from event.event_store import StoreLocator
 

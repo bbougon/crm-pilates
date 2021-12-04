@@ -21,6 +21,9 @@ class Credits:
     def type(self):
         return self.__type
 
+    def add(self, value: int):
+        self.__value += value
+
 
 class Client(AggregateRoot):
 
@@ -28,10 +31,10 @@ class Client(AggregateRoot):
         super().__init__()
         self.firstname = firstname
         self.lastname = lastname
-        self.credits: List[Credits] = None
+        self.credits: List[Credits] = []
 
     def _provide_credits(self, client_credits: List[ClientCredits]):
-        self.credits = list(map(lambda credit: Credits(credit.value, credit.type), client_credits))
+        self.credits.extend(list(map(lambda credit: Credits(credit.value, credit.type), client_credits)))
 
     @staticmethod
     def create(firstname: str, lastname: str, client_credits: List[ClientCredits] = None) -> Client:
@@ -39,3 +42,12 @@ class Client(AggregateRoot):
         if client_credits:
             client._provide_credits(client_credits)
         return client
+
+    def add_credits(self, credits: List[ClientCredits]):
+        for client_credits in credits:
+            found_credits = filter(lambda credit: credit.type is client_credits.type, self.credits)
+            found_credit = next(found_credits, None)
+            if found_credit:
+                found_credit.add(client_credits.value)
+            else:
+                self._provide_credits([client_credits])

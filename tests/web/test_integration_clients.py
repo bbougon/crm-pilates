@@ -91,3 +91,14 @@ def test_get_clients_should_return_all_clients():
     assert len(payload) == 3
     assert payload[0]["credits"][0]["value"] == 2
     assert payload[0]["credits"][0]["type"] == "MACHINE_TRIO"
+
+
+def test_update_client_credits():
+    repository, clients = ClientContextBuilderForTest().with_client(
+        ClientBuilderForTest().with_credit(2, ClassroomType.MACHINE_TRIO).build()).persist(
+        RepositoryProvider.write_repositories.client).build()
+    client_to_update: Client = clients[0]
+
+    response: Response = http_client.patch(f"clients/{str(client_to_update.id)}", json={"credits": [{"value": 2, "type": "MACHINE_TRIO"}, {"value": 10, "type": "MAT"}]})
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT

@@ -42,6 +42,12 @@ class ClientCreationCommand(Command):
 
 
 @dataclass
+class ClientUpdateCommand(Command):
+    id: UUID
+    credits: List[ClientCredits] = None
+
+
+@dataclass
 class ClassroomPatchCommand(Command):
     classroom_id: UUID
     attendees: List[UUID] = field(default_factory=list)

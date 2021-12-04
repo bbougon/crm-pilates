@@ -5,12 +5,12 @@ from fastapi import status, APIRouter, Response, Depends, HTTPException
 
 from command.command_handler import Status
 from domain.client.client import Client
-from domain.client.client_command_handler import ClientCreated
-from domain.commands import ClientCreationCommand, ClientCredits
+from domain.client.client_command_handlers import ClientCreated
+from domain.commands import ClientCreationCommand, ClientCredits, ClientUpdateCommand
 from domain.exceptions import AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
-from web.schema.client_creation import ClientCreation
+from web.schema.client_schemas import ClientCreation, ClientPatch
 from web.schema.client_response import ClientReadResponse
 
 router = APIRouter()
@@ -34,9 +34,9 @@ router = APIRouter()
 def create_client(client_creation: ClientCreation, response: Response,
                   command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     from command.response import Response
-    client_credits = list(map(lambda credit: ClientCredits(credit.value, credit.type), client_creation.credits)) if client_creation.credits else None
     result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
-        ClientCreationCommand(client_creation.firstname, client_creation.lastname, client_credits))
+        ClientCreationCommand(client_creation.firstname, client_creation.lastname,
+                              __to_client_credits(client_creation.credits)))
     event: ClientCreated = result[0].event
     response.headers["location"] = f"/clients/{event.root_id}"
     return __map_client(event)
@@ -75,7 +75,19 @@ def get_clients():
     return list(map(lambda client: __map_client(client), next(clients)))
 
 
-def __map_client(client: Union[Client, ClientCreated] ) -> dict:
+@router.patch("/clients/{id}",
+              status_code=status.HTTP_204_NO_CONTENT)
+def update_client(id: UUID, client_patch: ClientPatch, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+    command_bus_provider.command_bus.send(ClientUpdateCommand(id, __to_client_credits(client_patch.credits)))
+
+
+def __to_client_credits(creation_credits):
+    client_credits = list(map(lambda credit: ClientCredits(credit.value, credit.type),
+                              creation_credits)) if creation_credits else None
+    return client_credits
+
+
+def __map_client(client: Union[Client, ClientCreated]) -> dict:
     payload = {"id": client.root_id if hasattr(client, "root_id") else client.id, "firstname": client.firstname, "lastname": client.lastname}
     if client.credits:
         payload["credits"] = list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, client.credits))

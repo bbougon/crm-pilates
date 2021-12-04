@@ -4,10 +4,10 @@ from domain.classroom.classroom_type import ClassroomType
 from domain.client.client import Client
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from infrastructure.repository_provider import RepositoryProvider
-from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientBuilderForTest
+from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientBuilderForTest, CreditsJsonBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
-from web.api.clients import create_client, get_clients
-from web.schema.client_creation import ClientCreation
+from web.api.clients import create_client, get_clients, update_client
+from web.schema.client_schemas import ClientCreation, ClientPatch
 
 
 def test_client_creation():
@@ -52,6 +52,18 @@ def test_get_clients_should_return_all_clients(memory_repositories):
     assert len(response) == 2
     assert response_contains_client(response, first_client)
     assert response_contains_client(response, second_client)
+
+
+def test_should_add_credits_to_client(memory_repositories):
+    client: Client = ClientBuilderForTest().with_credit(2, ClassroomType.MAT).build()
+    RepositoryProvider.write_repositories.client.persist(client)
+
+    update_client(client.id, ClientPatch.parse_obj(CreditsJsonBuilderForTest().mat(2).machine_duo(10).build()), CommandBusProviderForTest().provide())
+
+    assert len(client.credits) == 2
+    assert client.credits[0].value == 4
+    assert client.credits[1].value == 10
+    assert client.credits[1].type == ClassroomType.MACHINE_DUO
 
 
 def response_contains_client(response, client: Client):

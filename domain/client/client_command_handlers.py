@@ -3,7 +3,7 @@ from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
 from domain.client.client import Client, Credits
-from domain.commands import ClientCreationCommand
+from domain.commands import ClientCreationCommand, ClientUpdateCommand
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
 
@@ -29,7 +29,24 @@ class ClientCreated(Event):
 
 
 class ClientCreationCommandHandler(CommandHandler):
+
     def execute(self, command: ClientCreationCommand) -> Tuple[ClientCreated, Status]:
         client = Client.create(command.firstname, command.lastname, command.credits)
         RepositoryProvider.write_repositories.client.persist(client)
         return ClientCreated(client._id, client.firstname, client.lastname, client.credits), Status.CREATED
+
+
+class ClientUpdated(Event):
+    def __init__(self, root_id: UUID, credits: List[Credits]) -> None:
+        super().__init__(root_id)
+
+    def _to_payload(self):
+        pass
+
+
+class ClientUpdateCommandHandler(CommandHandler):
+
+    def execute(self, command: ClientUpdateCommand) -> Tuple[ClientUpdated, Status]:
+        client: Client = RepositoryProvider.write_repositories.client.get_by_id(command.id)
+        client.add_credits(command.credits)
+        return ClientUpdated(client.id, client.credits), Status.UPDATED

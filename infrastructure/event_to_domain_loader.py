@@ -17,7 +17,7 @@ from domain.classroom.session.session_checkin_saga_handler import SessionChecked
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client, Credits
-from domain.client.client_command_handler import ClientCreated
+from domain.client.client_command_handlers import ClientCreated
 from event.event_store import StoreLocator, Event
 from infrastructure.repository_provider import RepositoryProvider
 

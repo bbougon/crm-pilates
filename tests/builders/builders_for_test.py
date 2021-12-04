@@ -22,7 +22,7 @@ from domain.classroom.session.session_checkin_saga_handler import SessionChecked
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
-from domain.client.client_command_handler import ClientCreated
+from domain.client.client_command_handlers import ClientCreated
 from domain.commands import ClientCredits
 from domain.repository import Repository
 from event.event_store import Event, EventSourced
@@ -94,13 +94,33 @@ class ClientJsonBuilderForTest(Builder):
         self.lastname = person.last_name()
         self.credits = []
 
-    def build(self):
+    def build(self) -> dict:
         client = {"firstname": self.firstname, "lastname": self.lastname, "credits": self.credits}
         return client
 
     def with_credits(self, nb_credits: int, classroom_type: ClassroomType):
         self.credits.append({"value": nb_credits, "type": classroom_type.value})
         return self
+
+
+class CreditsJsonBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        self.credits: List[dict] = []
+
+    def build(self) -> dict:
+        return {"credits": self.credits}
+
+    def mat(self, nb_credits) -> CreditsJsonBuilderForTest:
+        self.credits.append(self.__credit(nb_credits, ClassroomType.MAT))
+        return self
+
+    def machine_duo(self, nb_credits) -> CreditsJsonBuilderForTest:
+        self.credits.append(self.__credit(nb_credits, ClassroomType.MACHINE_DUO))
+        return self
+
+    def __credit(self, nb_credits: int, type_: ClassroomType):
+        return {"value": nb_credits, "type": type_}
 
 
 class ClassroomBuilderForTest(Builder):
