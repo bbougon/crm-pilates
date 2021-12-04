@@ -6,12 +6,13 @@ from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom, Session
 from domain.classroom.attendee import Attendance
+from domain.classroom.classroom_type import ClassroomType
 from domain.classroom.duration import Duration, MinuteTimeUnit
 from domain.client.client import Client
 from infrastructure.event_to_domain_loader import EventToDomainLoader
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuilderForTest, \
-    ConfirmedSessionBuilderForTest
+    ConfirmedSessionBuilderForTest, ClientBuilderForTest
 
 
 def test_load_classroom(persisted_event_store):
@@ -28,8 +29,21 @@ def test_load_classroom(persisted_event_store):
     assert classroom.schedule.stop == stop_date
 
 
+def test_should_load_clients_with_credits(persisted_event_store):
+    events = EventBuilderForTest().client(ClientBuilderForTest().with_credit(2, ClassroomType.MAT).with_credit(5, ClassroomType.MACHINE_TRIO).build()).build()
+    first_client_id: UUID = events[0].root_id
+
+    EventToDomainLoader().load()
+
+    client = RepositoryProvider.read_repositories.client.get_by_id(first_client_id)
+    assert client.credits[0].value == 2
+    assert client.credits[0].type == ClassroomType.MAT
+    assert client.credits[1].value == 5
+    assert client.credits[1].type == ClassroomType.MACHINE_TRIO
+
+
 def test_load_clients_and_classroom_with_attendees(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom_with_attendees(2).build()
+    events = EventBuilderForTest().nb_client(3).classroom_with_attendees(2).build()
     first_client_id: UUID = events[0].root_id
     second_client_id: UUID = events[1].root_id
     third_client_id: UUID = events[2].root_id
@@ -77,7 +91,7 @@ def test_load_confirmed_session(persisted_event_store):
 
 def test_should_load_events_by_date_ascending(persisted_event_store):
     with immobilus("2020-10-09 10:05:00"):
-        clients_events = EventBuilderForTest().client(3).build()
+        clients_events = EventBuilderForTest().nb_client(3).build()
         clients = list(map(lambda event: event.payload["id"], clients_events))
         classroom_builder = EventBuilderForTest().classroom(ClassroomBuilderForTest().starting_at(datetime.now()).with_attendees([clients[0], clients[1]]).build())
         classroom_builder.build()
@@ -96,7 +110,7 @@ def test_should_load_events_by_date_ascending(persisted_event_store):
 
 
 def test_load_confirmed_session_with_attendees(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom_with_attendees(2).confirmed_session().build()
+    events = EventBuilderForTest().nb_client(3).classroom_with_attendees(2).confirmed_session().build()
     payload = events[-1].payload
     session_id = payload["id"]
 
@@ -108,7 +122,7 @@ def test_load_confirmed_session_with_attendees(persisted_event_store):
 
 
 def test_load_attendees_added_to_classroom(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).build()
+    events = EventBuilderForTest().nb_client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).build()
     payload = events[3].payload
     classroom_id = payload["id"]
 
@@ -120,7 +134,7 @@ def test_load_attendees_added_to_classroom(persisted_event_store):
 
 
 def test_load_checkin_session(persisted_event_store):
-    events = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).confirmed_session().checked_in(2).build()
+    events = EventBuilderForTest().nb_client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(2).confirmed_session().checked_in(2).build()
     payload = events[6].payload
     session_id = payload["session_id"]
 
@@ -134,7 +148,7 @@ def test_load_checkin_session(persisted_event_store):
 
 
 def test_load_checkout_session(persisted_event_store):
-    checked_in_builder = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
+    checked_in_builder = EventBuilderForTest().nb_client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
         2).confirmed_session().checked_in(1)
     checked_in_builder.build()
     events = EventBuilderForTest().checked_out(checked_in_builder.sessions[0].id, [checked_in_builder.sessions[0].attendees[1].id]).build()
@@ -151,7 +165,7 @@ def test_load_checkout_session(persisted_event_store):
 
 
 def test_should_load_session_with_cancelled_attendee_removed(persisted_event_store):
-    confirmed_session_builder = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
+    confirmed_session_builder = EventBuilderForTest().nb_client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
         2).confirmed_session()
     confirmed_session_builder.build()
     events = EventBuilderForTest().cancel_attendee(confirmed_session_builder.sessions[0].id, [confirmed_session_builder.sessions[0].attendees[1].id]).build()
@@ -167,7 +181,7 @@ def test_should_load_session_with_cancelled_attendee_removed(persisted_event_sto
 
 
 def test_should_load_session_with_already_performed_cancelled_attendee_removal(persisted_event_store):
-    confirmed_session_builder = EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
+    confirmed_session_builder = EventBuilderForTest().nb_client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
         2).confirmed_session()
     confirmed_session_builder.build()
     EventBuilderForTest().cancel_attendee(confirmed_session_builder.sessions[0].id, [confirmed_session_builder.sessions[0].attendees[1].id]).build()
@@ -184,7 +198,7 @@ def test_should_load_session_with_already_performed_cancelled_attendee_removal(p
 
 
 def test_missing_mapper_should_not_stop_execution(persisted_event_store):
-    EventBuilderForTest().client(3).classroom(ClassroomBuilderForTest().build()).unknown_event().attendees_added(
+    EventBuilderForTest().nb_client(3).classroom(ClassroomBuilderForTest().build()).unknown_event().attendees_added(
         2).confirmed_session().build()
 
     EventToDomainLoader().load()

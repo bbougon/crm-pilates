@@ -30,7 +30,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
 @immobilus("2020-04-03 10:24:15.230")
 def test_classroom_creation_event_is_stored_with_credits(memory_event_store):
     result: Tuple[ClientCreated, Status] = ClientCreationCommandHandler().execute(
-        ClientCreationCommand(firstname="John", lastname="Doe", credits=ClientCredits(2, ClassroomType.MAT)))
+        ClientCreationCommand(firstname="John", lastname="Doe", credits=[ClientCredits(2, ClassroomType.MAT)]))
 
     events = StoreLocator.store.get_all()
     assert len(events) == 1
@@ -40,5 +40,5 @@ def test_classroom_creation_event_is_stored_with_credits(memory_event_store):
         "id": result[0].root_id,
         "firstname": "John",
         "lastname": "Doe",
-        "credits": {"value": 2, "type": "MAT"}
+        "credits": [{"value": 2, "type": "MAT"}]
     }

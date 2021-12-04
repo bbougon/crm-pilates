@@ -34,14 +34,14 @@ router = APIRouter()
 def create_client(client_creation: ClientCreation, response: Response,
                   command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     from command.response import Response
-    client_credits = ClientCredits(client_creation.credits.value, client_creation.credits.type) if client_creation.credits else None
+    client_credits = list(map(lambda credit: ClientCredits(credit.value, credit.type), client_creation.credits)) if client_creation.credits else None
     result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
         ClientCreationCommand(client_creation.firstname, client_creation.lastname, client_credits))
     event: ClientCreated = result[0].event
     response.headers["location"] = f"/clients/{event.root_id}"
     client = {"id": event.root_id, "firstname": event.firstname, "lastname": event.lastname}
     if event.credits:
-        client["credits"] = {"value": event.credits.value, "type": event.credits.type.value}
+        client["credits"] = list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, event.credits))
     return client
 
 

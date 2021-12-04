@@ -22,13 +22,23 @@ def test_client_creation():
     assert RepositoryProvider.write_repositories.client.get_by_id(response["id"])
 
 
-def test_should_create_client_with_credits_for_mat():
-    client = ClientJsonBuilderForTest().with_credits(5, ClassroomType.MAT).build()
+def test_should_create_client_with_credits_for_mat_and_machine():
+    client = ClientJsonBuilderForTest()\
+        .with_credits(5, ClassroomType.MAT)\
+        .with_credits(10, ClassroomType.MACHINE_DUO)\
+        .with_credits(8, ClassroomType.MACHINE_TRIO)\
+        .with_credits(9, ClassroomType.MACHINE_PRIVATE)\
+        .build()
     RepositoryProvider.write_repositories.client = MemoryClientRepository()
 
     response = create_client(ClientCreation.parse_obj(client), Response(), CommandBusProviderForTest().provide())
 
-    assert response["credits"] == {"value": 5, "type": "MAT"}
+    assert response["credits"] == [
+        {"value": 5, "type": "MAT"},
+        {"value": 10, "type": "MACHINE_DUO"},
+        {"value": 8, "type": "MACHINE_TRIO"},
+        {"value": 9, "type": "MACHINE_PRIVATE"}
+    ]
 
 
 def test_get_clients_should_return_all_clients(memory_repositories):

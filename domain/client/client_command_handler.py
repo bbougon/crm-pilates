@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
@@ -11,10 +11,10 @@ from infrastructure.repository_provider import RepositoryProvider
 @EventSourced
 class ClientCreated(Event):
 
-    def __init__(self, root_id: UUID, firstname: str, lastname: str, credits: Credits = None) -> None:
+    def __init__(self, root_id: UUID, firstname: str, lastname: str, credits: List[Credits] = None) -> None:
         self.firstname = firstname
         self.lastname = lastname
-        self.credits = credits
+        self.credits: List[Credits] = credits
         super().__init__(root_id)
 
     def _to_payload(self):
@@ -24,7 +24,7 @@ class ClientCreated(Event):
             "lastname": self.lastname,
         }
         if self.credits:
-            payload["credits"] = {"value": self.credits.value, "type": self.credits.type.value}
+            payload["credits"] = list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, self.credits))
         return payload
 
 

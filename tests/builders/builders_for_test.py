@@ -10,8 +10,8 @@ from uuid import UUID
 import pytz
 from mimesis import Person, Text, Numeric, Datetime
 
-from domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession
 from domain.classroom.attendee import Attendee
+from domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository
@@ -23,6 +23,7 @@ from domain.classroom.session.session_checkout_command_handler import SessionChe
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
+from domain.commands import ClientCredits
 from domain.repository import Repository
 from event.event_store import Event, EventSourced
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
@@ -44,9 +45,14 @@ class ClientBuilderForTest(Builder):
         person = Person()
         self.firstname = person.last_name()
         self.lastname = person.first_name()
+        self.credits: List[ClientCredits] = []
 
     def build(self) -> Client:
-        return Client.create(self.firstname, self.lastname)
+        return Client.create(self.firstname, self.lastname, self.credits)
+
+    def with_credit(self, nb_credits, type_: ClassroomType):
+        self.credits.append(ClientCredits(nb_credits, type_))
+        return self
 
 
 class ClientContextBuilderForTest(Builder):
@@ -82,14 +88,14 @@ class ClientJsonBuilderForTest(Builder):
         person: Person = Person()
         self.firstname = person.first_name()
         self.lastname = person.last_name()
-        self.credits = None
+        self.credits = []
 
     def build(self):
         client = {"firstname": self.firstname, "lastname": self.lastname, "credits": self.credits}
         return client
 
     def with_credits(self, nb_credits: int, classroom_type: ClassroomType):
-        self.credits = {"value": nb_credits, "type": classroom_type.value}
+        self.credits.append({"value": nb_credits, "type": classroom_type.value})
         return self
 
 
@@ -397,15 +403,20 @@ class EventBuilderForTest(Builder):
         self.classrooms.append(classroom)
         return self
 
-    def client(self, nb_clients: int) -> EventBuilderForTest:
+    def nb_client(self, nb_clients: int) -> EventBuilderForTest:
         clients: List[Client] = [ClientBuilderForTest().build() for _ in range(nb_clients)]
         self.event_to_store.extend(
             [(ClientCreated, (client.id, client.firstname, client.lastname)) for client in clients])
         self.clients.extend(clients)
         return self
 
+    def client(self, client: Client) -> EventBuilderForTest:
+        self.event_to_store.append((ClientCreated, (client.id, client.firstname, client.lastname, client.credits)))
+        self.clients.append(client)
+        return self
+
     def classroom_with_attendees(self, nb_attendees: int):
-        attendees: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.client(
+        attendees: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.nb_client(
             nb_attendees).clients
         classroom = ClassroomBuilderForTest().with_attendees(list(map(lambda client: client.id, attendees))).build()
         self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, attendees)))
@@ -425,7 +436,7 @@ class EventBuilderForTest(Builder):
         return self
 
     def attendees_added(self, nb_attendees: int) -> EventBuilderForTest:
-        clients: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.client(
+        clients: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.nb_client(
             nb_attendees).clients
         attendees = list(map(lambda client: Attendee(client.id), clients))
         classroom: Classroom = self.classrooms[0]

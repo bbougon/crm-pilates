@@ -10,12 +10,13 @@ from domain.classroom.classroom import Classroom, Schedule, ConfirmedSession, Se
 from domain.classroom.attendee import Attendee, Attendance
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
+from domain.classroom.classroom_type import ClassroomType
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
-from domain.client.client import Client
+from domain.client.client import Client, Credits
 from domain.client.client_command_handler import ClientCreated
 from event.event_store import StoreLocator, Event
 from infrastructure.repository_provider import RepositoryProvider
@@ -62,6 +63,8 @@ class EventToClientMapper(EventToDomainMapper):
     def map(self, event: Event) -> EventToDomainMapper:
         self.client = Client(event.payload["firstname"], event.payload["lastname"])
         self.client._id = uuid.UUID(event.payload["id"])
+        if "credits" in event.payload:
+            self.client.credits = list(map(lambda credit: Credits(credit["value"], ClassroomType[credit["type"]]), event.payload["credits"]))
         return self
 
     def and_persist(self) -> None:

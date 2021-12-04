@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import List
+
 from domain.classroom.classroom_type import ClassroomType
 from domain.commands import ClientCredits
 from domain.repository import AggregateRoot
@@ -26,13 +28,13 @@ class Client(AggregateRoot):
         super().__init__()
         self.firstname = firstname
         self.lastname = lastname
-        self.credits = None
+        self.credits: List[Credits] = None
 
-    def _provide_credits(self, client_credits):
-        self.credits = Credits(client_credits.value, client_credits.type)
+    def _provide_credits(self, client_credits: List[ClientCredits]):
+        self.credits = list(map(lambda credit: Credits(credit.value, credit.type), client_credits))
 
     @staticmethod
-    def create(firstname: str, lastname: str, client_credits: ClientCredits = None) -> Client:
+    def create(firstname: str, lastname: str, client_credits: List[ClientCredits] = None) -> Client:
         client = Client(firstname, lastname)
         if client_credits:
             client._provide_credits(client_credits)

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import validator
 from pydantic.main import BaseModel
@@ -14,7 +14,7 @@ class Credits(BaseModel):
 class ClientCreation(BaseModel):
     firstname: str
     lastname: str
-    credits: Optional[Credits]
+    credits: Optional[List[Credits]]
 
     @validator('firstname')
     def lastname_must_not_be_empty(cls, v):

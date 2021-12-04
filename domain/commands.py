@@ -38,7 +38,7 @@ class ClientCredits():
 class ClientCreationCommand(Command):
     firstname: str
     lastname: str
-    credits: ClientCredits = None
+    credits: List[ClientCredits] = None
 
 
 @dataclass
