@@ -1,5 +1,6 @@
 from fastapi import Response
 
+from domain.classroom.classroom_type import ClassroomType
 from domain.client.client import Client
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from infrastructure.repository_provider import RepositoryProvider
@@ -19,6 +20,15 @@ def test_client_creation():
     assert response["lastname"] == client["lastname"]
     assert response["id"]
     assert RepositoryProvider.write_repositories.client.get_by_id(response["id"])
+
+
+def test_should_create_client_with_credits_for_mat():
+    client = ClientJsonBuilderForTest().with_credits(5, ClassroomType.MAT).build()
+    RepositoryProvider.write_repositories.client = MemoryClientRepository()
+
+    response = create_client(ClientCreation.parse_obj(client), Response(), CommandBusProviderForTest().provide())
+
+    assert response["credits"] == {"value": 5, "type": "MAT"}
 
 
 def test_get_clients_should_return_all_clients(memory_repositories):

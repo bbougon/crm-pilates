@@ -15,6 +15,7 @@ from domain.classroom.attendee import Attendee
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository
+from domain.classroom.classroom_type import ClassroomType
 from domain.classroom.duration import Duration, HourTimeUnit
 from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
@@ -81,10 +82,15 @@ class ClientJsonBuilderForTest(Builder):
         person: Person = Person()
         self.firstname = person.first_name()
         self.lastname = person.last_name()
+        self.credits = None
 
     def build(self):
-        client = {"firstname": self.firstname, "lastname": self.lastname}
+        client = {"firstname": self.firstname, "lastname": self.lastname, "credits": self.credits}
         return client
+
+    def with_credits(self, nb_credits: int, classroom_type: ClassroomType):
+        self.credits = {"value": nb_credits, "type": classroom_type.value}
+        return self
 
 
 class ClassroomBuilderForTest(Builder):

@@ -6,7 +6,7 @@ from fastapi import status, APIRouter, Response, Depends, HTTPException
 from command.command_handler import Status
 from domain.client.client import Client
 from domain.client.client_command_handler import ClientCreated
-from domain.commands import ClientCreationCommand
+from domain.commands import ClientCreationCommand, ClientCredits
 from domain.exceptions import AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
@@ -34,11 +34,15 @@ router = APIRouter()
 def create_client(client_creation: ClientCreation, response: Response,
                   command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     from command.response import Response
+    client_credits = ClientCredits(client_creation.credits.value, client_creation.credits.type) if client_creation.credits else None
     result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
-        ClientCreationCommand(client_creation.firstname, client_creation.lastname))
+        ClientCreationCommand(client_creation.firstname, client_creation.lastname, client_credits))
     event: ClientCreated = result[0].event
     response.headers["location"] = f"/clients/{event.root_id}"
-    return {"id": event.root_id, "firstname": event.firstname, "lastname": event.lastname}
+    client = {"id": event.root_id, "firstname": event.firstname, "lastname": event.lastname}
+    if event.credits:
+        client["credits"] = {"value": event.credits.value, "type": event.credits.type.value}
+    return client
 
 
 @router.get("/clients/{id}",

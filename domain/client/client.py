@@ -1,6 +1,23 @@
 from __future__ import annotations
 
+from domain.classroom.classroom_type import ClassroomType
+from domain.commands import ClientCredits
 from domain.repository import AggregateRoot
+
+
+class Credits:
+
+    def __init__(self, nb_credits: int, type: ClassroomType) -> None:
+        self.__value = nb_credits
+        self.__type = type
+
+    @property
+    def value(self):
+        return self.__value
+
+    @property
+    def type(self):
+        return self.__type
 
 
 class Client(AggregateRoot):
@@ -9,7 +26,14 @@ class Client(AggregateRoot):
         super().__init__()
         self.firstname = firstname
         self.lastname = lastname
+        self.credits = None
+
+    def _provide_credits(self, client_credits):
+        self.credits = Credits(client_credits.value, client_credits.type)
 
     @staticmethod
-    def create(firstname: str, lastname: str) -> Client:
-        return Client(firstname, lastname)
+    def create(firstname: str, lastname: str, client_credits: ClientCredits = None) -> Client:
+        client = Client(firstname, lastname)
+        if client_credits:
+            client._provide_credits(client_credits)
+        return client

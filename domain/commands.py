@@ -6,6 +6,7 @@ from uuid import UUID
 import pytz
 
 from command.command_handler import Command
+from domain.classroom.classroom_type import ClassroomType
 from web.schema.classroom_schemas import Duration
 
 
@@ -28,9 +29,16 @@ class ClassroomCreationCommand(Command):
 
 
 @dataclass
+class ClientCredits():
+    value: int
+    type: ClassroomType
+
+
+@dataclass
 class ClientCreationCommand(Command):
     firstname: str
     lastname: str
+    credits: ClientCredits = None
 
 
 @dataclass
