@@ -21,8 +21,8 @@ from domain.classroom.session.attendee_session_cancellation_saga_handler import 
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
-from domain.client.client import Client
-from domain.client.client_command_handlers import ClientCreated
+from domain.client.client import Client, Credits
+from domain.client.client_command_handlers import ClientCreated, CreditsToClientAdded
 from domain.commands import ClientCredits
 from domain.repository import Repository
 from event.event_store import Event, EventSourced
@@ -437,6 +437,10 @@ class EventBuilderForTest(Builder):
     def client(self, client: Client) -> EventBuilderForTest:
         self.event_to_store.append((ClientCreated, (client.id, client.firstname, client.lastname, client.credits)))
         self.clients.append(client)
+        return self
+
+    def added_credits_for_machine_duo(self, client, nb_credits) -> EventBuilderForTest:
+        self.event_to_store.append((CreditsToClientAdded, (client.id, [Credits(nb_credits, ClassroomType.MACHINE_DUO)])))
         return self
 
     def classroom_with_attendees(self, nb_attendees: int):

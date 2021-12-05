@@ -17,7 +17,7 @@ from domain.classroom.session.session_checkin_saga_handler import SessionChecked
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client, Credits
-from domain.client.client_command_handlers import ClientCreated
+from domain.client.client_command_handlers import ClientCreated, CreditsToClientAdded
 from event.event_store import StoreLocator, Event
 from infrastructure.repository_provider import RepositoryProvider
 
@@ -134,6 +134,20 @@ class EventToAttendeeSessionCancelledMapper(EventToDomainMapper):
         pass
 
 
+class CreditsToClientAddedMapper(EventToDomainMapper):
+
+    def map(self, event: CreditsToClientAdded) -> EventToDomainMapper:
+        payload = event.payload
+        client_id = uuid.UUID(payload["id"])
+        client: Client = RepositoryProvider.write_repositories.client.get_by_id(client_id)
+        credits: List[Credits] = list(map(lambda credit: Credits(credit["value"], ClassroomType[credit["type"]]), payload["credits"]))
+        client.credits = credits
+        return self
+
+    def and_persist(self) -> None:
+        pass
+
+
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
@@ -143,7 +157,8 @@ class EventToDomainLoader:
             AllAttendeesAdded.event.__name__: EventToAttendeesAddedMapper,
             SessionCheckedIn.event.__name__: EventToSessionCheckedInMapper,
             SessionCheckedOut.event.__name__: EventToSessionCheckedOutMapper,
-            AttendeeSessionCancelled.event.__name__: EventToAttendeeSessionCancelledMapper
+            AttendeeSessionCancelled.event.__name__: EventToAttendeeSessionCancelledMapper,
+            CreditsToClientAdded.event.__name__: CreditsToClientAddedMapper
         }
 
     def load(self) -> None:

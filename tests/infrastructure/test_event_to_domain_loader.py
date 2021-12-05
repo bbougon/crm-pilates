@@ -42,6 +42,22 @@ def test_should_load_clients_with_credits(persisted_event_store):
     assert client.credits[1].type == ClassroomType.MACHINE_TRIO
 
 
+def test_should_load_added_credits_to_client(persisted_event_store):
+    client = ClientBuilderForTest().with_credit(2, ClassroomType.MAT).build()
+    EventBuilderForTest()\
+        .client(client)\
+        .nb_client(2)\
+        .added_credits_for_machine_duo(client, 10)\
+        .build()
+
+    EventToDomainLoader().load()
+
+    client = RepositoryProvider.read_repositories.client.get_by_id(client.id)
+    assert len(client.credits) == 1
+    assert client.credits[0].value == 10
+    assert client.credits[0].type == ClassroomType.MACHINE_DUO
+
+
 def test_load_clients_and_classroom_with_attendees(persisted_event_store):
     events = EventBuilderForTest().nb_client(3).classroom_with_attendees(2).build()
     first_client_id: UUID = events[0].root_id
