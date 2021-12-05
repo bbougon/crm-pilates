@@ -36,12 +36,17 @@ class ClientCreationCommandHandler(CommandHandler):
         return ClientCreated(client._id, client.firstname, client.lastname, client.credits), Status.CREATED
 
 
+@EventSourced
 class CreditsToClientAdded(Event):
     def __init__(self, root_id: UUID, credits: List[Credits]) -> None:
+        self.credits = credits
         super().__init__(root_id)
 
     def _to_payload(self):
-        pass
+        return {
+            "id": self.root_id,
+            "credits": list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, self.credits))
+        }
 
 
 class AddCreditsToClientCommandHandler(CommandHandler):

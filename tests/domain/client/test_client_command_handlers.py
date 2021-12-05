@@ -6,9 +6,12 @@ from immobilus import immobilus
 
 from command.command_handler import Status
 from domain.classroom.classroom_type import ClassroomType
-from domain.client.client_command_handlers import ClientCreated, ClientCreationCommandHandler
-from domain.commands import ClientCreationCommand, ClientCredits
+from domain.client.client_command_handlers import ClientCreated, ClientCreationCommandHandler, \
+    AddCreditsToClientCommandHandler
+from domain.commands import ClientCreationCommand, ClientCredits, AddCreditsToClientCommand
 from event.event_store import StoreLocator
+from infrastructure.repository_provider import RepositoryProvider
+from tests.builders.builders_for_test import ClientContextBuilderForTest, ClientBuilderForTest
 
 
 @immobilus("2020-04-03 10:24:15.230")
@@ -41,4 +44,21 @@ def test_classroom_creation_event_is_stored_with_credits(memory_event_store):
         "firstname": "John",
         "lastname": "Doe",
         "credits": [{"value": 2, "type": "MAT"}]
+    }
+
+
+def test_should_store_credits_to_client_added(memory_event_store, memory_repositories):
+    client = ClientBuilderForTest().build()
+    ClientContextBuilderForTest().with_client(client).persist(RepositoryProvider.write_repositories.client).build()
+
+    AddCreditsToClientCommandHandler().execute(AddCreditsToClientCommand(client.id, [ClientCredits(5, ClassroomType.MAT), ClientCredits(10, ClassroomType.MACHINE_DUO)]))
+
+    events = StoreLocator.store.get_all()
+    assert events[0].type == "CreditsToClientAdded"
+    assert events[0].payload == {
+        "id": client.id,
+        "credits": [
+            {"value": 5, "type": ClassroomType.MAT.value},
+            {"value": 10, "type": ClassroomType.MACHINE_DUO.value}
+        ]
     }

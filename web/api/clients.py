@@ -77,7 +77,14 @@ def get_clients():
 
 
 @router.patch("/clients/{id}",
-              status_code=status.HTTP_204_NO_CONTENT)
+              status_code=status.HTTP_204_NO_CONTENT,
+              description="Update client:"
+                          "- Add credits to client: you must provide current client credits and the new to add",
+              responses={
+                  204: {
+                      "description": "The request has been processed successfully."
+                  }
+              })
 def update_client(id: UUID, client_patch: ClientPatch, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     try:
         command_bus_provider.command_bus.send(AddCreditsToClientCommand(id, __to_client_credits(client_patch.credits)))

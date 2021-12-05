@@ -65,7 +65,7 @@ def test_should_add_credits_to_client(memory_repositories):
     update_client(client.id, ClientPatch.parse_obj(CreditsJsonBuilderForTest().mat(2).machine_duo(10).build()), CommandBusProviderForTest().provide())
 
     assert len(client.credits) == 2
-    assert client.credits[0].value == 4
+    assert client.credits[0].value == 2
     assert client.credits[1].value == 10
     assert client.credits[1].type == ClassroomType.MACHINE_DUO
 
