@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Tuple, List, Union
 from uuid import UUID
 
@@ -10,8 +11,8 @@ from domain.commands import ClientCreationCommand, ClientCredits, AddCreditsToCl
 from domain.exceptions import AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
-from web.schema.client_schemas import ClientCreation, ClientPatch
 from web.schema.client_response import ClientReadResponse
+from web.schema.client_schemas import ClientCreation, ClientPatch
 
 router = APIRouter()
 
@@ -78,7 +79,10 @@ def get_clients():
 @router.patch("/clients/{id}",
               status_code=status.HTTP_204_NO_CONTENT)
 def update_client(id: UUID, client_patch: ClientPatch, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
-    command_bus_provider.command_bus.send(AddCreditsToClientCommand(id, __to_client_credits(client_patch.credits)))
+    try:
+        command_bus_provider.command_bus.send(AddCreditsToClientCommand(id, __to_client_credits(client_patch.credits)))
+    except AggregateNotFoundException as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"The client with id '{e.unknown_id}' has not been found")
 
 
 def __to_client_credits(creation_credits):

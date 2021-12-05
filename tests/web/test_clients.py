@@ -1,4 +1,8 @@
-from fastapi import Response
+import uuid
+from http import HTTPStatus
+
+import pytest
+from fastapi import Response, HTTPException
 
 from domain.classroom.classroom_type import ClassroomType
 from domain.client.client import Client
@@ -64,6 +68,15 @@ def test_should_add_credits_to_client(memory_repositories):
     assert client.credits[0].value == 4
     assert client.credits[1].value == 10
     assert client.credits[1].type == ClassroomType.MACHINE_DUO
+
+
+def test_should_return_an_error_when_client_not_found():
+    with pytest.raises(HTTPException) as e:
+        uuid_ = uuid.uuid4()
+        update_client(uuid_, ClientPatch.parse_obj(CreditsJsonBuilderForTest().mat(2).machine_duo(10).build()), CommandBusProviderForTest().provide())
+
+    assert e.value.detail == f"The client with id '{uuid_}' has not been found"
+    assert e.value.status_code == HTTPStatus.NOT_FOUND
 
 
 def response_contains_client(response, client: Client):
