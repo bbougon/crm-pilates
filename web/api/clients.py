@@ -6,7 +6,7 @@ from fastapi import status, APIRouter, Response, Depends, HTTPException
 from command.command_handler import Status
 from domain.client.client import Client
 from domain.client.client_command_handlers import ClientCreated
-from domain.commands import ClientCreationCommand, ClientCredits, ClientUpdateCommand
+from domain.commands import ClientCreationCommand, ClientCredits, AddCreditsToClientCommand
 from domain.exceptions import AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
@@ -78,7 +78,7 @@ def get_clients():
 @router.patch("/clients/{id}",
               status_code=status.HTTP_204_NO_CONTENT)
 def update_client(id: UUID, client_patch: ClientPatch, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
-    command_bus_provider.command_bus.send(ClientUpdateCommand(id, __to_client_credits(client_patch.credits)))
+    command_bus_provider.command_bus.send(AddCreditsToClientCommand(id, __to_client_credits(client_patch.credits)))
 
 
 def __to_client_credits(creation_credits):

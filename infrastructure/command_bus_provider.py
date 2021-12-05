@@ -6,10 +6,10 @@ from domain.classroom.session.session_checkout_command_handler import SessionChe
 from domain.classroom.session.session_creation_command_handler import SessionCreationCommandHandler
 from domain.classroom.session.session_in_range_command_handler import SessionInRangeCommandHandler
 from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancellationSagaHandler
-from domain.client.client_command_handlers import ClientCreationCommandHandler, ClientUpdateCommandHandler
+from domain.client.client_command_handlers import ClientCreationCommandHandler, AddCreditsToClientCommandHandler
 from domain.commands import ClassroomCreationCommand, ClientCreationCommand, ClassroomPatchCommand, \
     GetNextSessionsCommand, SessionCreationCommand, GetSessionsInRangeCommand, SessionCheckoutCommand, \
-    ClientUpdateCommand
+    AddCreditsToClientCommand
 from domain.classroom.session.next_sessions_command_handler import NextSessionsCommandHandler
 from domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
 
@@ -22,7 +22,7 @@ command_handlers = {
     ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(),
     ClassroomPatchCommand.__name__: ClassroomPatchCommandHandler(),
     ClientCreationCommand.__name__: ClientCreationCommandHandler(),
-    ClientUpdateCommand.__name__: ClientUpdateCommandHandler(),
+    AddCreditsToClientCommand.__name__: AddCreditsToClientCommandHandler(),
     GetNextSessionsCommand.__name__: NextSessionsCommandHandler(),
     GetSessionsInRangeCommand.__name__: SessionInRangeCommandHandler(),
     SessionCreationCommand.__name__: SessionCreationCommandHandler(),

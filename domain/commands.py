@@ -42,7 +42,7 @@ class ClientCreationCommand(Command):
 
 
 @dataclass
-class ClientUpdateCommand(Command):
+class AddCreditsToClientCommand(Command):
     id: UUID
     credits: List[ClientCredits] = None
 
