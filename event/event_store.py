@@ -1,3 +1,4 @@
+from __future__ import annotations
 import uuid
 from abc import abstractmethod
 from datetime import datetime
@@ -5,6 +6,8 @@ from typing import List
 from uuid import UUID
 
 import pytz
+
+from infrastructure.event_bus_provider import EventBusProvider
 
 
 class Event:
@@ -43,6 +46,7 @@ class EventSourced:
         self.event = event
 
     def __call__(self, *args, **kwargs) -> Event:
-        event = self.event(*args, **kwargs)
+        event: Event = self.event(*args, **kwargs)
         StoreLocator.store.persist(event)
+        EventBusProvider.publish(event)
         return event

@@ -19,7 +19,7 @@ client = TestClient(app)
 
 
 @immobilus("2019-05-07 08:24:15.230")
-def test_get_next_sessions(memory_repositories):
+def test_get_next_sessions(memory_repositories, event_bus):
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
@@ -52,7 +52,7 @@ def test_get_next_sessions(memory_repositories):
 
 
 @immobilus("2019-05-07 08:24:15.230")
-def test_register_checkin(memory_repositories):
+def test_register_checkin(memory_repositories, event_bus):
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
@@ -79,7 +79,7 @@ def test_register_checkin(memory_repositories):
 
 
 @immobilus("2019-03-08 09:24:15.230")
-def test_updated_session_produces_ok_200(memory_event_store):
+def test_updated_session_produces_ok_200(memory_event_store, event_bus):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
         RepositoryProvider.write_repositories.client).build()
     repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
@@ -104,7 +104,7 @@ def test_updated_session_produces_ok_200(memory_event_store):
 
 
 @immobilus("2021-09-02 10:00:00")
-def test_sessions_should_return_all_sessions_in_range(memory_repositories):
+def test_sessions_should_return_all_sessions_in_range(memory_repositories, event_bus):
     repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
         ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10, 0)).ending_at(datetime(2021, 9, 16, 10, 0))).persist(
         RepositoryProvider.write_repositories.classroom).build()
@@ -122,7 +122,7 @@ def test_sessions_should_return_all_sessions_in_range(memory_repositories):
 
 
 @immobilus("2021-09-25 10:00:00", tz_offset=2)
-def test_sessions_should_return_all_sessions_from_classroom_for_current_month(memory_repositories):
+def test_sessions_should_return_all_sessions_from_classroom_for_current_month(memory_repositories, event_bus):
     repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
         ClassroomBuilderForTest().starting_at(datetime(2021, 8, 13, 10, 0)).ending_at(datetime(2022, 6, 16, 10, 0))).persist(
         RepositoryProvider.write_repositories.classroom).build()
@@ -141,7 +141,7 @@ def test_sessions_should_return_all_sessions_from_classroom_for_current_month(me
     ]
 
 
-def test_register_checkout(memory_repositories):
+def test_register_checkout(memory_repositories, event_bus):
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
@@ -170,7 +170,7 @@ def test_register_checkout(memory_repositories):
 
 
 @immobilus("2019-05-07 08:24:15.230")
-def test_register_cancellation(memory_repositories):
+def test_register_cancellation(memory_repositories, event_bus):
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()

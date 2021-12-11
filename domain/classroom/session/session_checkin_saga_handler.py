@@ -1,10 +1,11 @@
 from typing import Tuple
 from uuid import UUID
 
+from command.command_bus import CommandBus
 from command.command_handler import Status
 from command.saga_handler import SagaHandler
-from domain.classroom.classroom import ConfirmedSession
 from domain.classroom.attendee import Attendee
+from domain.classroom.classroom import ConfirmedSession
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.commands import SessionCreationCommand
 from domain.sagas import SessionCheckinSaga
@@ -30,6 +31,9 @@ class SessionCheckedIn(Event):
 
 
 class SessionCheckinSagaHandler(SagaHandler):
+
+    def __init__(self, command_bus: CommandBus) -> None:
+        super().__init__(command_bus)
 
     def execute(self, saga: SessionCheckinSaga) -> Tuple[SessionCheckedIn, Status]:
         session = RepositoryProvider.write_repositories.session.get_by_classroom_id_and_date(saga.classroom_id, saga.session_date)

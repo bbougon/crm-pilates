@@ -4,9 +4,11 @@ import immobilus  # noqa
 import psycopg
 import pytest
 
+from event.event_bus import EventBus, EventSubscriber
 from event.event_store import StoreLocator
 from infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
 from infrastructure.event.sqlite.sqlite_event_store import SQLiteEventStore
+from infrastructure.event_bus_provider import EventBusProvider
 from infrastructure.repositories import Repositories
 from infrastructure.repository.memory.memory_attendee_repository import MemoryAttendeeRepository
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository, \
@@ -21,6 +23,15 @@ from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
 def pytest_addoption(parser):
     parser.addoption("--db-type", action="store", default="sqlite")
+
+
+class DummyEventBus(EventBus):
+
+    def publish(self, event: any):
+        pass
+
+    def subscribe(self, event_subscriber: EventSubscriber):
+        pass
 
 
 @pytest.fixture
@@ -41,6 +52,8 @@ def persisted_event_store(request, tmpdir):
         with psycopg.connect(StoreLocator.store.connection_url) as connection:
             connection.execute("DELETE FROM event")
             connection.commit()
+
+    EventBusProvider.event_bus = DummyEventBus()
 
 
 @pytest.fixture
@@ -87,3 +100,9 @@ def memory_repositories():
         "client": MemoryClientReadRepository(client_repository),
         "session": MemorySessionReadRepository(session_repository),
     })
+
+
+@pytest.fixture
+def event_bus():
+    if isinstance(EventBusProvider.event_bus, DummyEventBus):
+        EventBusProvider.event_bus = EventBus()

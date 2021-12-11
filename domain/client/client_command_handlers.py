@@ -3,7 +3,7 @@ from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
 from domain.client.client import Client, Credits
-from domain.commands import ClientCreationCommand, AddCreditsToClientCommand
+from domain.commands import ClientCreationCommand, AddCreditsToClientCommand, DecreaseClientCreditsCommand
 from event.event_store import Event, EventSourced
 from infrastructure.repository_provider import RepositoryProvider
 
@@ -37,7 +37,7 @@ class ClientCreationCommandHandler(CommandHandler):
 
 
 @EventSourced
-class CreditsToClientAdded(Event):
+class ClientCreditsUpdated(Event):
     def __init__(self, root_id: UUID, credits: List[Credits]) -> None:
         self.credits = credits
         super().__init__(root_id)
@@ -51,7 +51,14 @@ class CreditsToClientAdded(Event):
 
 class AddCreditsToClientCommandHandler(CommandHandler):
 
-    def execute(self, command: AddCreditsToClientCommand) -> Tuple[CreditsToClientAdded, Status]:
+    def execute(self, command: AddCreditsToClientCommand) -> Tuple[ClientCreditsUpdated, Status]:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(command.id)
         client.add_credits(command.credits)
-        return CreditsToClientAdded(client.id, client.credits), Status.UPDATED
+        return ClientCreditsUpdated(client.id, client.credits), Status.UPDATED
+
+
+class DecreaseClientCreditsCommandHandler(CommandHandler):
+    def execute(self, command: DecreaseClientCreditsCommand) -> Tuple[Event, Status]:
+        client: Client = RepositoryProvider.write_repositories.client.get_by_id(command.attendee.id)
+        client.credits[0].decrease()
+        return ClientCreditsUpdated(client.id, client.credits), Status.UPDATED

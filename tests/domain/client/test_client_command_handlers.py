@@ -54,7 +54,7 @@ def test_should_store_credits_to_client_added(memory_event_store, memory_reposit
     AddCreditsToClientCommandHandler().execute(AddCreditsToClientCommand(client.id, [ClientCredits(5, ClassroomType.MAT), ClientCredits(10, ClassroomType.MACHINE_DUO)]))
 
     events = StoreLocator.store.get_all()
-    assert events[0].type == "CreditsToClientAdded"
+    assert events[0].type == "ClientCreditsUpdated"
     assert events[0].payload == {
         "id": client.id,
         "credits": [

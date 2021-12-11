@@ -22,7 +22,7 @@ from domain.classroom.session.session_checkin_saga_handler import SessionChecked
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
 from domain.client.client import Client, Credits
-from domain.client.client_command_handlers import ClientCreated, CreditsToClientAdded
+from domain.client.client_command_handlers import ClientCreated, ClientCreditsUpdated
 from domain.commands import ClientCredits
 from domain.repository import Repository
 from event.event_store import Event, EventSourced
@@ -50,8 +50,12 @@ class ClientBuilderForTest(Builder):
     def build(self) -> Client:
         return Client.create(self.firstname, self.lastname, self.credits)
 
-    def with_credit(self, nb_credits, type_: ClassroomType):
+    def with_credit(self, nb_credits: int, type_: ClassroomType) -> ClientBuilderForTest:
         self.credits.append(ClientCredits(nb_credits, type_))
+        return self
+
+    def with_mat_credit(self, nb_credits: int) -> ClientBuilderForTest:
+        self.with_credit(nb_credits, ClassroomType.MAT)
         return self
 
 
@@ -67,7 +71,7 @@ class ClientContextBuilderForTest(Builder):
 
     def with_clients(self, number_of_clients: int) -> ClientContextBuilderForTest:
         for i in range(number_of_clients):
-            self.clients.append(ClientBuilderForTest().build())
+            self.clients.append(ClientBuilderForTest().with_mat_credit(2).build())
         return self
 
     def persist(self, repository: Repository = None) -> ClientContextBuilderForTest:
@@ -440,7 +444,7 @@ class EventBuilderForTest(Builder):
         return self
 
     def added_credits_for_machine_duo(self, client, nb_credits) -> EventBuilderForTest:
-        self.event_to_store.append((CreditsToClientAdded, (client.id, [Credits(nb_credits, ClassroomType.MACHINE_DUO)])))
+        self.event_to_store.append((ClientCreditsUpdated, (client.id, [Credits(nb_credits, ClassroomType.MACHINE_DUO)])))
         return self
 
     def classroom_with_attendees(self, nb_attendees: int):

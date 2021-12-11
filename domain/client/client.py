@@ -21,6 +21,9 @@ class Credits:
     def type(self):
         return self.__type
 
+    def decrease(self):
+        self.__value -= 1
+
 
 class Client(AggregateRoot):
 

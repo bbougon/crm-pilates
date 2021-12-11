@@ -65,7 +65,7 @@ def test_get_client():
     client: Client = clients[0]
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
-        "credits": None,
+        "credits": [{'type': 'MAT', 'value': 2}],
         "id": str(client._id),
         "firstname": client.firstname,
         "lastname": client.lastname

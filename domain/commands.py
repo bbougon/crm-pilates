@@ -6,6 +6,7 @@ from uuid import UUID
 import pytz
 
 from command.command_handler import Command
+from domain.classroom.attendee import Attendee
 from domain.classroom.classroom_type import ClassroomType
 from web.schema.classroom_schemas import Duration
 
@@ -90,3 +91,9 @@ class GetSessionsInRangeCommand(Command):
 class SessionCheckoutCommand(Command):
     session_id: UUID
     attendee: UUID
+
+
+@dataclass
+class DecreaseClientCreditsCommand(Command):
+    session_id: UUID
+    attendee: Attendee
