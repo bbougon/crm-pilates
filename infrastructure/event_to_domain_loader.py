@@ -45,7 +45,7 @@ class EventToClassroomMapper(EventToDomainMapper):
         schedule = Schedule(arrow.get(schedule_start).datetime, arrow.get(schedule_stop).datetime if schedule_stop else None)
         duration = event.payload["duration"]
         time_unit = MinuteTimeUnit(duration["duration"]) if duration["time_unit"] else HourTimeUnit(duration["duration"])
-        self.classroom = Classroom(event.payload["name"], event.payload["position"], schedule, Duration(time_unit))
+        self.classroom = Classroom(event.payload["name"], event.payload["position"], schedule, ClassroomSubject[event.payload["subject"]], Duration(time_unit))
         self.classroom._id = uuid.UUID(event.payload["id"])
         self.classroom._attendees = list(map(lambda attendee: Attendee(uuid.UUID(attendee["id"])), event.payload["attendees"])) if "attendees" in event.payload else []
         return self
@@ -79,7 +79,7 @@ class EventToConfirmedSessionMapper(EventToDomainMapper):
         start = arrow.get(payload["schedule"]["start"]).datetime
         stop = arrow.get(payload["schedule"]["stop"]).datetime
         attendees = list(map(lambda attendee: Attendee(uuid.UUID(attendee["id"])), payload["attendees"])) if "attendees" in payload else []
-        self.session = ConfirmedSession(uuid.UUID(payload["classroom_id"]), payload["name"], payload["position"], start, MinuteTimeUnit(divmod((stop - start).seconds, 60)[0]), attendees)
+        self.session = ConfirmedSession(uuid.UUID(payload["classroom_id"]), payload["name"], payload["position"], ClassroomSubject[payload["subject"]], start, MinuteTimeUnit(divmod((stop - start).seconds, 60)[0]), attendees)
         self.session._id = uuid.UUID(payload["id"])
         return self
 

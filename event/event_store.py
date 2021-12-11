@@ -18,10 +18,12 @@ class Event:
         self.root_id: UUID = root_id
         self.type: str = self.__class__.__name__
         self.timestamp: datetime = datetime.now(tz=pytz.utc)
-        self.payload = self._to_payload()
+        self.payload: dict = self._to_payload()
+        if self.payload:
+            self.payload["version"] = "1"
 
     @abstractmethod
-    def _to_payload(self):
+    def _to_payload(self) -> dict:
         ...
 
 

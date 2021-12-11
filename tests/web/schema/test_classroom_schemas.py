@@ -9,6 +9,7 @@ def test_attendees_are_unique_for_creation():
         ClassroomCreation.parse_obj({
             "name": "a name",
             "position": 2,
+            "subject": "MAT",
             "start_date": Datetime().datetime(),
             "attendees": [
                 {"id": "ba3344fe-e9c1-4d9f-b35c-2c7c23d77280"},

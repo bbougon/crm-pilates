@@ -133,6 +133,7 @@ class ClassroomBuilderForTest(Builder):
         super().__init__()
         self.name: str = Text().title()
         self.position: int = Numeric().integer_number(1, 6)
+        self.subject: ClassroomSubject = ClassroomSubject.MAT
         self.start_date: datetime = Datetime().datetime().astimezone(pytz.utc)
         self.stop_date: datetime = None
         self.duration = Duration(HourTimeUnit(1))
@@ -141,7 +142,7 @@ class ClassroomBuilderForTest(Builder):
     def build(self) -> Classroom:
         if self.position < len(self.attendees):
             self.position = len(self.attendees)
-        classroom = Classroom.create(self.name, self.start_date, self.position, self.stop_date, self.duration)
+        classroom = Classroom.create(self.name, self.start_date, self.position, self.subject, self.stop_date, duration=self.duration)
         if self.attendees:
             classroom.all_attendees(self.attendees)
         return classroom
@@ -211,11 +212,12 @@ class ClassroomJsonBuilderForTest(Builder):
         self.position: int = Numeric().integer_number(1, 6)
         self.start_date: datetime = Datetime().datetime()
         self.stop_date: datetime = None
+        self.subject: ClassroomSubject = ClassroomSubject.MAT
         self.attendees: List[UUID] = []
         self.duration: dict = None
 
     def build(self):
-        classroom = {"name": self.classroom_name, "position": self.position, "start_date": self.start_date.isoformat()}
+        classroom = {"name": self.classroom_name, "position": self.position, "subject": self.subject.value, "start_date": self.start_date.isoformat()}
         if self.attendees:
             classroom["attendees"] = list(map(lambda attendee: {"id": attendee.hex}, self.attendees))
         if self.stop_date:
@@ -246,6 +248,18 @@ class ClassroomJsonBuilderForTest(Builder):
 
     def with_duration(self, duration: int, time_unit: TimeUnit) -> ClassroomJsonBuilderForTest:
         self.duration = {"duration": duration, "unit": time_unit.value}
+        return self
+
+    def for_mat(self) -> ClassroomJsonBuilderForTest:
+        self.subject = ClassroomSubject.MAT
+        return self
+
+    def for_trio(self) -> ClassroomJsonBuilderForTest:
+        self.subject = ClassroomSubject.MACHINE_TRIO
+        return self
+
+    def for_duo(self) -> ClassroomJsonBuilderForTest:
+        self.subject = ClassroomSubject.MACHINE_DUO
         return self
 
 
@@ -427,7 +441,7 @@ class EventBuilderForTest(Builder):
 
     def classroom(self, classroom: Classroom = None) -> EventBuilderForTest:
         classroom = classroom or ClassroomBuilderForTest().build()
-        self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, [])))
+        self.event_to_store.append(self.__classroom_created([], classroom))
         self.classrooms.append(classroom)
         return self
 
@@ -451,9 +465,12 @@ class EventBuilderForTest(Builder):
         attendees: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.nb_client(
             nb_attendees).clients
         classroom = ClassroomBuilderForTest().with_attendees(list(map(lambda client: client.id, attendees))).build()
-        self.event_to_store.append((ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.duration, classroom.schedule, attendees)))
+        self.event_to_store.append(self.__classroom_created(attendees, classroom))
         self.classrooms.append(classroom)
         return self
+
+    def __classroom_created(self, attendees, classroom):
+        return (ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.subject, classroom.duration, classroom.schedule, attendees))
 
     def confirmed_session(self, confirmed_session: ConfirmedSession = None) -> EventBuilderForTest:
         def get_confirmed_session(_confirmed_session: ConfirmedSession):
@@ -463,7 +480,7 @@ class EventBuilderForTest(Builder):
             return _confirmed_session
 
         confirmed_session = get_confirmed_session(confirmed_session)
-        self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
+        self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.subject, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
         self.sessions.append(confirmed_session)
         return self
 

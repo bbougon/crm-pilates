@@ -10,6 +10,7 @@ from domain.classroom.session.attendee_session_cancellation_saga_handler import 
 from domain.sagas import AttendeeSessionCancellationSaga
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
+from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClientContextBuilderForTest, ClassroomContextBuilderForTest, \
     ClassroomBuilderForTest, SessionContextBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
@@ -35,13 +36,7 @@ def test_attendee_session_cancellation_event_should_be_stored(memory_event_store
     assert events[0].type == "ConfirmedSessionEvent"
     assert events[1].type == "AttendeeSessionCancelled"
     assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc)
-    assert events[1].payload == {
-        "session_id": result.root_id,
-        "attendee":
-            {
-                "id": clients[1].id,
-            }
-    }
+    EventAsserter.assert_attendee_session_cancelled(events[1].payload, result.root_id, clients[1].id)
 
 
 @immobilus("2020-08-03 10:24:15.230")
@@ -63,10 +58,4 @@ def test_attendee_session_cancellation_on_already_confirmed_session_should_be_up
     events = StoreLocator.store.get_all()
     assert len(events) == 1
     assert events[0].type == "AttendeeSessionCancelled"
-    assert events[0].payload == {
-        "session_id": result.root_id,
-        "attendee":
-            {
-                "id": clients[1].id,
-            }
-    }
+    EventAsserter.assert_attendee_session_cancelled(events[0].payload, result.root_id, clients[1].id)

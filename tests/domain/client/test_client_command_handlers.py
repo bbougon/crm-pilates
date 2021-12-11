@@ -11,6 +11,7 @@ from domain.client.client_command_handlers import ClientCreated, ClientCreationC
 from domain.commands import ClientCreationCommand, ClientCredits, AddCreditsToClientCommand
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
+from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClientContextBuilderForTest, ClientBuilderForTest
 
 
@@ -23,11 +24,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
     assert len(events) == 1
     assert events[0].type == "ClientCreated"
     assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc)
-    assert events[0].payload == {
-        "id": result[0].root_id,
-        "firstname": "John",
-        "lastname": "Doe",
-    }
+    EventAsserter.assert_client_created(events[0].payload, result[0].root_id, "John", "Doe")
 
 
 @immobilus("2020-04-03 10:24:15.230")
@@ -39,12 +36,7 @@ def test_classroom_creation_event_is_stored_with_credits(memory_event_store):
     assert len(events) == 1
     assert events[0].type == "ClientCreated"
     assert events[0].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc)
-    assert events[0].payload == {
-        "id": result[0].root_id,
-        "firstname": "John",
-        "lastname": "Doe",
-        "credits": [{"value": 2, "subject": "MAT"}]
-    }
+    EventAsserter.assert_client_created(events[0].payload, result[0].root_id, "John", "Doe", [{"value": 2, "subject": "MAT"}])
 
 
 def test_should_store_credits_to_client_added(memory_event_store, memory_repositories):
@@ -55,10 +47,7 @@ def test_should_store_credits_to_client_added(memory_event_store, memory_reposit
 
     events = StoreLocator.store.get_all()
     assert events[0].type == "ClientCreditsUpdated"
-    assert events[0].payload == {
-        "id": client.id,
-        "credits": [
-            {"value": 5, "subject": ClassroomSubject.MAT.value},
-            {"value": 10, "subject": ClassroomSubject.MACHINE_DUO.value}
-        ]
-    }
+    EventAsserter.assert_client_credits_updated(events[0].payload, client.id, [
+        {"value": 5, "subject": ClassroomSubject.MAT.value},
+        {"value": 10, "subject": ClassroomSubject.MACHINE_DUO.value}
+    ])

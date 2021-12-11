@@ -51,4 +51,4 @@ def assert_event(event: Event, root_id: UUID):
     assert event.root_id == root_id
     assert event.type == "CustomEventEmitted"
     assert event.timestamp == datetime.datetime(2021, 5, 20, 10, 5, 17, 245000, tzinfo=pytz.utc)
-    assert event.payload == {"id": str(root_id), "name": "custom_event"}
+    assert event.payload == {"version": "1", "id": str(root_id), "name": "custom_event"}

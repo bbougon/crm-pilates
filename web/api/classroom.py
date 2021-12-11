@@ -6,6 +6,7 @@ from fastapi import status, APIRouter, Response, Depends, HTTPException
 
 from command.command_handler import Status
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
 from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
@@ -43,6 +44,7 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
     try:
         command = ClassroomCreationCommand(classroom_creation.name, classroom_creation.position,
                                            classroom_creation.duration,
+                                           ClassroomSubject[classroom_creation.subject],
                                            classroom_creation.start_date, classroom_creation.stop_date,
                                            list(map(lambda attendee: attendee.id, classroom_creation.attendees)))
         from command.response import Response
@@ -53,6 +55,7 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
             "name": event.name,
             "id": event.root_id,
             "position": event.position,
+            "subject": event.subject.value,
             "schedule": {
                 "start": event.schedule.start,
                 "stop": event.schedule.stop

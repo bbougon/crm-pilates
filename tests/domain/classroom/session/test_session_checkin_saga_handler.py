@@ -9,6 +9,7 @@ from domain.classroom.session.session_checkin_saga_handler import SessionCheckin
 from domain.sagas import SessionCheckinSaga
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
+from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClientContextBuilderForTest, ClassroomContextBuilderForTest, \
     ClassroomBuilderForTest, SessionContextBuilderForTest, ClientBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
@@ -36,14 +37,7 @@ def test_session_checkin_event_is_stored(memory_event_store):
     assert events[0].type == "ConfirmedSessionEvent"
     assert events[1].type == "SessionCheckedIn"
     assert events[1].timestamp == datetime(2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc)
-    assert events[1].payload == {
-        "session_id": result.root_id,
-        "attendee":
-            {
-                "id": clients[1].id,
-                "attendance": "CHECKED_IN"
-            }
-    }
+    EventAsserter.assert_session_checkin(events[1].payload, result.root_id, clients[1].id, "CHECKED_IN")
 
 
 @immobilus("2020-08-03 10:24:15.230")
@@ -68,14 +62,7 @@ def test_session_checkin_on_already_confirmed_session(memory_event_store):
     events = StoreLocator.store.get_all()
     assert len(events) == 2
     assert events[0].type == "SessionCheckedIn"
-    assert events[0].payload == {
-        "session_id": result.root_id,
-        "attendee":
-            {
-                "id": clients[1].id,
-                "attendance": "CHECKED_IN"
-            }
-    }
+    EventAsserter.assert_session_checkin(events[0].payload, result.root_id, clients[1].id, "CHECKED_IN")
 
 
 def test_should_decrease_client_credits_on_checkin(memory_event_store):

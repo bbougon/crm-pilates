@@ -12,6 +12,7 @@ import arrow
 import pytz
 
 from domain.classroom.attendee import Attendee
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.classroom.date_time_comparator import DateTimeComparator, DateComparator
 from domain.classroom.duration import Duration, MinuteTimeUnit, HourTimeUnit, TimeUnit
 from domain.datetimes import Weekdays
@@ -27,13 +28,14 @@ class Schedule:
 
 class Classroom(AggregateRoot):
 
-    def __init__(self, name: str, position: int, schedule: Schedule, duration: Duration):
+    def __init__(self, name: str, position: int, schedule: Schedule, subject: ClassroomSubject, duration: Duration):
         super().__init__()
         self._name = name
         self._position = position
         self._schedule = schedule
         self._duration = duration
         self._attendees: [Attendee] = []
+        self._subject = subject
 
     @property
     def name(self) -> str:
@@ -55,12 +57,16 @@ class Classroom(AggregateRoot):
     def attendees(self) -> List[Attendee]:
         return self._attendees
 
+    @property
+    def subject(self) -> ClassroomSubject:
+        return self._subject
+
     @staticmethod
-    def create(name: str, start_date: datetime, position: int, stop_date: datetime = None,
+    def create(name: str, start_date: datetime, position: int, subject: ClassroomSubject, stop_date: datetime = None,
                duration: Duration = Duration(HourTimeUnit(1))) -> Classroom:
         if not stop_date:
             stop_date = start_date + timedelta(hours=duration.time_unit.to_unit(HourTimeUnit).value)
-        classroom = Classroom(name, position, Schedule(start=start_date, stop=stop_date), duration)
+        classroom = Classroom(name, position, Schedule(start=start_date, stop=stop_date), subject, duration)
         return classroom
 
     def all_attendees(self, attendees: [Attendee]):
@@ -95,15 +101,16 @@ class Classroom(AggregateRoot):
             if DateComparator(classroom_start_date.date(), day).same_day().before().compare() \
                     and DateComparator(day, end_date.date()).before().compare() \
                     and DateComparator(day, self.schedule.stop.date()).before().compare():
-                sessions.append(Session(self.id, self.name, self.position, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute, tzinfo=pytz.utc if classroom_start_date.tzinfo is None else classroom_start_date.tzinfo), self.duration.time_unit, self.attendees))
+                sessions.append(Session(self.id, self.name, self.position, self.subject, datetime(day.year, day.month, day.day, classroom_start_date.hour, classroom_start_date.minute, tzinfo=pytz.utc if classroom_start_date.tzinfo is None else classroom_start_date.tzinfo), self.duration.time_unit, self.attendees))
         return sessions
 
 
 class Session:
 
-    def __init__(self, classroom_id: UUID, name: str, position: int, start: datetime, classroom_duration: TimeUnit, attendees: [Attendee]) -> None:
+    def __init__(self, classroom_id: UUID, name: str, position: int, subject: ClassroomSubject, start: datetime, classroom_duration: TimeUnit, attendees: [Attendee]) -> None:
         self.__name: str = name
         self.__position: int = position
+        self.__subject: ClassroomSubject = subject
         self.__attendees: List[Attendee] = deepcopy(attendees)
         self.__start: datetime = start.astimezone(pytz.utc) if start.tzinfo is None else start
         self.__stop: datetime = self.__start + timedelta(minutes=classroom_duration.to_unit(MinuteTimeUnit).value)
@@ -134,6 +141,10 @@ class Session:
         return self.__stop
 
     @property
+    def subject(self) -> ClassroomSubject:
+        return self.__subject
+
+    @property
     @abstractmethod
     def id(self):
         return None
@@ -143,7 +154,7 @@ class ScheduledSession(Session):
 
     @staticmethod
     def create(classroom: Classroom, start) -> ScheduledSession:
-        return ScheduledSession(classroom.id, classroom.name, classroom.position, start, classroom.duration.time_unit, classroom.attendees)
+        return ScheduledSession(classroom.id, classroom.name, classroom.position, classroom.subject, start, classroom.duration.time_unit, classroom.attendees)
 
     @property
     def id(self):
@@ -152,15 +163,15 @@ class ScheduledSession(Session):
 
 class ConfirmedSession(Session, AggregateRoot):
 
-    def __init__(self, classroom_id: UUID, name: str, position: int, start: datetime, duration_time_unit: TimeUnit, attendees: [Attendee]) -> None:
-        super().__init__(classroom_id, name, position, start, duration_time_unit, attendees)
+    def __init__(self, classroom_id: UUID, name: str, position: int, subject: ClassroomSubject, start: datetime, duration_time_unit: TimeUnit, attendees: [Attendee]) -> None:
+        super().__init__(classroom_id, name, position, subject, start, duration_time_unit, attendees)
         self._id = uuid.uuid4()
 
     @staticmethod
     def create(classroom: Classroom, start: datetime) -> ConfirmedSession:
         if not DateTimeComparator(classroom.schedule.start, start).same_day().same_time().before().compare():
             raise InvalidSessionStartDateException(classroom, start)
-        return ConfirmedSession(classroom.id, classroom.name, classroom.position, start, classroom.duration.time_unit, classroom.attendees)
+        return ConfirmedSession(classroom.id, classroom.name, classroom.position, classroom.subject, start, classroom.duration.time_unit, classroom.attendees)
 
     @property
     def id(self):

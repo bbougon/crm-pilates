@@ -16,6 +16,7 @@ class ClassroomCreationCommand(Command):
     name: str
     position: int
     duration: Duration
+    subject: ClassroomSubject
     _start_date: datetime
     _stop_date: datetime = None
     attendees: List[UUID] = field(default_factory=list)

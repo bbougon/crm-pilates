@@ -36,6 +36,7 @@ def check_unique_attendees(v):
 class ClassroomCreation(BaseModel):
     name: str
     position: int
+    subject: str
     start_date: datetime
     stop_date: Optional[datetime]
     duration: Duration = Duration.parse_obj({"duration": 1, "unit": TimeUnit.HOUR})

@@ -9,6 +9,7 @@ from fastapi import Response
 
 from domain.classroom.attendee import Attendee
 from domain.classroom.classroom import Classroom
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.exceptions import DomainException, AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
@@ -21,14 +22,19 @@ from web.schema.classroom_schemas import ClassroomCreation, TimeUnit
 
 def test_should_create_classroom(memory_event_store):
     repository = MemoryClassroomRepository()
-    classroom_json = ClassroomJsonBuilderForTest().with_name("advanced classroom").with_start_date(
-        datetime(2020, 2, 11, 10)).with_position(3).with_duration(45, TimeUnit.MINUTE).build()
+    classroom_json = ClassroomJsonBuilderForTest()\
+        .with_name("advanced classroom")\
+        .with_start_date(datetime(2020, 2, 11, 10))\
+        .with_position(3)\
+        .for_mat()\
+        .with_duration(45, TimeUnit.MINUTE)\
+        .build()
     RepositoryProviderForTest().for_classroom(repository).provide()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert_response_has_expected_values(response, "advanced classroom", datetime(2020, 2, 11, 10, 0), 3, 45, "MINUTE", datetime(2020, 2, 11, 10, 45))
+    assert_response_has_expected_values(response, "advanced classroom", datetime(2020, 2, 11, 10, 0), 3, ClassroomSubject.MAT, 45, "MINUTE", datetime(2020, 2, 11, 10, 45))
     assert repository.get_by_id(response["id"])
 
 
@@ -41,34 +47,34 @@ def test_should_create_scheduled_classroom(memory_event_store):
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert_response_has_expected_values(response, classroom_json["name"], start_date, classroom_json["position"],
+    assert_response_has_expected_values(response, classroom_json["name"], start_date, classroom_json["position"], ClassroomSubject.MAT,
                                         stop_date=stop_date)
 
 
 def test_should_create_classroom_with_timezone(memory_event_store):
     repository = MemoryClassroomRepository()
     classroom_json = ClassroomJsonBuilderForTest().with_name("advanced classroom").with_start_date(
-        arrow.get("2020-02-11T10:00:00-07:00").datetime).with_position(3).with_duration(45, TimeUnit.MINUTE).build()
+        arrow.get("2020-02-11T10:00:00-07:00").datetime).with_position(3).for_trio().with_duration(45, TimeUnit.MINUTE).build()
     RepositoryProviderForTest().for_classroom(repository).provide()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
-    assert_response_has_expected_values(response, "advanced classroom", arrow.get("2020-02-11T10:00:00-07:00").datetime, 3, 45, "MINUTE", arrow.get("2020-02-11T10:45:00-07:00").datetime)
+    assert_response_has_expected_values(response, "advanced classroom", arrow.get("2020-02-11T10:00:00-07:00").datetime, 3, ClassroomSubject.MACHINE_TRIO, 45, "MINUTE", arrow.get("2020-02-11T10:45:00-07:00").datetime)
     assert repository.get_by_id(response["id"])
 
 
 def test_should_create_classroom_with_attendees(memory_event_store):
     client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist().build()
     RepositoryProviderForTest().for_classroom().for_client(client_repository).provide()
-    classroom_json = ClassroomJsonBuilderForTest().with_position(2).with_attendees(
+    classroom_json = ClassroomJsonBuilderForTest().with_position(2).for_duo().with_attendees(
         [clients[0]._id, clients[1]._id]).build()
 
     response = create_classroom(ClassroomCreation.parse_obj(classroom_json), Response(),
                                 CommandBusProviderForTest().provide())
 
     assert_response_has_expected_values(response, classroom_json["name"],
-                                        datetime.fromisoformat(classroom_json["start_date"]), 2,
+                                        datetime.fromisoformat(classroom_json["start_date"]), 2, ClassroomSubject.MACHINE_DUO,
                                         stop_date=datetime.fromisoformat(classroom_json["start_date"]) + timedelta(hours=1),
                                         expected_attendees=[{"id": clients[0]._id}, {"id": clients[1]._id}])
 
@@ -161,7 +167,7 @@ def test_classroom_not_found():
 
 
 def assert_response_has_expected_values(response: dict, expected_name: str, expected_start: datetime,
-                                        expected_position: int, expected_duration: int = 1,
+                                        expected_position: int, expected_subject: ClassroomSubject, expected_duration: int = 1,
                                         expected_time_unit: str = "HOUR", stop_date: datetime = None,
                                         expected_attendees: [] = []):
     assert response.items() >= {
@@ -171,6 +177,7 @@ def assert_response_has_expected_values(response: dict, expected_name: str, expe
             "stop": stop_date.astimezone(pytz.utc)
         },
         "position": expected_position,
+        "subject": expected_subject.value,
         "duration": {
             "duration": expected_duration,
             "time_unit": expected_time_unit

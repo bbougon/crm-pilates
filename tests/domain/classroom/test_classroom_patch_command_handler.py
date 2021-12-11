@@ -10,6 +10,7 @@ from domain.classroom.classroom_patch_command_handler import ClassroomPatchComma
 from domain.commands import ClassroomPatchCommand
 from domain.exceptions import AggregateNotFoundException
 from event.event_store import StoreLocator
+from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClassroomContextBuilderForTest, ClientContextBuilderForTest, \
     ClassroomBuilderForTest
 from tests.builders.providers_for_test import RepositoryProviderForTest
@@ -33,12 +34,7 @@ def test_classroom_patch_with_attendees(memory_event_store):
     assert events[0].type == "AllAttendeesAdded"
     assert events[0].timestamp == datetime(2019, 3, 19, 10, 24, 15, 100000, tzinfo=pytz.utc)
     assert events[0].root_id == classroom._id
-    assert events[0].payload == {
-        "attendees": [
-            {"id": clients[0]._id},
-            {"id": clients[1]._id}
-        ]
-    }
+    EventAsserter.assert_all_attendees_added(events[0].payload, [{"id": clients[0]._id}, {"id": clients[1]._id}])
 
 
 def test_cannot_patch_classroom_with_attendees_for_unknown_clients(memory_event_store):
