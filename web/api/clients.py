@@ -93,7 +93,7 @@ def update_client(id: UUID, client_patch: ClientPatch, command_bus_provider: Com
 
 
 def __to_client_credits(creation_credits):
-    client_credits = list(map(lambda credit: ClientCredits(credit.value, credit.type),
+    client_credits = list(map(lambda credit: ClientCredits(credit.value, credit.subject),
                               creation_credits)) if creation_credits else None
     return client_credits
 
@@ -101,5 +101,5 @@ def __to_client_credits(creation_credits):
 def __map_client(client: Union[Client, ClientCreated]) -> dict:
     payload = {"id": client.root_id if hasattr(client, "root_id") else client.id, "firstname": client.firstname, "lastname": client.lastname}
     if client.credits:
-        payload["credits"] = list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, client.credits))
+        payload["credits"] = list(map(lambda credit: {"value": credit.value, "subject": credit.subject.value}, client.credits))
     return payload

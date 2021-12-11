@@ -7,7 +7,7 @@ import pytz
 
 from command.command_handler import Command
 from domain.classroom.attendee import Attendee
-from domain.classroom.classroom_type import ClassroomType
+from domain.classroom.classroom_type import ClassroomSubject
 from web.schema.classroom_schemas import Duration
 
 
@@ -32,7 +32,7 @@ class ClassroomCreationCommand(Command):
 @dataclass
 class ClientCredits():
     value: int
-    type: ClassroomType
+    subject: ClassroomSubject
 
 
 @dataclass

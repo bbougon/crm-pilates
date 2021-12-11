@@ -4,7 +4,7 @@ from fastapi import status, Response
 from fastapi.testclient import TestClient
 from mock.mock import ANY
 
-from domain.classroom.classroom_type import ClassroomType
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.client.client import Client
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
@@ -28,7 +28,7 @@ def test_should_create_client(persisted_event_store):
 
 
 def test_should_create_client_with_credits(persisted_event_store):
-    client_builder = ClientJsonBuilderForTest().with_credits(2, ClassroomType.MACHINE_DUO)
+    client_builder = ClientJsonBuilderForTest().with_credits(2, ClassroomSubject.MACHINE_DUO)
 
     response = http_client.post("/clients", json=client_builder.build())
 
@@ -39,7 +39,7 @@ def test_should_create_client_with_credits(persisted_event_store):
         "lastname": client_builder.lastname,
         "id": ANY,
         "credits": [
-            {"value": 2, "type": "MACHINE_DUO"}
+            {"value": 2, "subject": "MACHINE_DUO"}
         ]
     }
 
@@ -65,7 +65,7 @@ def test_get_client():
     client: Client = clients[0]
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
-        "credits": [{'type': 'MAT', 'value': 2}],
+        "credits": [{'subject': 'MAT', 'value': 2}],
         "id": str(client._id),
         "firstname": client.firstname,
         "lastname": client.lastname
@@ -82,7 +82,7 @@ def test_client_is_not_found():
 
 
 def test_get_clients_should_return_all_clients():
-    ClientContextBuilderForTest().with_client(ClientBuilderForTest().with_credit(2, ClassroomType.MACHINE_TRIO).build()).with_clients(2).persist(RepositoryProvider.write_repositories.client).build()
+    ClientContextBuilderForTest().with_client(ClientBuilderForTest().with_credit(2, ClassroomSubject.MACHINE_TRIO).build()).with_clients(2).persist(RepositoryProvider.write_repositories.client).build()
 
     response: Response = http_client.get("/clients")
 
@@ -90,15 +90,15 @@ def test_get_clients_should_return_all_clients():
     payload = response.json()
     assert len(payload) == 3
     assert payload[0]["credits"][0]["value"] == 2
-    assert payload[0]["credits"][0]["type"] == "MACHINE_TRIO"
+    assert payload[0]["credits"][0]["subject"] == "MACHINE_TRIO"
 
 
 def test_update_client_credits():
     repository, clients = ClientContextBuilderForTest().with_client(
-        ClientBuilderForTest().with_credit(2, ClassroomType.MACHINE_TRIO).build()).persist(
+        ClientBuilderForTest().with_credit(2, ClassroomSubject.MACHINE_TRIO).build()).persist(
         RepositoryProvider.write_repositories.client).build()
     client_to_update: Client = clients[0]
 
-    response: Response = http_client.patch(f"clients/{str(client_to_update.id)}", json={"credits": [{"value": 2, "type": "MACHINE_TRIO"}, {"value": 10, "type": "MAT"}]})
+    response: Response = http_client.patch(f"clients/{str(client_to_update.id)}", json={"credits": [{"value": 2, "subject": "MACHINE_TRIO"}, {"value": 10, "subject": "MAT"}]})
 
     assert response.status_code == status.HTTP_204_NO_CONTENT

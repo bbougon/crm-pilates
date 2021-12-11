@@ -24,7 +24,7 @@ class ClientCreated(Event):
             "lastname": self.lastname,
         }
         if self.credits:
-            payload["credits"] = list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, self.credits))
+            payload["credits"] = list(map(lambda credit: {"value": credit.value, "subject": credit.subject.value}, self.credits))
         return payload
 
 
@@ -45,7 +45,7 @@ class ClientCreditsUpdated(Event):
     def _to_payload(self):
         return {
             "id": self.root_id,
-            "credits": list(map(lambda credit: {"value": credit.value, "type": credit.type.value}, self.credits))
+            "credits": list(map(lambda credit: {"value": credit.value, "subject": credit.subject.value}, self.credits))
         }
 
 

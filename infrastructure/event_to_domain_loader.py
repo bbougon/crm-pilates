@@ -10,7 +10,7 @@ from domain.classroom.classroom import Classroom, Schedule, ConfirmedSession, Se
 from domain.classroom.attendee import Attendee, Attendance
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
-from domain.classroom.classroom_type import ClassroomType
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
 from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
@@ -64,7 +64,7 @@ class EventToClientMapper(EventToDomainMapper):
         self.client = Client(event.payload["firstname"], event.payload["lastname"])
         self.client._id = uuid.UUID(event.payload["id"])
         if "credits" in event.payload:
-            self.client.credits = list(map(lambda credit: Credits(credit["value"], ClassroomType[credit["type"]]), event.payload["credits"]))
+            self.client.credits = list(map(lambda credit: Credits(credit["value"], ClassroomSubject[credit["subject"]]), event.payload["credits"]))
         return self
 
     def and_persist(self) -> None:
@@ -140,7 +140,7 @@ class CreditsToClientAddedMapper(EventToDomainMapper):
         payload = event.payload
         client_id = uuid.UUID(payload["id"])
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(client_id)
-        credits: List[Credits] = list(map(lambda credit: Credits(credit["value"], ClassroomType[credit["type"]]), payload["credits"]))
+        credits: List[Credits] = list(map(lambda credit: Credits(credit["value"], ClassroomSubject[credit["subject"]]), payload["credits"]))
         client.credits = credits
         return self
 

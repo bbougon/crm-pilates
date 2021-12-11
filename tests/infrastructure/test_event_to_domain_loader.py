@@ -6,7 +6,7 @@ from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom, Session
 from domain.classroom.attendee import Attendance
-from domain.classroom.classroom_type import ClassroomType
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.classroom.duration import Duration, MinuteTimeUnit
 from domain.client.client import Client
 from infrastructure.event_to_domain_loader import EventToDomainLoader
@@ -30,20 +30,20 @@ def test_load_classroom(persisted_event_store):
 
 
 def test_should_load_clients_with_credits(persisted_event_store):
-    events = EventBuilderForTest().client(ClientBuilderForTest().with_credit(2, ClassroomType.MAT).with_credit(5, ClassroomType.MACHINE_TRIO).build()).build()
+    events = EventBuilderForTest().client(ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).with_credit(5, ClassroomSubject.MACHINE_TRIO).build()).build()
     first_client_id: UUID = events[0].root_id
 
     EventToDomainLoader().load()
 
     client = RepositoryProvider.read_repositories.client.get_by_id(first_client_id)
     assert client.credits[0].value == 2
-    assert client.credits[0].type == ClassroomType.MAT
+    assert client.credits[0].subject == ClassroomSubject.MAT
     assert client.credits[1].value == 5
-    assert client.credits[1].type == ClassroomType.MACHINE_TRIO
+    assert client.credits[1].subject == ClassroomSubject.MACHINE_TRIO
 
 
 def test_should_load_added_credits_to_client(persisted_event_store):
-    client = ClientBuilderForTest().with_credit(2, ClassroomType.MAT).build()
+    client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
     EventBuilderForTest()\
         .client(client)\
         .nb_client(2)\
@@ -55,7 +55,7 @@ def test_should_load_added_credits_to_client(persisted_event_store):
     client = RepositoryProvider.read_repositories.client.get_by_id(client.id)
     assert len(client.credits) == 1
     assert client.credits[0].value == 10
-    assert client.credits[0].type == ClassroomType.MACHINE_DUO
+    assert client.credits[0].subject == ClassroomSubject.MACHINE_DUO
 
 
 def test_load_clients_and_classroom_with_attendees(persisted_event_store):

@@ -3,12 +3,12 @@ from typing import Optional, List
 from pydantic import validator
 from pydantic.main import BaseModel
 
-from domain.classroom.classroom_type import ClassroomType
+from domain.classroom.classroom_type import ClassroomSubject
 
 
 class Credits(BaseModel):
     value: int
-    type: ClassroomType
+    subject: ClassroomSubject
 
 
 class ClientCreation(BaseModel):

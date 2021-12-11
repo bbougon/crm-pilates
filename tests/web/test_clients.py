@@ -4,7 +4,7 @@ from http import HTTPStatus
 import pytest
 from fastapi import Response, HTTPException
 
-from domain.classroom.classroom_type import ClassroomType
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.client.client import Client
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from infrastructure.repository_provider import RepositoryProvider
@@ -28,20 +28,20 @@ def test_client_creation():
 
 def test_should_create_client_with_credits_for_mat_and_machine():
     client = ClientJsonBuilderForTest()\
-        .with_credits(5, ClassroomType.MAT)\
-        .with_credits(10, ClassroomType.MACHINE_DUO)\
-        .with_credits(8, ClassroomType.MACHINE_TRIO)\
-        .with_credits(9, ClassroomType.MACHINE_PRIVATE)\
+        .with_credits(5, ClassroomSubject.MAT)\
+        .with_credits(10, ClassroomSubject.MACHINE_DUO)\
+        .with_credits(8, ClassroomSubject.MACHINE_TRIO)\
+        .with_credits(9, ClassroomSubject.MACHINE_PRIVATE)\
         .build()
     RepositoryProvider.write_repositories.client = MemoryClientRepository()
 
     response = create_client(ClientCreation.parse_obj(client), Response(), CommandBusProviderForTest().provide())
 
     assert response["credits"] == [
-        {"value": 5, "type": "MAT"},
-        {"value": 10, "type": "MACHINE_DUO"},
-        {"value": 8, "type": "MACHINE_TRIO"},
-        {"value": 9, "type": "MACHINE_PRIVATE"}
+        {"value": 5, "subject": "MAT"},
+        {"value": 10, "subject": "MACHINE_DUO"},
+        {"value": 8, "subject": "MACHINE_TRIO"},
+        {"value": 9, "subject": "MACHINE_PRIVATE"}
     ]
 
 
@@ -59,7 +59,7 @@ def test_get_clients_should_return_all_clients(memory_repositories):
 
 
 def test_should_add_credits_to_client(memory_repositories):
-    client: Client = ClientBuilderForTest().with_credit(2, ClassroomType.MAT).build()
+    client: Client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
     RepositoryProvider.write_repositories.client.persist(client)
 
     update_client(client.id, ClientPatch.parse_obj(CreditsJsonBuilderForTest().mat(2).machine_duo(10).build()), CommandBusProviderForTest().provide())
@@ -67,7 +67,7 @@ def test_should_add_credits_to_client(memory_repositories):
     assert len(client.credits) == 2
     assert client.credits[0].value == 2
     assert client.credits[1].value == 10
-    assert client.credits[1].type == ClassroomType.MACHINE_DUO
+    assert client.credits[1].subject == ClassroomSubject.MACHINE_DUO
 
 
 def test_should_return_an_error_when_client_not_found():

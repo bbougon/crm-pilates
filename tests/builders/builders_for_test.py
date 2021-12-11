@@ -15,7 +15,7 @@ from domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSes
 from domain.classroom.classroom_creation_command_handler import ClassroomCreated
 from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
 from domain.classroom.classroom_repository import ClassroomRepository
-from domain.classroom.classroom_type import ClassroomType
+from domain.classroom.classroom_type import ClassroomSubject
 from domain.classroom.duration import Duration, HourTimeUnit
 from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
@@ -50,12 +50,12 @@ class ClientBuilderForTest(Builder):
     def build(self) -> Client:
         return Client.create(self.firstname, self.lastname, self.credits)
 
-    def with_credit(self, nb_credits: int, type_: ClassroomType) -> ClientBuilderForTest:
-        self.credits.append(ClientCredits(nb_credits, type_))
+    def with_credit(self, nb_credits: int, subject: ClassroomSubject) -> ClientBuilderForTest:
+        self.credits.append(ClientCredits(nb_credits, subject))
         return self
 
     def with_mat_credit(self, nb_credits: int) -> ClientBuilderForTest:
-        self.with_credit(nb_credits, ClassroomType.MAT)
+        self.with_credit(nb_credits, ClassroomSubject.MAT)
         return self
 
 
@@ -102,8 +102,8 @@ class ClientJsonBuilderForTest(Builder):
         client = {"firstname": self.firstname, "lastname": self.lastname, "credits": self.credits}
         return client
 
-    def with_credits(self, nb_credits: int, classroom_type: ClassroomType):
-        self.credits.append({"value": nb_credits, "type": classroom_type.value})
+    def with_credits(self, nb_credits: int, classroom_subject: ClassroomSubject):
+        self.credits.append({"value": nb_credits, "subject": classroom_subject.value})
         return self
 
 
@@ -116,15 +116,15 @@ class CreditsJsonBuilderForTest(Builder):
         return {"credits": self.credits}
 
     def mat(self, nb_credits) -> CreditsJsonBuilderForTest:
-        self.credits.append(self.__credit(nb_credits, ClassroomType.MAT))
+        self.credits.append(self.__credit(nb_credits, ClassroomSubject.MAT))
         return self
 
     def machine_duo(self, nb_credits) -> CreditsJsonBuilderForTest:
-        self.credits.append(self.__credit(nb_credits, ClassroomType.MACHINE_DUO))
+        self.credits.append(self.__credit(nb_credits, ClassroomSubject.MACHINE_DUO))
         return self
 
-    def __credit(self, nb_credits: int, type_: ClassroomType):
-        return {"value": nb_credits, "type": type_}
+    def __credit(self, nb_credits: int, subject_: ClassroomSubject):
+        return {"value": nb_credits, "subject": subject_}
 
 
 class ClassroomBuilderForTest(Builder):
@@ -444,7 +444,7 @@ class EventBuilderForTest(Builder):
         return self
 
     def added_credits_for_machine_duo(self, client, nb_credits) -> EventBuilderForTest:
-        self.event_to_store.append((ClientCreditsUpdated, (client.id, [Credits(nb_credits, ClassroomType.MACHINE_DUO)])))
+        self.event_to_store.append((ClientCreditsUpdated, (client.id, [Credits(nb_credits, ClassroomSubject.MACHINE_DUO)])))
         return self
 
     def classroom_with_attendees(self, nb_attendees: int):
