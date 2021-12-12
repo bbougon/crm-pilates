@@ -6,6 +6,9 @@ from api import api_router
 from event.event_store import StoreLocator
 from infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
 from infrastructure.event_to_domain_loader import EventToDomainLoader
+from infrastructure.migration.migration import Migration
+
+Migration(settings.DATABASE_URL).migrate()
 
 app = FastAPI(
     title="CRM Pilates",
