@@ -21,6 +21,7 @@ from domain.classroom.session.attendee_session_cancellation_saga_handler import 
 from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
 from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
 from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
+from domain.classroom.session.session_repository import SessionRepository
 from domain.client.client import Client, Credits
 from domain.client.client_command_handlers import ClientCreated, ClientCreditsUpdated
 from domain.commands import ClientCredits
@@ -28,6 +29,7 @@ from domain.repository import Repository
 from event.event_store import Event, EventSourced
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
+from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
 from infrastructure.repository_provider import RepositoryProvider
 from web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 
@@ -171,6 +173,14 @@ class ClassroomBuilderForTest(Builder):
 
     def with_duration(self, duration: Duration) -> ClassroomBuilderForTest:
         self.duration = duration
+        return self
+
+    def machine_private(self) -> ClassroomBuilderForTest:
+        self.subject = ClassroomSubject.MACHINE_PRIVATE
+        return self
+
+    def mat(self) -> ClassroomBuilderForTest:
+        self.subject = ClassroomSubject.MAT
         return self
 
 
@@ -410,6 +420,30 @@ class ConfirmedSessionBuilderForTest(Builder):
     def for_classroom(self, classroom: Classroom) -> ConfirmedSessionBuilderForTest:
         self.classroom = classroom
         self.start_at = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
+        return self
+
+
+class ConfirmedSessionContextBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.classroom: Classroom = ClassroomBuilderForTest().build()
+        self.start_at: datetime = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
+        self.repository: SessionRepository = MemorySessionRepository()
+
+    def build(self):
+        session = ConfirmedSession.create(self.classroom, self.start_at)
+        if self.repository:
+            self.repository.persist(session)
+        return self.repository, session
+
+    def for_classroom(self, classroom: Classroom) -> ConfirmedSessionContextBuilderForTest:
+        self.classroom = classroom
+        self.start_at: datetime = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
+        return self
+
+    def persist(self, repository: SessionRepository) -> ConfirmedSessionContextBuilderForTest:
+        self.repository = repository
         return self
 
 

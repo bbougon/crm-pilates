@@ -2,6 +2,7 @@ from typing import Tuple, List
 from uuid import UUID
 
 from command.command_handler import CommandHandler, Status
+from domain.classroom.classroom import Session
 from domain.client.client import Client, Credits
 from domain.commands import ClientCreationCommand, AddCreditsToClientCommand, DecreaseClientCreditsCommand
 from event.event_store import Event, EventSourced
@@ -60,5 +61,6 @@ class AddCreditsToClientCommandHandler(CommandHandler):
 class DecreaseClientCreditsCommandHandler(CommandHandler):
     def execute(self, command: DecreaseClientCreditsCommand) -> Tuple[Event, Status]:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(command.attendee.id)
-        client.credits[0].decrease()
+        session: Session = RepositoryProvider.write_repositories.session.get_by_id(command.session_id)
+        client.decrease_credits_for(session.subject)
         return ClientCreditsUpdated(client.id, client.credits), Status.UPDATED

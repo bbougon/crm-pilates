@@ -5,14 +5,17 @@ import pytz
 from immobilus import immobilus
 
 from command.command_handler import Status
+from domain.classroom.attendee import Attendee
 from domain.classroom.classroom_type import ClassroomSubject
 from domain.client.client_command_handlers import ClientCreated, ClientCreationCommandHandler, \
-    AddCreditsToClientCommandHandler
-from domain.commands import ClientCreationCommand, ClientCredits, AddCreditsToClientCommand
+    AddCreditsToClientCommandHandler, DecreaseClientCreditsCommandHandler
+from domain.commands import ClientCreationCommand, ClientCredits, AddCreditsToClientCommand, \
+    DecreaseClientCreditsCommand
 from event.event_store import StoreLocator
 from infrastructure.repository_provider import RepositoryProvider
 from tests.asserters.event_asserter import EventAsserter
-from tests.builders.builders_for_test import ClientContextBuilderForTest, ClientBuilderForTest
+from tests.builders.builders_for_test import ClientContextBuilderForTest, ClientBuilderForTest, \
+    ClassroomContextBuilderForTest, ClassroomBuilderForTest, ConfirmedSessionContextBuilderForTest
 
 
 @immobilus("2020-04-03 10:24:15.230")
@@ -51,3 +54,38 @@ def test_should_store_credits_to_client_added(memory_event_store, memory_reposit
         {"value": 5, "subject": ClassroomSubject.MAT.value},
         {"value": 10, "subject": ClassroomSubject.MACHINE_DUO.value}
     ])
+
+
+@immobilus("2020-05-03 10:00:00.000")
+def test_should_decrease_credits_event_with_unprovided_credits(memory_event_store, memory_repositories):
+    client = ClientBuilderForTest().build()
+    ClientContextBuilderForTest().with_client(client).persist(RepositoryProvider.write_repositories.client).build()
+    repository, classrooms = ClassroomContextBuilderForTest()\
+        .with_classroom(ClassroomBuilderForTest().machine_private().with_attendee(client.id)).persist(RepositoryProvider.write_repositories.classroom)\
+        .build()
+    session_repository, session = ConfirmedSessionContextBuilderForTest()\
+        .for_classroom(classrooms[0])\
+        .persist(RepositoryProvider.write_repositories.session)\
+        .build()
+
+    DecreaseClientCreditsCommandHandler().execute(DecreaseClientCreditsCommand(session.id, Attendee.create(client.id)))
+
+    assert client.credits[0].value == -1
+
+
+@immobilus("2020-05-03 10:00:00.000")
+def test_should_decrease_credits_on_expected_subject_credits(memory_event_store, memory_repositories):
+    client = ClientBuilderForTest().with_credit(5, ClassroomSubject.MACHINE_DUO).with_credit(4, ClassroomSubject.MAT).build()
+    ClientContextBuilderForTest().with_client(client).persist(RepositoryProvider.write_repositories.client).build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classroom(ClassroomBuilderForTest().mat().with_attendee(client.id)).persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    session_repository, session = ConfirmedSessionContextBuilderForTest()\
+        .for_classroom(classrooms[0])\
+        .persist(RepositoryProvider.write_repositories.session)\
+        .build()
+
+    DecreaseClientCreditsCommandHandler().execute(DecreaseClientCreditsCommand(session.id, Attendee.create(client.id)))
+
+    assert client.credits[0].value == 5
+    assert client.credits[1].value == 3

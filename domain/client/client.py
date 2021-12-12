@@ -45,3 +45,10 @@ class Client(AggregateRoot):
 
     def add_credits(self, credits: List[ClientCredits]):
         self._provide_credits(credits)
+
+    def decrease_credits_for(self, subject: ClassroomSubject):
+        available_credits: Credits = next(filter(lambda credit: credit.subject is subject, self.credits), None)
+        if not available_credits:
+            available_credits = Credits(0, subject)
+            self.credits.append(available_credits)
+        available_credits.decrease()
