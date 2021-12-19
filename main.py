@@ -8,8 +8,6 @@ from infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEv
 from infrastructure.event_to_domain_loader import EventToDomainLoader
 from infrastructure.migration.migration import Migration
 
-Migration(settings.DATABASE_URL).migrate()
-
 app = FastAPI(
     title="CRM Pilates",
     openapi_url="/openapi.json",
@@ -31,4 +29,5 @@ app.add_middleware(
 app.include_router(api_router)
 
 StoreLocator.store = PostgresSQLEventStore(settings.DATABASE_URL)
+Migration(settings.DATABASE_URL).migrate()
 EventToDomainLoader().load()

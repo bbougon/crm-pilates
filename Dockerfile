@@ -2,7 +2,7 @@ FROM python:3.9.7-slim-buster AS development
 
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install make && apt-get install -y --no-install-recommends ca-certificates sqlite3
+RUN apt-get update && apt-get install make && apt-get install -y libpq5 && apt-get install -y --no-install-recommends ca-certificates sqlite3
 
 WORKDIR /app
 COPY . .
@@ -15,7 +15,7 @@ FROM python:3.9.7-slim-buster AS production
 
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install make && apt-get install -y --no-install-recommends ca-certificates sqlite3
+RUN apt-get update && apt-get install make && apt-get install -y libpq5 && apt-get install -y --no-install-recommends ca-certificates sqlite3
 
 WORKDIR /app
 COPY . .
