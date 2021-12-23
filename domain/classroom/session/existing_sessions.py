@@ -21,6 +21,7 @@ class ExistingSession(Event):
         super().__init__(root_id)
         self.root_id = session.id
         self.name = session.name
+        self.subject = session.subject
         self.classroom_id = session.classroom_id
         self.position = session.position
         self.start = session.start

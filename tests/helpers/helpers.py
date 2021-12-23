@@ -7,6 +7,7 @@ def expected_session_response(session_id, classroom_id, classroom: Classroom, st
         "id": session_id,
         "name": classroom.name,
         "classroom_id": classroom_id,
+        "subject": classroom.subject.value,
         "position": classroom.position,
         "schedule": {
             "start": start_date,

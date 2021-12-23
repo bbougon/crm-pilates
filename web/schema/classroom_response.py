@@ -28,6 +28,7 @@ class ClassroomResponse(BaseModel):
     name: str
     id: UUID
     position: int
+    subject: str
     schedule: ScheduleReadResponse
     duration: DurationReadResponse
 

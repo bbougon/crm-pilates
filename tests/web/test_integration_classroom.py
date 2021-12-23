@@ -1,3 +1,5 @@
+import arrow
+from dateutil.tz import tzutc
 from fastapi import status, Response
 from fastapi.testclient import TestClient
 
@@ -20,11 +22,30 @@ def test_create_classroom(persisted_event_store):
 def test_create_classroom_with_attendees(persisted_event_store):
     repository, clients = ClientContextBuilderForTest().with_one_client().persist(
         RepositoryProvider.write_repositories.client).build()
+    classroom: dict = ClassroomJsonBuilderForTest().with_attendees([clients[0]._id]).build()
 
-    response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().with_attendees([clients[0]._id]).build())
+    response = client.post("/classrooms", json=classroom)
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
+    classroom_id = response.json()['id']
+    assert response.headers["Location"] == f"/classrooms/{classroom_id}"
+    assert response.json() == {
+        "name": classroom["name"],
+        "id": classroom_id,
+        "position": classroom["position"],
+        "subject": classroom["subject"],
+        "schedule": {
+            "start": arrow.get(classroom["start_date"], tzinfo=tzutc()).datetime.isoformat(),
+            "stop": arrow.get(classroom["start_date"], tzinfo=tzutc()).shift(hours=+1).datetime.isoformat()
+        },
+        "duration": {
+            "time_unit": "HOUR",
+            "duration": 1
+        },
+        "attendees": [
+            {"id": str(clients[0].id)},
+        ]
+    }
 
 
 def test_get_classroom(memory_repositories):
@@ -46,6 +67,7 @@ def test_get_classroom(memory_repositories):
         "name": classroom.name,
         "id": str(classroom.id),
         "position": classroom.position,
+        "subject": classroom.subject.value,
         "schedule": {
             "start": classroom.schedule.start.isoformat(),
             "stop": classroom.schedule.stop.isoformat() if classroom.schedule.stop else None

@@ -2,6 +2,7 @@ from typing import List
 from uuid import UUID
 
 from domain.classroom.classroom import Classroom
+from domain.classroom.classroom_type import ClassroomSubject
 from web.presentation.domain.detailed_attendee import DetailedAttendee
 from web.presentation.domain.units import Units
 
@@ -20,6 +21,7 @@ class DetailedClassroom:
         super().__init__()
         self.id: UUID = classroom.id
         self.name: str = classroom.name
+        self.subject: ClassroomSubject = classroom.subject
         self.position: int = classroom.position
         self.start: str = classroom.schedule.start.isoformat()
         self.stop: str = classroom.schedule.stop.isoformat() if classroom.schedule.stop else None

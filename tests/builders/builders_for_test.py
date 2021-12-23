@@ -220,7 +220,7 @@ class ClassroomJsonBuilderForTest(Builder):
         super().__init__()
         self.classroom_name: str = Text().title()
         self.position: int = Numeric().integer_number(1, 6)
-        self.start_date: datetime = Datetime().datetime()
+        self.start_date: datetime = Datetime().datetime().astimezone(pytz.utc)
         self.stop_date: datetime = None
         self.subject: ClassroomSubject = ClassroomSubject.MAT
         self.attendees: List[UUID] = []
@@ -231,7 +231,7 @@ class ClassroomJsonBuilderForTest(Builder):
         if self.attendees:
             classroom["attendees"] = list(map(lambda attendee: {"id": attendee.hex}, self.attendees))
         if self.stop_date:
-            classroom["stop_date"] = self.stop_date
+            classroom["stop_date"] = self.stop_date.astimezone(pytz.utc).isoformat()
         if self.duration:
             classroom["duration"] = self.duration
         return classroom

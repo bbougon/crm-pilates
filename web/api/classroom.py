@@ -85,6 +85,7 @@ def get_classroom(id: UUID):
             "name": detailed_classroom.name,
             "id": detailed_classroom.id,
             "position": detailed_classroom.position,
+            "subject": detailed_classroom.subject.value,
             "schedule": {
                 "start": detailed_classroom.start,
                 "stop": detailed_classroom.stop

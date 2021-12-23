@@ -135,6 +135,7 @@ def __map_session(root_id: UUID, session: Session):
         "id": root_id,
         "name": session.name,
         "classroom_id": session.classroom_id,
+        "subject": session.subject.value,
         "position": session.position,
         "schedule": {
             "start": session.start.isoformat(),

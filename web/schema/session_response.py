@@ -21,6 +21,7 @@ class SessionResponse(BaseModel):
     id: Optional[UUID]
     name: str
     classroom_id: UUID
+    subject: str
     position: int
     schedule: Schedule
     attendees: List[Attendee]
