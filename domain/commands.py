@@ -98,3 +98,9 @@ class SessionCheckoutCommand(Command):
 class DecreaseClientCreditsCommand(Command):
     session_id: UUID
     attendee: Attendee
+
+
+@dataclass
+class RefundClientCreditsCommand(Command):
+    session_id: UUID
+    attendee: Attendee

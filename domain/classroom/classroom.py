@@ -187,9 +187,9 @@ class ConfirmedSession(Session, AggregateRoot):
 
     def checkout(self, attendee: Attendee) -> Attendee:
         try:
-            checkedout_attendee: Attendee = next(filter(lambda current_attendee: current_attendee == attendee, self.attendees))
-            checkedout_attendee.checkout()
-            return checkedout_attendee
+            checked_out_attendee: Attendee = next(filter(lambda current_attendee: current_attendee == attendee, self.attendees))
+            checked_out_attendee.checkout()
+            return checked_out_attendee
         except StopIteration:
             raise DomainException(f"Attendee with id {str(attendee.id)} could not be checked out")
 

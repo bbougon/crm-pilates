@@ -4,6 +4,7 @@ from typing import List
 
 from domain.classroom.classroom_type import ClassroomSubject
 from domain.commands import ClientCredits
+from domain.exceptions import DomainException
 from domain.repository import AggregateRoot
 
 
@@ -23,6 +24,9 @@ class Credits:
 
     def decrease(self):
         self.__value -= 1
+
+    def refund(self):
+        self.__value += 1
 
 
 class Client(AggregateRoot):
@@ -52,3 +56,9 @@ class Client(AggregateRoot):
             available_credits = Credits(0, subject)
             self.credits.append(available_credits)
         available_credits.decrease()
+
+    def refund_credits_for(self, subject: ClassroomSubject):
+        available_credits: Credits = next(filter(lambda credit: credit.subject is subject, self.credits), None)
+        if not available_credits:
+            raise DomainException(f"Credits for client with id '{str(self.id)}' cannot be refund as the client has no credits available.")
+        available_credits.refund()
