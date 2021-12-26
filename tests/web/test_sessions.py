@@ -10,6 +10,7 @@ from immobilus import immobilus
 from mock.mock import ANY
 
 from domain.classroom.classroom import Classroom
+from domain.client.client import Client
 from domain.exceptions import AggregateNotFoundException
 from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
 from infrastructure.repository_provider import RepositoryProvider
@@ -19,7 +20,7 @@ from tests.builders.builders_for_test import SessionCheckinJsonBuilderForTest, C
 from tests.builders.providers_for_test import CommandBusProviderForTest
 from tests.helpers.helpers import expected_session_response
 from web.api.session import session_checkin, next_sessions, sessions, session_checkout, attendee_session_cancellation
-from web.presentation.domain.detailed_attendee import DetailedAttendee
+from web.presentation.domain.detailed_attendee import DetailedAttendee, AvailableCredits
 from web.schema.session_schemas import SessionCheckin, SessionCheckout, AttendeeSessionCancellation
 
 
@@ -83,14 +84,14 @@ def test_get_next_sessions_with_confirmed_sessions():
         expected_session_response(None, first_classroom.id, first_classroom, "2020-03-19T10:00:00+00:00",
                                   "2020-03-19T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ]),
         expected_session_response(session.id, second_classroom.id, second_classroom, "2020-03-19T11:00:00+00:00",
                                   "2020-03-19T12:00:00+00:00", [
                                       DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[2]))
                                   ])
     ]
 
@@ -123,47 +124,47 @@ def test_sessions_should_return_sessions_in_current_month_range():
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-02T10:00:00+00:00",
                                   "2021-09-02T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ]),
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-09T10:00:00+00:00",
                                   "2021-09-09T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ]),
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-16T10:00:00+00:00",
                                   "2021-09-16T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ]),
         expected_session_response(None, second_classroom.id, second_classroom, "2021-09-18T11:00:00+00:00",
                                   "2021-09-18T12:00:00+00:00", [
                                       DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[2]))
                                   ]),
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-23T10:00:00+00:00",
                                   "2021-09-23T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ]),
         expected_session_response(confirmed_session.id, second_classroom.id, second_classroom, "2021-09-25T11:00:00+00:00",
                                   "2021-09-25T12:00:00+00:00", [
                                       DetailedAttendee(clients[2].id, clients[2].firstname, clients[2].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[2]))
                                   ]),
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-30T10:00:00+00:00",
                                   "2021-09-30T11:00:00+00:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ])
     ]
 
@@ -219,16 +220,16 @@ def test_sessions_should_return_sessions_according_to_time_zone():
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-02T10:00:00+03:00",
                                   "2021-09-02T11:00:00+03:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ]),
         expected_session_response(None, first_classroom.id, first_classroom, "2021-09-09T10:00:00+03:00",
                                   "2021-09-09T11:00:00+03:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ])
     ]
 
@@ -251,9 +252,9 @@ def test_get_next_sessions_with_time_zone():
         expected_session_response(None, first_classroom.id, first_classroom, "2020-03-19T10:00:00+03:00",
                                   "2020-03-19T11:00:00+03:00", [
                                       DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                       "REGISTERED"),
+                                                       "REGISTERED", __to_available_credits(clients[0])),
                                       DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                       "REGISTERED")
+                                                       "REGISTERED", __to_available_credits(clients[1]))
                                   ])
     ]
 
@@ -277,9 +278,9 @@ def test_confirm_session_on_timezone():
     assert response == expected_session_response(ANY, classroom.id, classroom, "2019-05-14T10:00:00+05:00",
                                                  "2019-05-14T11:00:00+05:00", [
                                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                                      "CHECKED_IN"),
+                                                                      "CHECKED_IN", __to_available_credits(clients[0])),
                                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                                      "REGISTERED")
+                                                                      "REGISTERED", __to_available_credits(clients[1]))
                                                  ])
 
 
@@ -305,9 +306,9 @@ def test_should_checkout_attendee():
     assert response == expected_session_response(session.id, classroom.id, classroom, "2019-05-14T10:00:00+05:00",
                                                  "2019-05-14T11:00:00+05:00", [
                                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
-                                                                      "REGISTERED"),
+                                                                      "REGISTERED", __to_available_credits(clients[0])),
                                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                                      "REGISTERED")
+                                                                      "REGISTERED", __to_available_credits(clients[1]))
                                                  ])
 
 
@@ -366,7 +367,7 @@ def test_should_cancel_attendee():
     assert response == expected_session_response(ANY, classroom.id, classroom, "2020-05-19T10:00:00+00:00",
                                                  "2020-05-19T11:00:00+00:00", [
                                                      DetailedAttendee(clients[1].id, clients[1].firstname, clients[1].lastname,
-                                                                      "REGISTERED")
+                                                                      "REGISTERED", __to_available_credits(clients[1]))
                                                  ])
 
 
@@ -404,3 +405,7 @@ def test_should_handle_unexisting_classroom_on_attendee_cancellation():
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
     assert e.value.detail == f"Aggregate 'Classroom' with id '{classroom.id}' not found"
+
+
+def __to_available_credits(client: Client):
+    return list(map(lambda credit: AvailableCredits(credit.subject.value, credit.value), client.credits))

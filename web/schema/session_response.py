@@ -5,11 +5,17 @@ from uuid import UUID
 from pydantic.main import BaseModel
 
 
+class AvailableCredits(BaseModel):
+    subject: str
+    amount: int
+
+
 class Attendee(BaseModel):
     id: UUID
     firstname: str
     lastname: str
     attendance: str
+    credits: Optional[List[AvailableCredits]]
 
 
 class Schedule(BaseModel):

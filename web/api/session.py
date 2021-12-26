@@ -149,8 +149,7 @@ def __map_session(root_id: UUID, session: Session):
 def __map_sessions(event):
     result = []
     for session in event.sessions:
-        next_session = __map_session(session.root_id, session)
-        result.append(next_session)
+        result.append(__map_session(session.root_id, session))
     return result
 
 

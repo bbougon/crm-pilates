@@ -8,11 +8,12 @@ from immobilus import immobilus
 
 from domain.classroom.classroom import Classroom, ScheduledSession
 from domain.classroom.attendee import Attendance
+from domain.client.client import Client
 from infrastructure.repository_provider import RepositoryProvider
 from main import app
 from tests.builders.builders_for_test import ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionCheckinJsonBuilderForTest, \
-    SessionContextBuilderForTest, AttendeeSessionCancellationJsonBuilderForTest
+    SessionContextBuilderForTest, AttendeeSessionCancellationJsonBuilderForTest, ClientBuilderForTest
 from tests.helpers.helpers import expected_session_response
 
 client = TestClient(app)
@@ -23,11 +24,14 @@ def test_get_next_sessions(memory_repositories, event_bus):
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
         .build()
+    first_client = clients[0]
+    second_client = clients[1]
+    third_client = clients[2]
     repository, classrooms = ClassroomContextBuilderForTest() \
         .with_classrooms(ClassroomBuilderForTest().starting_at(datetime(2019, 5, 7, 10))
-                         .with_attendee(clients[0]._id).with_attendee(clients[1]._id),
+                         .with_attendee(first_client._id).with_attendee(second_client._id),
                          ClassroomBuilderForTest().starting_at(datetime(2019, 5, 7, 11))
-                         .with_attendee(clients[2]._id),
+                         .with_attendee(third_client._id),
                          ClassroomBuilderForTest().starting_at(datetime(2019, 5, 8, 10))) \
         .persist(RepositoryProvider.write_repositories.classroom) \
         .build()
@@ -38,17 +42,30 @@ def test_get_next_sessions(memory_repositories, event_bus):
     second_classroom: Classroom = classrooms[1]
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
-        expected_session_response(ANY, str(str(first_classroom.id)), first_classroom, "2019-05-07T10:00:00+00:00", "2019-05-07T11:00:00+00:00", [
-            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-             "attendance": "REGISTERED"},
-            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
-             "attendance": "REGISTERED"}
-        ]),
-        expected_session_response(ANY, str(second_classroom.id), second_classroom, "2019-05-07T11:00:00+00:00", "2019-05-07T12:00:00+00:00", [
-            {"id": str(clients[2].id), "firstname": clients[2].firstname, "lastname": clients[2].lastname,
-             "attendance": "REGISTERED"}
-        ])
+        expected_session_response(ANY, str(str(first_classroom.id)), first_classroom, "2019-05-07T10:00:00+00:00",
+                                  "2019-05-07T11:00:00+00:00", [
+                                      {"id": str(first_client.id), "firstname": first_client.firstname,
+                                       "lastname": first_client.lastname,
+                                       "attendance": "REGISTERED", "credits": [
+                                          {"subject": client_credits(first_client).subject.value,
+                                           "amount": client_credits(first_client).value}]},
+                                      {"id": str(second_client.id), "firstname": second_client.firstname,
+                                       "lastname": second_client.lastname,
+                                       "attendance": "REGISTERED", "credits": [
+                                          {"subject": client_credits(second_client).subject.value,
+                                           "amount": client_credits(second_client).value}]}]),
+        expected_session_response(ANY, str(second_classroom.id), second_classroom, "2019-05-07T11:00:00+00:00",
+                                  "2019-05-07T12:00:00+00:00", [
+                                      {"id": str(third_client.id), "firstname": third_client.firstname,
+                                       "lastname": third_client.lastname,
+                                       "attendance": "REGISTERED", "credits": [
+                                          {"subject": client_credits(third_client).subject.value,
+                                           "amount": client_credits(third_client).value}]}])
     ]
+
+
+def client_credits(client: Client):
+    return client.credits[0]
 
 
 @immobilus("2019-05-07 08:24:15.230")
@@ -70,12 +87,20 @@ def test_register_checkin(memory_repositories, event_bus):
 
     assert classroom.attendees[0].attendance == Attendance.REGISTERED
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-07T10:00:00+00:00", "2019-05-07T11:00:00+00:00", [
-        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-         "attendance": "CHECKED_IN"},
-        {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
-         "attendance": "REGISTERED"}
-    ])
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-07T10:00:00+00:00",
+                                                        "2019-05-07T11:00:00+00:00", [
+                                                            {"id": str(clients[0].id),
+                                                             "firstname": clients[0].firstname,
+                                                             "lastname": clients[0].lastname,
+                                                             "attendance": "CHECKED_IN", "credits": [
+                                                                {"subject": client_credits(clients[0]).subject.value,
+                                                                 "amount": client_credits(clients[0]).value}]},
+                                                            {"id": str(clients[1].id),
+                                                             "firstname": clients[1].firstname,
+                                                             "lastname": clients[1].lastname,
+                                                             "attendance": "REGISTERED", "credits": [
+                                                                {"subject": client_credits(clients[1]).subject.value,
+                                                                 "amount": client_credits(clients[1]).value}]}])
 
 
 @immobilus("2019-03-08 09:24:15.230")
@@ -95,19 +120,33 @@ def test_updated_session_produces_ok_200(memory_event_store, event_bus):
                                          clients[1]._id).at(datetime(2020, 3, 8, 11, 0)).build())
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2020-03-08T11:00:00+00:00", "2020-03-08T12:00:00+00:00", [
-        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-         "attendance": "CHECKED_IN"},
-        {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
-         "attendance": "CHECKED_IN"}
-    ])
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2020-03-08T11:00:00+00:00",
+                                                        "2020-03-08T12:00:00+00:00", [
+                                                            {"id": str(clients[0].id),
+                                                             "firstname": clients[0].firstname,
+                                                             "lastname": clients[0].lastname,
+                                                             "attendance": "CHECKED_IN", "credits": [
+                                                                {"subject": client_credits(clients[0]).subject.value,
+                                                                 "amount": client_credits(clients[0]).value}]},
+                                                            {"id": str(clients[1].id),
+                                                             "firstname": clients[1].firstname,
+                                                             "lastname": clients[1].lastname,
+                                                             "attendance": "CHECKED_IN", "credits": [
+                                                                {"subject": client_credits(clients[1]).subject.value,
+                                                                 "amount": client_credits(clients[1]).value}]}])
 
 
 @immobilus("2021-09-02 10:00:00")
 def test_sessions_should_return_all_sessions_in_range(memory_repositories, event_bus):
-    repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10, 0)).ending_at(datetime(2021, 9, 16, 10, 0))).persist(
-        RepositoryProvider.write_repositories.classroom).build()
+    repository, clients = ClientContextBuilderForTest() \
+        .with_client(ClientBuilderForTest().with_mat_credit(5).build()) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    classroom_client = clients[0]
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classroom(ClassroomBuilderForTest().starting_at(datetime(2021, 9, 2, 10, 0)).ending_at(datetime(2021, 9, 16, 10, 0)).with_attendee(classroom_client.id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
 
     response: Response = client.get("/sessions?start_date=2021-09-02T00:00:00Z&end_date=2021-09-09T23:59:59Z")
 
@@ -116,15 +155,24 @@ def test_sessions_should_return_all_sessions_in_range(memory_repositories, event
                                          '</sessions?start_date=2021-09-02T00%3A00%3A00%2B00%3A00&end_date=2021-09-09T23%3A59%3A59%2B00%3A00>; rel="current", ' \
                                          '</sessions?start_date=2021-09-10T00%3A00%3A00%2B00%3A00&end_date=2021-09-17T23%3A59%3A59%2B00%3A00>; rel="next"'
     assert response.json() == [
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-02T10:00:00+00:00", "2021-09-02T11:00:00+00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00+00:00", "2021-09-09T11:00:00+00:00", [])
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-02T10:00:00+00:00",
+                                  "2021-09-02T11:00:00+00:00",
+                                  [{"id": str(classroom_client.id), "firstname": classroom_client.firstname,
+                                    "lastname": classroom_client.lastname,
+                                    "attendance": "REGISTERED", "credits": [{"subject": client_credits(clients[0]).subject.value, "amount": client_credits(clients[0]).value}]}]),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00+00:00",
+                                  "2021-09-09T11:00:00+00:00",
+                                  [{"id": str(classroom_client.id), "firstname": classroom_client.firstname,
+                                    "lastname": classroom_client.lastname,
+                                    "attendance": "REGISTERED", "credits": [{"subject": client_credits(clients[0]).subject.value, "amount": client_credits(clients[0]).value}]}])
     ]
 
 
 @immobilus("2021-09-25 10:00:00", tz_offset=2)
 def test_sessions_should_return_all_sessions_from_classroom_for_current_month(memory_repositories, event_bus):
     repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().starting_at(datetime(2021, 8, 13, 10, 0)).ending_at(datetime(2022, 6, 16, 10, 0))).persist(
+        ClassroomBuilderForTest().starting_at(datetime(2021, 8, 13, 10, 0)).ending_at(
+            datetime(2022, 6, 16, 10, 0))).persist(
         RepositoryProvider.write_repositories.classroom).build()
 
     response: Response = client.get("/sessions?start_date=2021-10-01T00:00:00&end_date=2021-10-31T23:59:59")
@@ -133,11 +181,16 @@ def test_sessions_should_return_all_sessions_from_classroom_for_current_month(me
                                          '</sessions?start_date=2021-10-01T00%3A00%3A00%2B00%3A00&end_date=2021-10-31T23%3A59%3A59%2B00%3A00>; rel="current", ' \
                                          '</sessions?start_date=2021-11-01T00%3A00%3A00%2B00%3A00&end_date=2021-11-30T23%3A59%3A59%2B00%3A00>; rel="next"'
     assert response.json() == [
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-01T10:00:00+00:00", "2021-10-01T11:00:00+00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-08T10:00:00+00:00", "2021-10-08T11:00:00+00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-15T10:00:00+00:00", "2021-10-15T11:00:00+00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-22T10:00:00+00:00", "2021-10-22T11:00:00+00:00", []),
-        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-29T10:00:00+00:00", "2021-10-29T11:00:00+00:00", [])
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-01T10:00:00+00:00",
+                                  "2021-10-01T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-08T10:00:00+00:00",
+                                  "2021-10-08T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-15T10:00:00+00:00",
+                                  "2021-10-15T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-22T10:00:00+00:00",
+                                  "2021-10-22T11:00:00+00:00", []),
+        expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-10-29T10:00:00+00:00",
+                                  "2021-10-29T11:00:00+00:00", [])
     ]
 
 
@@ -161,12 +214,20 @@ def test_register_checkout(memory_repositories, event_bus):
                                      json={"attendee": str(clients[0].id)})
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == expected_session_response(str(session.id), str(classroom.id), classroom, "2019-05-14T10:00:00+05:00", "2019-05-14T11:00:00+05:00", [
-        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-         "attendance": "REGISTERED"},
-        {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname,
-         "attendance": "REGISTERED"}
-    ])
+    assert response.json() == expected_session_response(str(session.id), str(classroom.id), classroom,
+                                                        "2019-05-14T10:00:00+05:00", "2019-05-14T11:00:00+05:00", [
+                                                            {"id": str(clients[0].id),
+                                                             "firstname": clients[0].firstname,
+                                                             "lastname": clients[0].lastname,
+                                                             "attendance": "REGISTERED", "credits": [
+                                                                {"subject": client_credits(clients[0]).subject.value,
+                                                                 "amount": client_credits(clients[0]).value}]},
+                                                            {"id": str(clients[1].id),
+                                                             "firstname": clients[1].firstname,
+                                                             "lastname": clients[1].lastname,
+                                                             "attendance": "REGISTERED", "credits": [
+                                                                {"subject": client_credits(clients[1]).subject.value,
+                                                                 "amount": client_credits(clients[1]).value}]}])
 
 
 @immobilus("2019-05-07 08:24:15.230")
@@ -182,11 +243,16 @@ def test_register_cancellation(memory_repositories, event_bus):
 
     classroom: Classroom = classrooms[0]
     response: Response = client.post(f"/sessions/cancellation/{clients[1].id}",
-                                     json=AttendeeSessionCancellationJsonBuilderForTest().for_classroom(classroom).at(arrow.get("2019-05-21T10:00:00+00:00").datetime).build())
+                                     json=AttendeeSessionCancellationJsonBuilderForTest().for_classroom(classroom).at(
+                                         arrow.get("2019-05-21T10:00:00+00:00").datetime).build())
 
     assert classroom.attendees[0].attendance == Attendance.REGISTERED
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-21T10:00:00+00:00", "2019-05-21T11:00:00+00:00", [
-        {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname,
-         "attendance": "REGISTERED"}
-    ])
+    assert response.json() == expected_session_response(ANY, str(classroom.id), classroom, "2019-05-21T10:00:00+00:00",
+                                                        "2019-05-21T11:00:00+00:00", [
+                                                            {"id": str(clients[0].id),
+                                                             "firstname": clients[0].firstname,
+                                                             "lastname": clients[0].lastname,
+                                                             "attendance": "REGISTERED", "credits": [
+                                                                {"subject": client_credits(clients[0]).subject.value,
+                                                                 "amount": client_credits(clients[0]).value}]}])
