@@ -527,6 +527,13 @@ class EventBuilderForTest(Builder):
         self.event_to_store.append((AllAttendeesAdded, (classroom.id, attendees)))
         return self
 
+    def checked_in_attendees(self, attendees: [UUID]) -> EventBuilderForTest:
+        confirmed_session: ConfirmedSession = self.sessions[0]
+        for attendee_id in attendees:
+            attendee = next(filter(lambda confirm_attendee: confirm_attendee.id == attendee_id, confirmed_session.attendees), None)
+            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.checkin(attendee))))
+        return self
+
     def checked_in(self, nb_attendees_checked_in: int) -> EventBuilderForTest:
         confirmed_session: ConfirmedSession = self.sessions[0]
         for i in range(nb_attendees_checked_in):
@@ -534,9 +541,10 @@ class EventBuilderForTest(Builder):
             self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.checkin(attendee))))
         return self
 
-    def checked_out(self, session_id: UUID, attendees_ids: [int]) -> EventBuilderForTest:
-        for id in attendees_ids:
-            attendee = Attendee.create(id)
+    def checked_out(self, session_id: UUID, attendees_ids: [UUID]) -> EventBuilderForTest:
+        all_attendees = next(map(lambda session: session.attendees, self.sessions))
+        attendees = [attendee for index, attendee in enumerate(all_attendees) if attendee.id in attendees_ids]
+        for attendee in attendees:
             attendee.checkout()
             self.event_to_store.append((SessionCheckedOut, (session_id, attendee)))
         return self

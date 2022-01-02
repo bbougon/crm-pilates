@@ -47,20 +47,16 @@ def test_get_next_sessions(memory_repositories, event_bus):
                                   "2019-05-07T11:00:00+00:00", [
                                       {"id": str(first_client.id), "firstname": first_client.firstname,
                                        "lastname": first_client.lastname,
-                                       "attendance": "REGISTERED", "credits": {"amount": client_credits(first_client).value}},
+                                       "attendance": "REGISTERED", "credits": {"amount": __client_credits(first_client).value}},
                                       {"id": str(second_client.id), "firstname": second_client.firstname,
                                        "lastname": second_client.lastname,
-                                       "attendance": "REGISTERED", "credits": {"amount": client_credits(second_client).value}}]),
+                                       "attendance": "REGISTERED", "credits": {"amount": __client_credits(second_client).value}}]),
         expected_session_response(ANY, str(second_classroom.id), second_classroom, "2019-05-07T11:00:00+00:00",
                                   "2019-05-07T12:00:00+00:00", [
                                       {"id": str(third_client.id), "firstname": third_client.firstname,
                                        "lastname": third_client.lastname,
-                                       "attendance": "REGISTERED", "credits": {"amount": client_credits(third_client).value}}])
+                                       "attendance": "REGISTERED", "credits": {"amount": __client_credits(third_client).value}}])
     ]
-
-
-def client_credits(client: Client):
-    return client.credits[0]
 
 
 @immobilus("2019-05-07 08:24:15.230")
@@ -87,11 +83,11 @@ def test_register_checkin(memory_repositories, event_bus):
                                                             {"id": str(clients[0].id),
                                                              "firstname": clients[0].firstname,
                                                              "lastname": clients[0].lastname,
-                                                             "attendance": "CHECKED_IN", "credits": {"amount": client_credits(clients[0]).value}},
+                                                             "attendance": "CHECKED_IN", "credits": {"amount": __client_credits(clients[0]).value}},
                                                             {"id": str(clients[1].id),
                                                              "firstname": clients[1].firstname,
                                                              "lastname": clients[1].lastname,
-                                                             "attendance": "REGISTERED", "credits": {"amount": client_credits(clients[1]).value}}])
+                                                             "attendance": "REGISTERED", "credits": {"amount": __client_credits(clients[1]).value}}])
 
 
 @immobilus("2019-03-08 09:24:15.230")
@@ -116,11 +112,11 @@ def test_updated_session_produces_ok_200(memory_event_store, event_bus):
                                                             {"id": str(clients[0].id),
                                                              "firstname": clients[0].firstname,
                                                              "lastname": clients[0].lastname,
-                                                             "attendance": "CHECKED_IN", "credits": {"amount": client_credits(clients[0]).value}},
+                                                             "attendance": "CHECKED_IN", "credits": {"amount": __client_credits(clients[0]).value}},
                                                             {"id": str(clients[1].id),
                                                              "firstname": clients[1].firstname,
                                                              "lastname": clients[1].lastname,
-                                                             "attendance": "CHECKED_IN", "credits": {"amount": client_credits(clients[1]).value}}])
+                                                             "attendance": "CHECKED_IN", "credits": {"amount": __client_credits(clients[1]).value}}])
 
 
 @immobilus("2021-09-02 10:00:00")
@@ -146,12 +142,12 @@ def test_sessions_should_return_all_sessions_in_range(memory_repositories, event
                                   "2021-09-02T11:00:00+00:00",
                                   [{"id": str(classroom_client.id), "firstname": classroom_client.firstname,
                                     "lastname": classroom_client.lastname,
-                                    "attendance": "REGISTERED", "credits": {"amount": client_credits(clients[0]).value}}]),
+                                    "attendance": "REGISTERED", "credits": {"amount": __client_credits(clients[0]).value}}]),
         expected_session_response(None, str(classrooms[0].id), classrooms[0], "2021-09-09T10:00:00+00:00",
                                   "2021-09-09T11:00:00+00:00",
                                   [{"id": str(classroom_client.id), "firstname": classroom_client.firstname,
                                     "lastname": classroom_client.lastname,
-                                    "attendance": "REGISTERED", "credits": {"amount": client_credits(clients[0]).value}}])
+                                    "attendance": "REGISTERED", "credits": {"amount": __client_credits(clients[0]).value}}])
     ]
 
 
@@ -206,11 +202,11 @@ def test_register_checkout(memory_repositories, event_bus):
                                                             {"id": str(clients[0].id),
                                                              "firstname": clients[0].firstname,
                                                              "lastname": clients[0].lastname,
-                                                             "attendance": "REGISTERED", "credits": {"amount": client_credits(clients[0]).value}},
+                                                             "attendance": "REGISTERED", "credits": {"amount": __client_credits(clients[0]).value}},
                                                             {"id": str(clients[1].id),
                                                              "firstname": clients[1].firstname,
                                                              "lastname": clients[1].lastname,
-                                                             "attendance": "REGISTERED", "credits": {"amount": client_credits(clients[1]).value}}])
+                                                             "attendance": "REGISTERED", "credits": {"amount": __client_credits(clients[1]).value}}])
 
 
 @immobilus("2019-05-07 08:24:15.230")
@@ -236,4 +232,8 @@ def test_register_cancellation(memory_repositories, event_bus):
                                                             {"id": str(clients[0].id),
                                                              "firstname": clients[0].firstname,
                                                              "lastname": clients[0].lastname,
-                                                             "attendance": "REGISTERED", "credits": {"amount": client_credits(clients[0]).value}}])
+                                                             "attendance": "REGISTERED", "credits": {"amount": __client_credits(clients[0]).value}}])
+
+
+def __client_credits(client: Client):
+    return client.credits[0]

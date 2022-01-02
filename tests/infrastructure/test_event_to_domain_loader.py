@@ -165,10 +165,10 @@ def test_load_checkin_session(persisted_event_store):
 
 def test_load_checkout_session(persisted_event_store):
     checked_in_builder = EventBuilderForTest().nb_client(3).classroom(ClassroomBuilderForTest().build()).attendees_added(
-        2).confirmed_session().checked_in(1)
-    checked_in_builder.build()
-    events = EventBuilderForTest().checked_out(checked_in_builder.sessions[0].id, [checked_in_builder.sessions[0].attendees[1].id]).build()
-    payload = events[0].payload
+        2).confirmed_session()
+    checked_in_builder.checked_in_attendees([checked_in_builder.sessions[0].attendees[1].id])
+    events = checked_in_builder.checked_out(checked_in_builder.sessions[0].id, [checked_in_builder.sessions[0].attendees[1].id]).build()
+    payload = events[7].payload
     session_id = payload["session_id"]
 
     EventToDomainLoader().load()

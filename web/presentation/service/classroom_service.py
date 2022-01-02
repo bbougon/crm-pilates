@@ -21,4 +21,4 @@ def get_detailed_attendees(classroom):
 def to_detailed_attendee(attendee_id: UUID, attendance: str, session_subject: ClassroomSubject) -> DetailedAttendee:
     attendee: Client = RepositoryProvider.read_repositories.client.get_by_id(attendee_id)
     attendee_credits = next(filter(lambda credit: credit.subject is session_subject, attendee.credits), None)
-    return DetailedAttendee(attendee.id, attendee.firstname, attendee.lastname, attendance, AvailableCredits(attendee_credits.subject.value, attendee_credits.value))
+    return DetailedAttendee(attendee.id, attendee.firstname, attendee.lastname, attendance, AvailableCredits(attendee_credits.subject.value, attendee_credits.value) if attendee_credits else None)

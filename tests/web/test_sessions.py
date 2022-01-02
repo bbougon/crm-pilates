@@ -17,7 +17,7 @@ from infrastructure.repository.memory.memory_classroom_repositories import Memor
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import SessionCheckinJsonBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionContextBuilderForTest, \
-    AttendeeSessionCancellationJsonBuilderForTest
+    AttendeeSessionCancellationJsonBuilderForTest, ClientBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
 from tests.helpers.helpers import expected_session_response
 from web.api.session import session_checkin, next_sessions, sessions, session_checkout, attendee_session_cancellation
@@ -406,6 +406,30 @@ def test_should_handle_unexisting_classroom_on_attendee_cancellation():
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
     assert e.value.detail == f"Aggregate 'Classroom' with id '{classroom.id}' not found"
+
+
+@immobilus("2019-07-05 10:20:15.230")
+def test_should_return_sessions_for_uncredited_attendees():
+    repository, clients = ClientContextBuilderForTest().with_client(ClientBuilderForTest().build()) \
+        .persist(RepositoryProvider.write_repositories.client) \
+        .build()
+    repository, classrooms = ClassroomContextBuilderForTest() \
+        .with_classrooms(ClassroomBuilderForTest().starting_at(arrow.get("2019-07-05T11:00:00+03:00").datetime).ending_at(arrow.get("2019-07-05T12:00:00+03:00").datetime)
+                         .with_attendee(clients[0]._id)) \
+        .persist(RepositoryProvider.write_repositories.classroom) \
+        .build()
+    response = Response()
+
+    result = sessions(response, CommandBusProviderForTest().provide(), start_date=datetime(2019, 7, 5, tzinfo=pytz.timezone("Europe/Moscow")), end_date=datetime(2019, 7, 5, 23, 59, 59, tzinfo=pytz.timezone("Europe/Moscow")))
+
+    classroom = classrooms[0]
+    assert result == [
+        expected_session_response(None, classroom.id, classroom, "2019-07-05T11:00:00+03:00",
+                                  "2019-07-05T12:00:00+03:00", [
+                                      DetailedAttendee(clients[0].id, clients[0].firstname, clients[0].lastname,
+                                                       "REGISTERED", None)
+                                  ])
+    ]
 
 
 def __to_available_credits(client: Client, subject: ClassroomSubject) -> AvailableCredits:
