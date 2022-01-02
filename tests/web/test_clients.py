@@ -10,8 +10,8 @@ from infrastructure.repository.memory.memory_client_repositories import MemoryCl
 from infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientBuilderForTest, CreditsJsonBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
-from web.api.clients import create_client, get_clients, update_client
-from web.schema.client_schemas import ClientCreation, ClientPatch
+from web.api.clients import create_client, get_clients, add_credits_to_client
+from web.schema.client_schemas import ClientCreation, Credits
 
 
 def test_client_creation():
@@ -62,10 +62,10 @@ def test_should_add_credits_to_client(memory_repositories):
     client: Client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
     RepositoryProvider.write_repositories.client.persist(client)
 
-    update_client(client.id, ClientPatch.parse_obj(CreditsJsonBuilderForTest().mat(2).machine_duo(10).build()), CommandBusProviderForTest().provide())
+    add_credits_to_client(client.id, [Credits.parse_obj(CreditsJsonBuilderForTest().mat(2).build()), Credits.parse_obj(CreditsJsonBuilderForTest().machine_duo(10).build())], CommandBusProviderForTest().provide())
 
     assert len(client.credits) == 2
-    assert client.credits[0].value == 2
+    assert client.credits[0].value == 4
     assert client.credits[1].value == 10
     assert client.credits[1].subject == ClassroomSubject.MACHINE_DUO
 
@@ -73,7 +73,7 @@ def test_should_add_credits_to_client(memory_repositories):
 def test_should_return_an_error_when_client_not_found():
     with pytest.raises(HTTPException) as e:
         uuid_ = uuid.uuid4()
-        update_client(uuid_, ClientPatch.parse_obj(CreditsJsonBuilderForTest().mat(2).machine_duo(10).build()), CommandBusProviderForTest().provide())
+        add_credits_to_client(uuid_, [Credits.parse_obj(CreditsJsonBuilderForTest().mat(2).build()), Credits.parse_obj(CreditsJsonBuilderForTest().machine_duo(10).build())], CommandBusProviderForTest().provide())
 
     assert e.value.detail == f"The client with id '{uuid_}' has not been found"
     assert e.value.status_code == HTTPStatus.NOT_FOUND

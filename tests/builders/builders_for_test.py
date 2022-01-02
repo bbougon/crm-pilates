@@ -112,21 +112,21 @@ class ClientJsonBuilderForTest(Builder):
 class CreditsJsonBuilderForTest(Builder):
 
     def __init__(self) -> None:
-        self.credits: List[dict] = []
+        self.credits: dict = None
 
     def build(self) -> dict:
-        return {"credits": self.credits}
+        return self.credits
 
     def mat(self, nb_credits) -> CreditsJsonBuilderForTest:
-        self.credits.append(self.__credit(nb_credits, ClassroomSubject.MAT))
+        self.credits = self.__credit(nb_credits, ClassroomSubject.MAT)
         return self
 
     def machine_duo(self, nb_credits) -> CreditsJsonBuilderForTest:
-        self.credits.append(self.__credit(nb_credits, ClassroomSubject.MACHINE_DUO))
+        self.credits = self.__credit(nb_credits, ClassroomSubject.MACHINE_DUO)
         return self
 
     def __credit(self, nb_credits: int, subject_: ClassroomSubject):
-        return {"value": nb_credits, "subject": subject_}
+        return {"value": nb_credits, "subject": subject_.value}
 
 
 class ClassroomBuilderForTest(Builder):

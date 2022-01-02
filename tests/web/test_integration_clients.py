@@ -93,12 +93,12 @@ def test_get_clients_should_return_all_clients():
     assert payload[0]["credits"][0]["subject"] == "MACHINE_TRIO"
 
 
-def test_update_client_credits():
+def test_should_add_credits_to_client():
     repository, clients = ClientContextBuilderForTest().with_client(
         ClientBuilderForTest().with_credit(2, ClassroomSubject.MACHINE_TRIO).build()).persist(
         RepositoryProvider.write_repositories.client).build()
     client_to_update: Client = clients[0]
 
-    response: Response = http_client.patch(f"clients/{str(client_to_update.id)}", json={"credits": [{"value": 2, "subject": "MACHINE_TRIO"}, {"value": 10, "subject": "MAT"}]})
+    response: Response = http_client.post(f"clients/{str(client_to_update.id)}/credits", json=[{"value": 2, "subject": "MACHINE_TRIO"}, {"value": 10, "subject": "MAT"}])
 
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK

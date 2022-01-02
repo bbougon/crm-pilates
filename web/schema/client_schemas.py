@@ -27,7 +27,3 @@ class ClientCreation(BaseModel):
         if not v:
             raise ValueError('You must provide the client lastname')
         return v.title()
-
-
-class ClientPatch(BaseModel):
-    credits: List[Credits]

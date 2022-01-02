@@ -12,7 +12,7 @@ from domain.exceptions import AggregateNotFoundException
 from infrastructure.command_bus_provider import CommandBusProvider
 from infrastructure.repository_provider import RepositoryProvider
 from web.schema.client_response import ClientReadResponse
-from web.schema.client_schemas import ClientCreation, ClientPatch
+from web.schema.client_schemas import ClientCreation, Credits
 
 router = APIRouter()
 
@@ -76,18 +76,18 @@ def get_clients():
     return list(map(lambda client: __map_client(client), next(clients)))
 
 
-@router.patch("/clients/{id}",
-              status_code=status.HTTP_204_NO_CONTENT,
-              description="Update client:"
-                          "- Add credits to client: you must provide current client credits and the new to add",
-              responses={
-                  204: {
-                      "description": "The request has been processed successfully."
-                  }
-              })
-def update_client(id: UUID, client_patch: ClientPatch, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+@router.post("/clients/{id}/credits",
+             status_code=status.HTTP_200_OK,
+             description="""Update client:
+                          - Add credits to client""",
+             responses={
+                 204: {
+                     "description": "The request has been processed successfully."
+                 }
+             })
+def add_credits_to_client(id: UUID, _credits: List[Credits], command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     try:
-        command_bus_provider.command_bus.send(AddCreditsToClientCommand(id, __to_client_credits(client_patch.credits)))
+        command_bus_provider.command_bus.send(AddCreditsToClientCommand(id, __to_client_credits(_credits)))
     except AggregateNotFoundException as e:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"The client with id '{e.unknown_id}' has not been found")
 

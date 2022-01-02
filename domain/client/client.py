@@ -28,6 +28,9 @@ class Credits:
     def refund(self):
         self.__value += 1
 
+    def add_credits(self, value: int):
+        self.__value += value
+
 
 class Client(AggregateRoot):
 
@@ -37,18 +40,20 @@ class Client(AggregateRoot):
         self.lastname = lastname
         self.credits: List[Credits] = []
 
-    def _provide_credits(self, client_credits: List[ClientCredits]):
-        self.credits = (list(map(lambda credit: Credits(credit.value, credit.subject), client_credits)))
+    def _add_credits(self, client_credits: List[ClientCredits]):
+        for _client_credits in client_credits:
+            existing_credits = next(filter(lambda credits: credits.subject is _client_credits.subject, self.credits), None)
+            existing_credits.add_credits(_client_credits.value) if existing_credits else self.credits.append(Credits(_client_credits.value, _client_credits.subject))
 
     @staticmethod
     def create(firstname: str, lastname: str, client_credits: List[ClientCredits] = None) -> Client:
         client = Client(firstname, lastname)
         if client_credits:
-            client._provide_credits(client_credits)
+            client._add_credits(client_credits)
         return client
 
     def add_credits(self, credits: List[ClientCredits]):
-        self._provide_credits(credits)
+        self._add_credits(credits)
 
     def decrease_credits_for(self, subject: ClassroomSubject):
         available_credits: Credits = next(filter(lambda credit: credit.subject is subject, self.credits), None)
