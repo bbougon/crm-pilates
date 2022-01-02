@@ -1,7 +1,8 @@
 from uuid import UUID
 
 from domain.classroom.classroom import Classroom
-from domain.client.client import Client, Credits
+from domain.classroom.classroom_type import ClassroomSubject
+from domain.client.client import Client
 from infrastructure.repository_provider import RepositoryProvider
 from web.presentation.domain.detailed_attendee import DetailedAttendee, AvailableCredits
 from web.presentation.domain.detailed_classroom import DetailedClassroom
@@ -14,14 +15,10 @@ def get_detailed_classroom(id: UUID):
 
 def get_detailed_attendees(classroom):
     return list(
-        map(lambda attendee: to_detailed_attendee(attendee.id, attendee.attendance.value), classroom.attendees))
+        map(lambda attendee: to_detailed_attendee(attendee.id, attendee.attendance.value, classroom.subject), classroom.attendees))
 
 
-def to_detailed_attendee(attendee_id: UUID, attendance: str) -> DetailedAttendee:
+def to_detailed_attendee(attendee_id: UUID, attendance: str, session_subject: ClassroomSubject) -> DetailedAttendee:
     attendee: Client = RepositoryProvider.read_repositories.client.get_by_id(attendee_id)
-
-    def __to_credits(_credits: Credits):
-        return AvailableCredits(_credits.subject.value, _credits.value)
-
-    attendee_credits = list(map(lambda credit: __to_credits(credit), attendee.credits))
-    return DetailedAttendee(attendee.id, attendee.firstname, attendee.lastname, attendance, attendee_credits)
+    attendee_credits = next(filter(lambda credit: credit.subject is session_subject, attendee.credits), None)
+    return DetailedAttendee(attendee.id, attendee.firstname, attendee.lastname, attendance, AvailableCredits(attendee_credits.subject.value, attendee_credits.value))

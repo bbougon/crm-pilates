@@ -142,7 +142,7 @@ def __map_session(root_id: UUID, session: Session):
             "stop": session.stop.isoformat()
         },
         "attendees": list(
-            map(lambda attendee: to_detailed_attendee(attendee.id, attendee.attendance.value), session.attendees))
+            map(lambda attendee: to_detailed_attendee(attendee.id, attendee.attendance.value, session.subject), session.attendees))
     }
 
 

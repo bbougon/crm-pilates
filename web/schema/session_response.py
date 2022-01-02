@@ -6,7 +6,6 @@ from pydantic.main import BaseModel
 
 
 class AvailableCredits(BaseModel):
-    subject: str
     amount: int
 
 
@@ -15,7 +14,7 @@ class Attendee(BaseModel):
     firstname: str
     lastname: str
     attendance: str
-    credits: Optional[List[AvailableCredits]]
+    credits: Optional[AvailableCredits]
 
 
 class Schedule(BaseModel):

@@ -1,5 +1,4 @@
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass
 from uuid import UUID
 
 
@@ -15,4 +14,4 @@ class DetailedAttendee:
     firstname: str
     lastname: str
     attendance: str
-    credits: List[AvailableCredits] = field(default_factory=list)
+    credits: AvailableCredits = None
