@@ -72,8 +72,8 @@ def get_client(id: UUID):
                 }
             })
 def get_clients():
-    clients = RepositoryProvider.read_repositories.client.get_all()
-    return list(map(lambda client: __map_client(client), next(clients)))
+    clients = sorted(next(RepositoryProvider.read_repositories.client.get_all()), key=lambda client: client.lastname and client.firstname)
+    return list(map(lambda client: __map_client(client), clients))
 
 
 @router.post("/clients/{id}/credits",

@@ -58,6 +58,35 @@ def test_get_clients_should_return_all_clients(memory_repositories):
     assert response_contains_client(response, second_client)
 
 
+def test_should_get_all_clients_sorted_by_name_and_firstname(memory_repositories):
+    first_client = ClientBuilderForTest().with_lastname("bardot").with_firstname("Jean").build()
+    second_client = ClientBuilderForTest().with_lastname("Martin").with_firstname("Lucien").build()
+    third_client = ClientBuilderForTest().with_lastname("BArdot").with_firstname("Brigitte").build()
+    RepositoryProvider.write_repositories.client.persist(first_client)
+    RepositoryProvider.write_repositories.client.persist(second_client)
+    RepositoryProvider.write_repositories.client.persist(third_client)
+
+    response = get_clients()
+
+    assert response == [
+        {
+            "lastname": third_client.lastname,
+            "firstname": third_client.firstname,
+            "id": third_client.id
+        },
+        {
+            "lastname": first_client.lastname,
+            "firstname": first_client.firstname,
+            "id": first_client.id
+        },
+        {
+            "lastname": second_client.lastname,
+            "firstname": second_client.firstname,
+            "id": second_client.id
+        }
+    ]
+
+
 def test_should_add_credits_to_client(memory_repositories):
     client: Client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
     RepositoryProvider.write_repositories.client.persist(client)

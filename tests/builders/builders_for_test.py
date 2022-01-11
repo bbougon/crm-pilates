@@ -60,6 +60,14 @@ class ClientBuilderForTest(Builder):
         self.with_credit(nb_credits, ClassroomSubject.MAT)
         return self
 
+    def with_firstname(self, firstname: str) -> ClientBuilderForTest:
+        self.firstname = firstname
+        return self
+
+    def with_lastname(self, lastname: str) -> ClientBuilderForTest:
+        self.lastname = lastname
+        return self
+
 
 class ClientContextBuilderForTest(Builder):
 
