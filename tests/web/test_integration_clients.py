@@ -82,7 +82,7 @@ def test_client_is_not_found():
 
 
 def test_get_clients_should_return_all_clients():
-    ClientContextBuilderForTest().with_client(ClientBuilderForTest().with_credit(2, ClassroomSubject.MACHINE_TRIO).build()).with_clients(2).persist(RepositoryProvider.write_repositories.client).build()
+    ClientContextBuilderForTest().with_client(ClientBuilderForTest().with_lastname("AA").with_credit(2, ClassroomSubject.MACHINE_TRIO).build()).with_clients(2).persist(RepositoryProvider.write_repositories.client).build()
 
     response: Response = http_client.get("/clients")
 

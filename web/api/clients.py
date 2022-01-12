@@ -72,7 +72,8 @@ def get_client(id: UUID):
                 }
             })
 def get_clients():
-    clients = sorted(next(RepositoryProvider.read_repositories.client.get_all()), key=lambda client: client.lastname and client.firstname)
+    clients = sorted(sorted(next(RepositoryProvider.read_repositories.client.get_all()),
+                            key=lambda client: client.firstname.lower()), key=lambda client: client.lastname.lower())
     return list(map(lambda client: __map_client(client), clients))
 
 
@@ -85,11 +86,13 @@ def get_clients():
                      "description": "The request has been processed successfully."
                  }
              })
-def add_credits_to_client(id: UUID, _credits: List[Credits], command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
+def add_credits_to_client(id: UUID, _credits: List[Credits],
+                          command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)):
     try:
         command_bus_provider.command_bus.send(AddCreditsToClientCommand(id, __to_client_credits(_credits)))
     except AggregateNotFoundException as e:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"The client with id '{e.unknown_id}' has not been found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND,
+                            detail=f"The client with id '{e.unknown_id}' has not been found")
 
 
 def __to_client_credits(creation_credits):
@@ -99,7 +102,9 @@ def __to_client_credits(creation_credits):
 
 
 def __map_client(client: Union[Client, ClientCreated]) -> dict:
-    payload = {"id": client.root_id if hasattr(client, "root_id") else client.id, "firstname": client.firstname, "lastname": client.lastname}
+    payload = {"id": client.root_id if hasattr(client, "root_id") else client.id, "firstname": client.firstname,
+               "lastname": client.lastname}
     if client.credits:
-        payload["credits"] = list(map(lambda credit: {"value": credit.value, "subject": credit.subject.value}, client.credits))
+        payload["credits"] = list(
+            map(lambda credit: {"value": credit.value, "subject": credit.subject.value}, client.credits))
     return payload

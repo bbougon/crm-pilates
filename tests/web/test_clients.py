@@ -60,19 +60,25 @@ def test_get_clients_should_return_all_clients(memory_repositories):
 
 def test_should_get_all_clients_sorted_by_name_and_firstname(memory_repositories):
     first_client = ClientBuilderForTest().with_lastname("bardot").with_firstname("Jean").build()
-    second_client = ClientBuilderForTest().with_lastname("Martin").with_firstname("Lucien").build()
-    third_client = ClientBuilderForTest().with_lastname("BArdot").with_firstname("Brigitte").build()
+    second_client = ClientBuilderForTest().with_lastname("Debussy").with_firstname("claude").build()
+    third_client = ClientBuilderForTest().with_lastname("Martin").with_firstname("Lucien").build()
+    fourth_client = ClientBuilderForTest().with_lastname("BArdot").with_firstname("Brigitte").build()
+    fifth_client = ClientBuilderForTest().with_lastname("Brecht").with_firstname("Bertolt").build()
+    sixth_client = ClientBuilderForTest().with_lastname("Wagner").with_firstname("Alfred").build()
     RepositoryProvider.write_repositories.client.persist(first_client)
-    RepositoryProvider.write_repositories.client.persist(second_client)
     RepositoryProvider.write_repositories.client.persist(third_client)
+    RepositoryProvider.write_repositories.client.persist(fifth_client)
+    RepositoryProvider.write_repositories.client.persist(sixth_client)
+    RepositoryProvider.write_repositories.client.persist(fourth_client)
+    RepositoryProvider.write_repositories.client.persist(second_client)
 
     response = get_clients()
 
     assert response == [
         {
-            "lastname": third_client.lastname,
-            "firstname": third_client.firstname,
-            "id": third_client.id
+            "lastname": fourth_client.lastname,
+            "firstname": fourth_client.firstname,
+            "id": fourth_client.id
         },
         {
             "lastname": first_client.lastname,
@@ -80,9 +86,24 @@ def test_should_get_all_clients_sorted_by_name_and_firstname(memory_repositories
             "id": first_client.id
         },
         {
+            "lastname": fifth_client.lastname,
+            "firstname": fifth_client.firstname,
+            "id": fifth_client.id
+        },
+        {
             "lastname": second_client.lastname,
             "firstname": second_client.firstname,
             "id": second_client.id
+        },
+        {
+            "lastname": third_client.lastname,
+            "firstname": third_client.firstname,
+            "id": third_client.id
+        },
+        {
+            "lastname": sixth_client.lastname,
+            "firstname": sixth_client.firstname,
+            "id": sixth_client.id
         }
     ]
 
