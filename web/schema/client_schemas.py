@@ -10,6 +10,12 @@ class Credits(BaseModel):
     value: int
     subject: ClassroomSubject
 
+    @validator('value')
+    def credit_must_be_positive(cls, v):
+        if v < 1:
+            raise ValueError("Credits cannot be null or negative, please provide a positive credit.")
+        return v
+
 
 class ClientCreation(BaseModel):
     firstname: str

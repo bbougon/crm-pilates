@@ -56,6 +56,17 @@ def test_should_not_create_client_with_empty_lastname_or_firstname(persisted_eve
                                            'type': 'value_error'}]}
 
 
+def test_should_not_accept_negative_credits():
+    client_builder = ClientJsonBuilderForTest().with_credits(-1, ClassroomSubject.MACHINE_DUO)
+
+    response = http_client.post("/clients", json=client_builder.build())
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.json() == {'detail': [{'loc': ['body', 'credits', 0, 'value'],
+                                           'msg': "Credits cannot be null or negative, please provide a positive credit.",
+                                           'type': 'value_error'}]}
+
+
 def test_get_client():
     repository, clients = ClientContextBuilderForTest().with_one_client().persist(
         RepositoryProvider.write_repositories.client).build()
