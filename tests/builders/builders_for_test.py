@@ -60,6 +60,10 @@ class ClientBuilderForTest(Builder):
         self.with_credit(nb_credits, ClassroomSubject.MAT)
         return self
 
+    def with_machine_duo_credit(self, nb_credits: int) -> ClientBuilderForTest:
+        self.with_credit(nb_credits, ClassroomSubject.MACHINE_DUO)
+        return self
+
     def with_firstname(self, firstname: str) -> ClientBuilderForTest:
         self.firstname = firstname
         return self

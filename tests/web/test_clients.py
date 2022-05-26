@@ -46,16 +46,16 @@ def test_should_create_client_with_credits_for_mat_and_machine():
 
 
 def test_get_clients_should_return_all_clients(memory_repositories):
-    first_client = ClientBuilderForTest().build()
-    second_client = ClientBuilderForTest().build()
+    first_client = ClientBuilderForTest().with_mat_credit(-1).build()
+    second_client = ClientBuilderForTest().with_mat_credit(5).build()
     RepositoryProvider.write_repositories.client.persist(first_client)
     RepositoryProvider.write_repositories.client.persist(second_client)
 
     response = get_clients()
 
     assert len(response) == 2
-    assert response_contains_client(response, first_client)
-    assert response_contains_client(response, second_client)
+    assert client_payload(first_client) in response
+    assert client_payload(second_client) in response
 
 
 def test_should_get_all_clients_sorted_by_name_and_firstname(memory_repositories):
@@ -75,36 +75,12 @@ def test_should_get_all_clients_sorted_by_name_and_firstname(memory_repositories
     response = get_clients()
 
     assert response == [
-        {
-            "lastname": fourth_client.lastname,
-            "firstname": fourth_client.firstname,
-            "id": fourth_client.id
-        },
-        {
-            "lastname": first_client.lastname,
-            "firstname": first_client.firstname,
-            "id": first_client.id
-        },
-        {
-            "lastname": fifth_client.lastname,
-            "firstname": fifth_client.firstname,
-            "id": fifth_client.id
-        },
-        {
-            "lastname": second_client.lastname,
-            "firstname": second_client.firstname,
-            "id": second_client.id
-        },
-        {
-            "lastname": third_client.lastname,
-            "firstname": third_client.firstname,
-            "id": third_client.id
-        },
-        {
-            "lastname": sixth_client.lastname,
-            "firstname": sixth_client.firstname,
-            "id": sixth_client.id
-        }
+        client_payload(fourth_client),
+        client_payload(first_client),
+        client_payload(fifth_client),
+        client_payload(second_client),
+        client_payload(third_client),
+        client_payload(sixth_client)
     ]
 
 
@@ -129,11 +105,16 @@ def test_should_return_an_error_when_client_not_found():
     assert e.value.status_code == HTTPStatus.NOT_FOUND
 
 
-def response_contains_client(response, client: Client):
+def client_payload(client):
     expected_client = {
         "lastname": client.lastname,
         "firstname": client.firstname,
-        "id": client.id
+        "id": client.id,
     }
+    if client.credits:
+        expected_client["credits"] = list(map(lambda credit: credit_to_payload(credit), client.credits))
+    return expected_client
 
-    return expected_client in response
+
+def credit_to_payload(credits: Credits):
+    return {"value": credits.value, "subject": credits.subject.value}

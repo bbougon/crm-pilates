@@ -68,7 +68,7 @@ def test_should_not_accept_negative_credits():
 
 
 def test_get_client():
-    repository, clients = ClientContextBuilderForTest().with_one_client().persist(
+    repository, clients = ClientContextBuilderForTest().with_client(ClientBuilderForTest().with_mat_credit(2).with_machine_duo_credit(-1).build()).persist(
         RepositoryProvider.write_repositories.client).build()
 
     response: Response = http_client.get(f"/clients/{clients[0]._id}")
@@ -76,7 +76,7 @@ def test_get_client():
     client: Client = clients[0]
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
-        "credits": [{'subject': 'MAT', 'value': 2}],
+        "credits": [{'subject': 'MAT', 'value': 2}, {'subject': 'MACHINE_DUO', 'value': -1}],
         "id": str(client._id),
         "firstname": client.firstname,
         "lastname": client.lastname
