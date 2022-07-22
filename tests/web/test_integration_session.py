@@ -2,6 +2,7 @@ from datetime import datetime
 from unittest.mock import ANY
 
 import arrow
+import pytz
 from fastapi import status, Response
 from fastapi.testclient import TestClient
 from immobilus import immobilus
@@ -20,7 +21,7 @@ from tests.helpers.helpers import expected_session_response
 client = TestClient(app)
 
 
-@immobilus("2019-05-07 08:24:15.230")
+@immobilus(pytz.timezone('Europe/Paris').localize(datetime(2019, 5, 7, 8, 24)))
 def test_get_next_sessions(memory_repositories, event_bus):
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \

@@ -1,4 +1,4 @@
-FROM python:3.9.7-slim-buster AS development
+FROM python:3.9.9-slim-buster AS development
 
 ENV LANG C.UTF-8
 
@@ -11,7 +11,7 @@ RUN make install-docker-local
 
 CMD [ "/app/local.virtualenv/bin/gunicorn", "--config", "/app/local.persistent/gunicorn.py", "--reload"]
 
-FROM python:3.9.7-slim-buster AS production
+FROM python:3.9.9-slim-buster AS production
 
 ENV LANG C.UTF-8
 

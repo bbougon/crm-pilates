@@ -61,7 +61,7 @@ class GetNextSessionsCommand(Command):
 
     @property
     def current_time(self) -> datetime:
-        return self._current_time.astimezone(pytz.utc) if self._current_time.tzinfo is None else self._current_time
+        return pytz.utc.localize(self._current_time) if self._current_time.tzinfo is None else self._current_time
 
 
 @dataclass

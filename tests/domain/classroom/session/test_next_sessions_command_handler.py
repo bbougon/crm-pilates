@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Tuple
 
+import pytz
 from immobilus import immobilus
 
 from command.command_handler import Status
@@ -19,7 +20,7 @@ def test_has_no_next_sessions():
     assert result[0].sessions == []
 
 
-@immobilus("2021-08-23T08:50")
+@immobilus(pytz.timezone('Europe/Paris').localize(datetime(2021, 8, 23, 8, 50)))
 def test_next_sessions_with_confirmed_sessions(memory_repositories):
     client_repository, clients = ClientContextBuilderForTest().with_one_client().persist(RepositoryProvider.write_repositories.client).build()
     classroom_repository, classrooms = ClassroomContextBuilderForTest()\

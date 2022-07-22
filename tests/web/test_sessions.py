@@ -61,7 +61,7 @@ def test_should_handle_aggregate_not_found_exception_on_checkin(mocker):
         assert e.detail == f"Classroom with id '{str(classroom_id)}' not found"
 
 
-@immobilus("2020-03-19 08:24:15.230")
+@immobilus(pytz.timezone('Europe/Paris').localize(datetime(2020, 3, 19, 8, 24)))
 def test_get_next_sessions_with_confirmed_sessions():
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
@@ -235,7 +235,7 @@ def test_sessions_should_return_sessions_according_to_time_zone():
     ]
 
 
-@immobilus("2020-03-19 08:24:15.230")
+@immobilus(pytz.timezone('Europe/Paris').localize(datetime(2020, 3, 19, 8, 24, 15)))
 def test_get_next_sessions_with_time_zone():
     repository, clients = ClientContextBuilderForTest().with_clients(3) \
         .persist(RepositoryProvider.write_repositories.client) \
