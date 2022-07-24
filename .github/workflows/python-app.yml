@@ -29,11 +29,10 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - uses: Gr1N/setup-poetry@v7
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        poetry install
     - name: Configure settings
       run: |
         ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/test.yml --diff
