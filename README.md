@@ -3,7 +3,10 @@
 CRM Pilates is an application to manage Pilates classroom for small and medium Pilates offices.
 
 ## Development
-CRM Pilates is made over `python 3.9.2`
+### Prerequisites
+
+- CRM Pilates is made over `python 3.9.9`
+- You need to install postgres and libpq in order to run tests and run the app locally
 
 [Documentation](https://miro.com/app/board/o9J_leSmQNU=/)
 
