@@ -2,9 +2,9 @@ import uuid
 
 import pytest
 
-from domain.exceptions import AggregateNotFoundException
-from domain.repository import Repository
-from infrastructure.repository.memory.memory_repository import MemoryRepository
+from crm_pilates.domain.exceptions import AggregateNotFoundException
+from crm_pilates.domain.repository import Repository
+from crm_pilates.infrastructure.repository.memory.memory_repository import MemoryRepository
 
 
 class Custom:

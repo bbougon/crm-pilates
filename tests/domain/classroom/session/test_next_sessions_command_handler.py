@@ -4,11 +4,11 @@ from typing import Tuple
 import pytz
 from immobilus import immobilus
 
-from command.command_handler import Status
-from domain.classroom.session.next_sessions_command_handler import NextSessionsCommandHandler
-from domain.classroom.session.existing_sessions import ExistingSessions
-from domain.commands import GetNextSessionsCommand
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.command.command_handler import Status
+from crm_pilates.domain.classroom.session.next_sessions_command_handler import NextSessionsCommandHandler
+from crm_pilates.domain.classroom.session.existing_sessions import ExistingSessions
+from crm_pilates.domain.commands import GetNextSessionsCommand
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClassroomBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, SessionContextBuilderForTest
 

@@ -9,20 +9,20 @@ from fastapi import Response, HTTPException, status
 from immobilus import immobilus
 from mock.mock import ANY
 
-from domain.classroom.classroom import Classroom
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.client.client import Client
-from domain.exceptions import AggregateNotFoundException
-from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.domain.classroom.classroom import Classroom
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.client.client import Client
+from crm_pilates.domain.exceptions import AggregateNotFoundException
+from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import SessionCheckinJsonBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, SessionContextBuilderForTest, \
     AttendeeSessionCancellationJsonBuilderForTest, ClientBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
 from tests.helpers.helpers import expected_session_response
-from web.api.session import session_checkin, next_sessions, sessions, session_checkout, attendee_session_cancellation
-from web.presentation.domain.detailed_attendee import DetailedAttendee, AvailableCredits
-from web.schema.session_schemas import SessionCheckin, SessionCheckout, AttendeeSessionCancellation
+from crm_pilates.web.api.session import session_checkin, next_sessions, sessions, session_checkout, attendee_session_cancellation
+from crm_pilates.web.presentation.domain.detailed_attendee import DetailedAttendee, AvailableCredits
+from crm_pilates.web.schema.session_schemas import SessionCheckin, SessionCheckout, AttendeeSessionCancellation
 
 
 def test_should_handle_domain_exception_on_invalid_confirmed_session():

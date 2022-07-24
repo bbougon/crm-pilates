@@ -1,7 +1,7 @@
 import pytest
 from mimesis import Datetime
 
-from web.schema.classroom_schemas import ClassroomCreation, ClassroomPatch
+from crm_pilates.web.schema.classroom_schemas import ClassroomCreation, ClassroomPatch
 
 
 def test_attendees_are_unique_for_creation():

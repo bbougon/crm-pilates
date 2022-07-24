@@ -4,13 +4,13 @@ from uuid import UUID
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, Session
-from domain.classroom.attendee import Attendance
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.classroom.duration import Duration, MinuteTimeUnit
-from domain.client.client import Client
-from infrastructure.event_to_domain_loader import EventToDomainLoader
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.domain.classroom.classroom import Classroom, Session
+from crm_pilates.domain.classroom.attendee import Attendance
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.classroom.duration import Duration, MinuteTimeUnit
+from crm_pilates.domain.client.client import Client
+from crm_pilates.infrastructure.event_to_domain_loader import EventToDomainLoader
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import EventBuilderForTest, ClassroomBuilderForTest, \
     ConfirmedSessionBuilderForTest, ClientBuilderForTest
 

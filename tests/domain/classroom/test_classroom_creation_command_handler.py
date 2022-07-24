@@ -4,15 +4,15 @@ from typing import Tuple
 import pytz
 from immobilus import immobilus
 
-from command.command_handler import Status
-from domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.commands import ClassroomCreationCommand
-from event.event_store import StoreLocator
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.command.command_handler import Status
+from crm_pilates.domain.classroom.classroom_creation_command_handler import ClassroomCreationCommandHandler, ClassroomCreated
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.commands import ClassroomCreationCommand
+from crm_pilates.event.event_store import StoreLocator
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClientContextBuilderForTest
-from web.schema.classroom_schemas import Duration
+from crm_pilates.web.schema.classroom_schemas import Duration
 
 
 @immobilus("2020-04-03 10:24:15.230")

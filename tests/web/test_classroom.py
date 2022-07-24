@@ -7,17 +7,17 @@ import pytz
 from fastapi import HTTPException
 from fastapi import Response
 
-from domain.classroom.attendee import Attendee
-from domain.classroom.classroom import Classroom
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.exceptions import DomainException, AggregateNotFoundException
-from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
-from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
+from crm_pilates.domain.classroom.attendee import Attendee
+from crm_pilates.domain.classroom.classroom import Classroom
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
+from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
+from crm_pilates.infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest, ClassroomPatchJsonBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest, RepositoryProviderForTest
-from web.api.classroom import create_classroom, update_classroom, get_classroom
-from web.schema.classroom_schemas import ClassroomCreation, TimeUnit
+from crm_pilates.web.api.classroom import create_classroom, update_classroom, get_classroom
+from crm_pilates.web.schema.classroom_schemas import ClassroomCreation, TimeUnit
 
 
 def test_should_create_classroom(memory_event_store):

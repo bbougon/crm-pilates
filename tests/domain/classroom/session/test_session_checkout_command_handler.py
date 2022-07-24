@@ -3,13 +3,13 @@ from datetime import datetime
 import pytest
 import pytz
 
-from command.command_handler import Status
-from domain.classroom.session.session_checkin_saga_handler import SessionCheckinSagaHandler, SessionCheckedIn
-from domain.classroom.session.session_checkout_command_handler import SessionCheckoutCommandHandler
-from domain.commands import SessionCheckoutCommand
-from domain.exceptions import DomainException
-from domain.sagas import SessionCheckinSaga
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.command.command_handler import Status
+from crm_pilates.domain.classroom.session.session_checkin_saga_handler import SessionCheckinSagaHandler, SessionCheckedIn
+from crm_pilates.domain.classroom.session.session_checkout_command_handler import SessionCheckoutCommandHandler
+from crm_pilates.domain.commands import SessionCheckoutCommand
+from crm_pilates.domain.exceptions import DomainException
+from crm_pilates.domain.sagas import SessionCheckinSaga
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClientContextBuilderForTest, ClientBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest

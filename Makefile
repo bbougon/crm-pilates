@@ -2,13 +2,12 @@
 ## PATHS DEFINITION ##
 ######################
 persistent_path := local.persistent
-virtualenv_path := local.virtualenv
+virtualenv_path := .venv
 
 install-virtualenv:
-	./install-virtualenv.sh
-
-requirements:
-	./install-virtualenv.sh requirements.txt
+	@poetry config virtualenvs.in-project true
+	@poetry config virtualenvs.path .venv
+	@poetry install $(INSTALL_ARGS)
 
 settings:
 	$(virtualenv_path)/bin/ansible-playbook scripts/ansible/playbook.yml --inventory scripts/ansible/local.yml --diff
@@ -27,11 +26,11 @@ install-persistent:
 create-local-database:
 	python ./scripts/create_database.py
 
-install: requirements install-persistent settings create-local-database
+install: install-virtualenv install-persistent settings create-local-database
 
-install-docker: requirements install-persistent settings-docker create-local-database
+install-docker: install-virtualenv install-persistent settings-docker create-local-database
 
-install-docker-local: requirements install-persistent settings-docker-local create-local-database
+install-docker-local: install-virtualenv install-persistent settings-docker-local create-local-database
 
 run-all: run
 
@@ -43,7 +42,7 @@ coverage:
 ######################
 
 test: linter
-	./local.virtualenv/bin/pytest $(args)
+	./.venv/bin/pytest $(args)
 
 run:
 	./run.sh

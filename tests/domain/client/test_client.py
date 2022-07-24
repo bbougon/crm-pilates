@@ -1,8 +1,8 @@
 import pytest
 
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.client.client import Client
-from domain.exceptions import DomainException
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.client.client import Client
+from crm_pilates.domain.exceptions import DomainException
 
 
 def test_cannot_refund_credits_when_none_available():

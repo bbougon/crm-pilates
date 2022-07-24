@@ -4,11 +4,11 @@ from typing import Tuple
 import pytz
 from immobilus import immobilus
 
-from command.command_handler import Status
-from domain.classroom.session.session_creation_command_handler import SessionCreationCommandHandler, ConfirmedSessionEvent
-from domain.commands import SessionCreationCommand
-from event.event_store import StoreLocator
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.command.command_handler import Status
+from crm_pilates.domain.classroom.session.session_creation_command_handler import SessionCreationCommandHandler, ConfirmedSessionEvent
+from crm_pilates.domain.commands import SessionCreationCommand
+from crm_pilates.event.event_store import StoreLocator
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClassroomBuilderForTest, ClassroomContextBuilderForTest, \
     ClientContextBuilderForTest

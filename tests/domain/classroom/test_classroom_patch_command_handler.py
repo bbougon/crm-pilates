@@ -5,11 +5,11 @@ import pytest
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom
-from domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
-from domain.commands import ClassroomPatchCommand
-from domain.exceptions import AggregateNotFoundException
-from event.event_store import StoreLocator
+from crm_pilates.domain.classroom.classroom import Classroom
+from crm_pilates.domain.classroom.classroom_patch_command_handler import ClassroomPatchCommandHandler
+from crm_pilates.domain.commands import ClassroomPatchCommand
+from crm_pilates.domain.exceptions import AggregateNotFoundException
+from crm_pilates.event.event_store import StoreLocator
 from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClassroomContextBuilderForTest, ClientContextBuilderForTest, \
     ClassroomBuilderForTest

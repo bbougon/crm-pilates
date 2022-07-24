@@ -6,7 +6,7 @@ cores = multiprocessing.cpu_count()
 bind = ["0.0.0.0:{{ gunicorn_port }}"]
 
 # app
-wsgi_app = "main:app"
+wsgi_app = "crm_pilates.main:app"
 
 # worker type
 worker_class = "uvicorn.workers.UvicornWorker"

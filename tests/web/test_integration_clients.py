@@ -4,10 +4,10 @@ from fastapi import status, Response
 from fastapi.testclient import TestClient
 from mock.mock import ANY
 
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.client.client import Client
-from infrastructure.repository_provider import RepositoryProvider
-from main import app
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.client.client import Client
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.main import app
 from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientContextBuilderForTest, ClientBuilderForTest
 
 http_client = TestClient(app)

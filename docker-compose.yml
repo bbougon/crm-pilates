@@ -25,11 +25,11 @@ services:
     ports:
       - 8081:8081
     volumes:
-      - "./command:/app/command"
-      - "./domain:/app/domain"
-      - "./event:/app/event"
-      - "./infrastructure:/app/infrastructure"
-      - "./web:/app/web"
+      - "./command:/crm-pilates/crm_pilates/command"
+      - "./domain:/crm-pilates/crm_pilates/domain"
+      - "./event:/crm-pilates/crm_pilates/event"
+      - "./infrastructure:/crm-pilates/crm_pilates/infrastructure"
+      - "./web:/crm-pilates/crm_pilates/web"
     build:
       context: .
       target: development

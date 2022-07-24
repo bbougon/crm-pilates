@@ -7,3 +7,38 @@ max-line-length = 100
 [flake8]
 ignore = "E501"
 
+
+[tool.poetry]
+name = "crm-pilates"
+version = "0.1.0"
+description = "A Pilates CRM to manage small pilates studio"
+authors = ["Bertrand Bougon <bertrandbougon@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+uvicorn = {extras = ["standard"], version = "^0.18.2"}
+gunicorn = "^20.1.0"
+pydantic = "^1.9.1"
+ansible = "^6.1.0"
+arrow = "^1.2.2"
+pytz = "^2022.1"
+colorlog = "^6.6.0"
+fastapi = "^0.79.0"
+psycopg-c = "^3.0.15"
+psycopg = "^3.0.15"
+
+[tool.poetry.dev-dependencies]
+coverage = "^6.4.2"
+pytest-cov = "^3.0.0"
+flake8 = "^4.0.1"
+immobilus = "^1.5.0"
+mimesis = "^5.5.0"
+mock = "^4.0.3"
+pytest = "^7.1.2"
+requests = "^2.28.1"
+pytest-mock = "^3.8.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

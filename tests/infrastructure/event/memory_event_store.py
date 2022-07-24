@@ -1,4 +1,4 @@
-from event.event_store import EventStore, Event
+from crm_pilates.event.event_store import EventStore, Event
 
 
 class MemoryEventStore(EventStore):

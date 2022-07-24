@@ -5,7 +5,7 @@ from uuid import UUID
 import pytz
 from immobilus import immobilus
 
-from event.event_store import Event, EventSourced, StoreLocator
+from crm_pilates.event.event_store import Event, EventSourced, StoreLocator
 
 
 @EventSourced

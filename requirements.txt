@@ -7,14 +7,3 @@ ansible
 arrow
 psycopg[c]
 pytz
-
-# test
-coverage
-pytest-cov
-flake8
-immobilus
-mimesis
-mock
-pytest
-requests
-pytest-mock

@@ -10,28 +10,28 @@ from uuid import UUID
 import pytz
 from mimesis import Person, Text, Numeric, Datetime
 
-from domain.classroom.attendee import Attendee
-from domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession
-from domain.classroom.classroom_creation_command_handler import ClassroomCreated
-from domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
-from domain.classroom.classroom_repository import ClassroomRepository
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.classroom.duration import Duration, HourTimeUnit
-from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
-from domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
-from domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
-from domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
-from domain.classroom.session.session_repository import SessionRepository
-from domain.client.client import Client, Credits
-from domain.client.client_command_handlers import ClientCreated, ClientCreditsUpdated
-from domain.commands import ClientCredits
-from domain.repository import Repository
-from event.event_store import Event, EventSourced
-from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
-from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
-from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
-from infrastructure.repository_provider import RepositoryProvider
-from web.schema.classroom_schemas import TimeUnit, ClassroomPatch
+from crm_pilates.domain.classroom.attendee import Attendee
+from crm_pilates.domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession
+from crm_pilates.domain.classroom.classroom_creation_command_handler import ClassroomCreated
+from crm_pilates.domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
+from crm_pilates.domain.classroom.classroom_repository import ClassroomRepository
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.classroom.duration import Duration, HourTimeUnit
+from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
+from crm_pilates.domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
+from crm_pilates.domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
+from crm_pilates.domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
+from crm_pilates.domain.classroom.session.session_repository import SessionRepository
+from crm_pilates.domain.client.client import Client, Credits
+from crm_pilates.domain.client.client_command_handlers import ClientCreated, ClientCreditsUpdated
+from crm_pilates.domain.commands import ClientCredits
+from crm_pilates.domain.repository import Repository
+from crm_pilates.event.event_store import Event, EventSourced
+from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
+from crm_pilates.infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
+from crm_pilates.infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 
 
 class Builder:

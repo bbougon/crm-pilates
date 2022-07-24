@@ -3,9 +3,9 @@ from dateutil.tz import tzutc
 from fastapi import status, Response
 from fastapi.testclient import TestClient
 
-from domain.classroom.classroom import Classroom
-from infrastructure.repository_provider import RepositoryProvider
-from main import app
+from crm_pilates.domain.classroom.classroom import Classroom
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.main import app
 from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest, \
     ClassroomContextBuilderForTest, ClassroomBuilderForTest
 

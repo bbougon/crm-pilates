@@ -5,12 +5,12 @@ import pytest
 import pytz
 from immobilus import immobilus
 
-from domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession, \
+from crm_pilates.domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession, \
     InvalidSessionStartDateException, Session
-from domain.classroom.attendee import Attendee
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
-from domain.exceptions import DomainException
+from crm_pilates.domain.classroom.attendee import Attendee
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
+from crm_pilates.domain.exceptions import DomainException
 
 
 def test_create_should_create_a_classroom_with_1_hour_duration():

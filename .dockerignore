@@ -3,3 +3,9 @@
 htmlcov
 local.persistent
 local.virtualenv
+.venv
+adr
+.github
+.do
+dist
+tests

@@ -6,9 +6,9 @@ from uuid import UUID, uuid4
 import psycopg
 from psycopg.types.json import Jsonb
 
-from infrastructure.event.sqlite.sqlite_event_store import MultipleJsonEncoders, UUIDEncoder, EnumEncoder, \
+from crm_pilates.infrastructure.event.sqlite.sqlite_event_store import MultipleJsonEncoders, UUIDEncoder, EnumEncoder, \
     DateTimeEncoder
-from infrastructure.migration.migration import Migration
+from crm_pilates.infrastructure.migration.migration import Migration
 
 
 def set_event(id: UUID, root_id: UUID, event_type: str, date: datetime, event: dict):

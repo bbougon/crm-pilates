@@ -4,14 +4,14 @@ from http import HTTPStatus
 import pytest
 from fastapi import Response, HTTPException
 
-from domain.classroom.classroom_type import ClassroomSubject
-from domain.client.client import Client
-from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.client.client import Client
+from crm_pilates.infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import ClientJsonBuilderForTest, ClientBuilderForTest, CreditsJsonBuilderForTest
 from tests.builders.providers_for_test import CommandBusProviderForTest
-from web.api.clients import create_client, get_clients, add_credits_to_client
-from web.schema.client_schemas import ClientCreation, Credits
+from crm_pilates.web.api.clients import create_client, get_clients, add_credits_to_client
+from crm_pilates.web.schema.client_schemas import ClientCreation, Credits
 
 
 def test_client_creation():

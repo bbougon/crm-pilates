@@ -4,12 +4,12 @@ from typing import Tuple
 import pytz
 from immobilus import immobilus
 
-from command.command_handler import Status
-from domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled, \
+from crm_pilates.command.command_handler import Status
+from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled, \
     AttendeeSessionCancellationSagaHandler
-from domain.sagas import AttendeeSessionCancellationSaga
-from event.event_store import StoreLocator
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.domain.sagas import AttendeeSessionCancellationSaga
+from crm_pilates.event.event_store import StoreLocator
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import ClientContextBuilderForTest, ClassroomContextBuilderForTest, \
     ClassroomBuilderForTest, SessionContextBuilderForTest

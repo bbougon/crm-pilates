@@ -5,6 +5,6 @@ local.persistent/
 *.iml
 .coverage
 htmlcov
-/settings.ini
+settings.ini
 volumes/
 tests/volumes

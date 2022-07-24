@@ -2,16 +2,16 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from command.command_bus import CommandBus
-from domain.classroom.classroom_repository import ClassroomRepository
-from domain.client.client_repository import ClientRepository
-from infrastructure.command_bus_provider import CommandBusProvider, command_handlers, saga_handlers
-from infrastructure.repositories import Repositories
-from infrastructure.repository.memory.memory_attendee_repository import MemoryAttendeeRepository
-from infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
-from infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
-from infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
-from infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.command.command_bus import CommandBus
+from crm_pilates.domain.classroom.classroom_repository import ClassroomRepository
+from crm_pilates.domain.client.client_repository import ClientRepository
+from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider, command_handlers, saga_handlers
+from crm_pilates.infrastructure.repositories import Repositories
+from crm_pilates.infrastructure.repository.memory.memory_attendee_repository import MemoryAttendeeRepository
+from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
+from crm_pilates.infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
+from crm_pilates.infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
+from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
 
 class ProviderForTest:

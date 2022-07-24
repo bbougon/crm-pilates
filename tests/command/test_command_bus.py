@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Tuple
 
-from command.command_bus import CommandBus
-from command.command_handler import CommandHandler, Command, Status
-from event.event_store import Event
+from crm_pilates.command.command_bus import CommandBus
+from crm_pilates.command.command_handler import CommandHandler, Command, Status
+from crm_pilates.event.event_store import Event
 
 
 @dataclass
