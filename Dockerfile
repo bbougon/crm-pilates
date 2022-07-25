@@ -22,7 +22,7 @@ RUN make install-docker-local INSTALL_ARGS="--no-dev"
 ENV VIRTUAL_ENV=/crm-pilates/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-CMD [ "gunicorn", "--config", "/crm-pilates/local.persistent/gunicorn.py", "--reload"]
+CMD [ "gunicorn", "--config", "/crm-pilates/crm_pilates/gunicorn.py", "--reload"]
 
 FROM runtime-env AS production
 
@@ -33,5 +33,5 @@ RUN make install-docker INSTALL_ARGS="--no-dev"
 ENV VIRTUAL_ENV=/crm-pilates/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-CMD [ "gunicorn", "--config", "/crm-pilates/local.persistent/gunicorn.py" ]
+CMD [ "gunicorn", "--config", "/crm-pilates/crm_pilates/gunicorn.py" ]
 

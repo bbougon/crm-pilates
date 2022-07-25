@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-gunicorn
-pydantic
-colorlog
-ansible
-arrow
-psycopg[c]
-pytz

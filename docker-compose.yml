@@ -24,12 +24,12 @@ services:
     container_name: crm-pilates-api
     ports:
       - 8081:8081
-    volumes:
-      - "./command:/crm-pilates/crm_pilates/command"
-      - "./domain:/crm-pilates/crm_pilates/domain"
-      - "./event:/crm-pilates/crm_pilates/event"
-      - "./infrastructure:/crm-pilates/crm_pilates/infrastructure"
-      - "./web:/crm-pilates/crm_pilates/web"
+#    volumes:
+#      - "./crm_pilates/command:/crm-pilates/crm_pilates/command"
+#      - "./crm_pilates/domain:/crm-pilates/crm_pilates/domain"
+#      - "./crm_pilates/event:/crm-pilates/crm_pilates/event"
+#      - "./crm_pilates/infrastructure:/crm-pilates/crm_pilates/infrastructure"
+#      - "./crm_pilates/web:/crm-pilates/crm_pilates/web"
     build:
       context: .
       target: development

@@ -1,11 +1,11 @@
+.do
+.github
 .idea
 .pytest_cache
-htmlcov
-local.persistent
-local.virtualenv
 .venv
 adr
-.github
-.do
 dist
+htmlcov
+local.persistent
 tests
+*.iml
