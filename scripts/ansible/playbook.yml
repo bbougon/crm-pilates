@@ -2,6 +2,7 @@
   hosts: all
   roles:
     - role: settings
+    - role: print_settings
 
 - name: Configure test environment variable
   hosts: test
