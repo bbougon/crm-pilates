@@ -1,5 +1,6 @@
 gunicorn_port: "8081"
 root_dir: "{{ (playbook_dir + '/../..') | realpath }}"
+module_dir: "{{ root_dir }}"
 event_store_path: "{{ root_dir }}/local.persistent/event/event_store.db"
 cors_allow_origins: "*"
 database_url: "postgresql://crm-pilates:example@crm-pilates-postgres:5432/crm-pilates"

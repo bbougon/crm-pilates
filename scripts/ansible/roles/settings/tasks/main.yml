@@ -1,4 +1,4 @@
 - name: copy settings
   template:
     src: settings.ini
-    dest: "{{ root_dir }}/settings.ini"
+    dest: "{{ module_dir }}/settings.ini"

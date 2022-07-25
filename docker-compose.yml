@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: crm-pilates
       POSTGRES_PASSWORD: example
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - "./volumes/db/data:/var/lib/postgresql/data"
 
@@ -17,13 +17,13 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
 
   crm-pilates-api:
     image: crm-pilates-api:latest
     container_name: crm-pilates-api
     ports:
-      - 8081:8081
+      - "8081:8081"
 #    volumes:
 #      - "./crm_pilates/command:/crm-pilates/crm_pilates/command"
 #      - "./crm_pilates/domain:/crm-pilates/crm_pilates/domain"
