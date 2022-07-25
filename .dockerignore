@@ -1,5 +1,7 @@
 .do
+.git
 .github
+.gitignore
 .idea
 .pytest_cache
 .venv
@@ -8,4 +10,5 @@ dist
 htmlcov
 local.persistent
 tests
+volumes
 *.iml
