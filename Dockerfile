@@ -34,5 +34,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN make install-docker INSTALL_ARGS="--no-dev"
 
+WORKDIR /crm-pilates/crm_pilates
+
 CMD [ "gunicorn", "--config", "/crm-pilates/crm_pilates/gunicorn.py" ]
 
