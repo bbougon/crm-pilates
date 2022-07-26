@@ -1,3 +1,3 @@
 - name: display settings
-  command: cat {{ root_dir }}/settings.ini
+  command: cat {{ module_dir }}/settings.ini
   register: display_settings_output
