@@ -1,5 +1,4 @@
 root_dir: "{{ (playbook_dir + '/../..') | realpath }}"
-module_dir: "{{ root_dir }}"
 event_store_path: "{{ root_dir }}/local.persistent/event/event_store.db"
 cors_allow_origins: "*"
 database_url: "postgresql://crm-pilates-test:example@localhost:5433/crm-pilates-test"
