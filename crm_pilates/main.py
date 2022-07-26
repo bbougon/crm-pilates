@@ -1,5 +1,14 @@
+import logging
+import os
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+logging.getLogger(__name__)
+logging.warning("Current main path %s", os.path.realpath(__file__))
+logging.warning(f'files in root dir: {", ".join([f for f in os.listdir(".") if os.path.isfile(f)])}')
+logging.warning(f'files in module dir: {", ".join([f for f in os.listdir("./crm_pilates")])}')
 
 from crm_pilates.api import api_router
 from crm_pilates import settings
