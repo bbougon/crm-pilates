@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 logging.getLogger(__name__)
 logging.warning("Current main path %s", os.path.realpath(__file__))
 logging.warning("Current working dir %s", os.getcwd())
+logging.warning(f'OS Root dir: {", ".join([f for f in os.listdir("/")])}')
 logging.warning(f'Root dir: {", ".join([f for f in os.listdir(".")])}')
 logging.warning(f'Module dir: {", ".join([f for f in os.listdir("./crm_pilates")])}')
 
