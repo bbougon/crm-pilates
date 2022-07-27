@@ -7,8 +7,6 @@ class Config:
     KEY_SEPARATOR = "."
 
     def __init__(self, settings_path="test.txt") -> None:
-        logging.getLogger(__name__)
-        logging.warning(f'Current settings path {settings_path} - current execution path {os.path.realpath(__file__)}')
         self._file_path = os.environ.get("SETTINGS_PATH", settings_path)
         self._config = self._parse_file(self._file_path)
 
@@ -19,6 +17,11 @@ class Config:
         return config_parser
 
     def __call__(self, key, default=None, cast=None):
+        environ_variable = os.environ.get(key)
+        logger = logging.getLogger(__name__)
+        logger.warning(f'env key-value {key} - {environ_variable}')
+        if environ_variable is not None:
+            return environ_variable
         section, option = self._parse_key(key)
         if cast is bool:
             get = self._config.getboolean
@@ -41,5 +44,5 @@ class Config:
 config = Config()
 
 EVENT_STORE_PATH = config("EVENT_STORE_PATH")
-CORS_ALLOW_ORIGINS = config("CORS.CORS_ALLOW_ORIGINS").split(",")
-DATABASE_URL = os.environ.get("DATABASE_URL", config("DATABASE.DATABASE_URL"))
+CORS_ALLOW_ORIGINS = config("CORS_ALLOW_ORIGINS").split(",")
+DATABASE_URL = config("DATABASE_URL")

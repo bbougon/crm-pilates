@@ -42,7 +42,7 @@ There is a `Dockerfile` within root directory. It builds the api then creates an
 
 There is also a `docker-compose.yml` file
 
-- `docker-compose up` will:
+- `docker-compose --env-file .env.local up` will:
     1. boot a postgres database container named `crm-pilates-postgres` (login: `crm-pilates`, password: `example`)
     2. boot an adminer container
     3. boot the `crm-pilates-api` and load the events persisted in database 

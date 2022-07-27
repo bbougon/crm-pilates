@@ -1,4 +1,4 @@
-- name: copy gunicorn configuration
+- name: setup server
   template:
     src: gunicorn.py
     dest: "{{ root_dir }}/crm_pilates/gunicorn.py"

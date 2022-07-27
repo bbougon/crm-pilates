@@ -1,3 +1,0 @@
-- name: display settings
-  command: cat {{ root_dir }}/test.txt
-  register: display_settings_output

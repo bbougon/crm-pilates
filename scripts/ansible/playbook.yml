@@ -1,10 +1,3 @@
-- name: Configure settings
-  hosts: all
-  roles:
-    - role: settings
-    - role: display_settings
-    - role: print_settings
-
 - name: Configure test environment variable
   hosts: test
   environment:

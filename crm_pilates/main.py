@@ -1,18 +1,8 @@
-import logging
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-logging.getLogger(__name__)
-logging.warning("Current main path %s", os.path.realpath(__file__))
-logging.warning("Current working dir %s", os.getcwd())
-logging.warning(f'OS Root dir: {", ".join([f for f in os.listdir("/")])}')
-logging.warning(f'Root dir: {", ".join([f for f in os.listdir(".")])}')
-logging.warning(f'Module dir: {", ".join([f for f in os.listdir("./crm_pilates")])}')
-
-from crm_pilates.api import api_router
 from crm_pilates import settings
+from crm_pilates.api import api_router
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
 from crm_pilates.infrastructure.event_to_domain_loader import EventToDomainLoader
