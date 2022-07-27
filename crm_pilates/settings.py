@@ -6,7 +6,7 @@ from configparser import ConfigParser
 class Config:
     KEY_SEPARATOR = "."
 
-    def __init__(self, settings_path="test.ini") -> None:
+    def __init__(self, settings_path="test.txt") -> None:
         logging.getLogger(__name__)
         logging.warning(f'Current settings path {settings_path} - current execution path {os.path.realpath(__file__)}')
         self._file_path = os.environ.get("SETTINGS_PATH", settings_path)
