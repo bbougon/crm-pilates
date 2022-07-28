@@ -1,4 +1,3 @@
-import logging
 import os
 from configparser import ConfigParser
 
@@ -18,8 +17,6 @@ class Config:
 
     def __call__(self, key, default=None, cast=None):
         environ_variable = os.environ.get(key)
-        logger = logging.getLogger(__name__)
-        logger.warning(f'env key-value {key} - {environ_variable}')
         if environ_variable is not None:
             return environ_variable
         section, option = self._parse_key(key)
