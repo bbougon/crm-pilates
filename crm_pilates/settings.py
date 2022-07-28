@@ -5,7 +5,7 @@ from configparser import ConfigParser
 class Config:
     KEY_SEPARATOR = "."
 
-    def __init__(self, settings_path="test.txt") -> None:
+    def __init__(self, settings_path="settings.ini") -> None:
         self._file_path = os.environ.get("SETTINGS_PATH", settings_path)
         self._config = self._parse_file(self._file_path)
 

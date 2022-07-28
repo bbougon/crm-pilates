@@ -1,13 +1,13 @@
 #!/bin/bash
 
-PATH=./local.virtualenv/bin:$PATH
+PATH=./.venv/bin:$PATH
 COVARGS="\
     --cov-report=html \
-    --cov=command \
-    --cov=domain \
-    --cov=event \
-    --cov=infrastructure \
-    --cov=web \
+    --cov=crm_pilates/command \
+    --cov=crm_pilates/domain \
+    --cov=crm_pilates/event \
+    --cov=crm_pilates/infrastructure \
+    --cov=crm_pilates/web \
 "
 
 pytest "$*" $COVARGS

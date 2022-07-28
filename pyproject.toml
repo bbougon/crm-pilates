@@ -27,6 +27,9 @@ colorlog = "^6.6.0"
 fastapi = "^0.79.0"
 psycopg-c = "^3.0.15"
 psycopg = "^3.0.15"
+python-jose = {version = "^3.3.0", extras = ["cryptography"]}
+passlib = {version = "^1.7.4", extras = ["bcrypt"]}
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.2"
