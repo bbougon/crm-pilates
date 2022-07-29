@@ -21,6 +21,7 @@ router = APIRouter()
 @router.post("/classrooms",
              response_model=ClassroomCreatedResponse,
              status_code=status.HTTP_201_CREATED,
+             tags=["classroom"],
              responses={
                  201: {
                      "description": "Create a classroom",
@@ -72,6 +73,7 @@ def create_classroom(classroom_creation: ClassroomCreation, response: Response,
 
 @router.get("/classrooms/{id}",
             response_model=ClassroomReadResponse,
+            tags=["classroom"],
             responses={
                 404: {
                     "description": "Classroom has not been found"
@@ -102,6 +104,7 @@ def get_classroom(id: UUID):
 
 @router.patch("/classrooms/{id}",
               status_code=status.HTTP_204_NO_CONTENT,
+              tags=["classroom"],
               description="Add attendees to a classroom. This resource works as a patch, "
                           "you must provide all classroom attendees (i.e: you had Clara already added to the classroom,"
                           " if you want John to join, you must provide both Clara and John "

@@ -19,6 +19,7 @@ router = APIRouter()
 
 @router.post("/clients",
              status_code=status.HTTP_201_CREATED,
+             tags=["clients"],
              response_model=ClientReadResponse,
              responses={
                  201: {
@@ -45,6 +46,7 @@ def create_client(client_creation: ClientCreation, response: Response,
 
 @router.get("/clients/{id}",
             status_code=status.HTTP_200_OK,
+            tags=["clients"],
             response_model=ClientReadResponse,
             responses={
                 200: {
@@ -65,6 +67,7 @@ def get_client(id: UUID):
 
 @router.get("/clients",
             status_code=status.HTTP_200_OK,
+            tags=["clients"],
             response_model=List[ClientReadResponse],
             responses={
                 200: {
@@ -79,6 +82,7 @@ def get_clients():
 
 @router.post("/clients/{id}/credits",
              status_code=status.HTTP_200_OK,
+             tags=["clients"],
              description="""Update client:
                           - Add credits to client""",
              responses={
