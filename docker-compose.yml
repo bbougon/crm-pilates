@@ -28,6 +28,7 @@ services:
       EVENT_STORE_PATH: ./local.persistent/event/event_store.db
       CORS_ALLOW_ORIGINS: "*"
       DATABASE_URL: postgresql://crm-pilates:example@crm-pilates-postgres:5432/crm-pilates
+      SECRET_KEY: "683ed7b9228d007f40b60de125fbb35681e94bdd23c45e2e0394fe470e1d55bb"
 #    volumes:
 #      - "./crm_pilates/command:/crm-pilates/crm_pilates/command"
 #      - "./crm_pilates/domain:/crm-pilates/crm_pilates/domain"
