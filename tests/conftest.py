@@ -4,6 +4,7 @@ import immobilus  # noqa
 import psycopg
 import pytest
 
+from crm_pilates import settings
 from crm_pilates.event.event_bus import EventBus, EventSubscriber
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
@@ -58,11 +59,27 @@ def persisted_event_store(request, tmpdir):
 
 
 @pytest.fixture
-def postgres_event_store():
+def create_database():
+    with psycopg.connect(settings.DATABASE_URL) as connection:
+        connection.execute('''CREATE TABLE IF NOT EXISTS users (id text, username text, password text, config text)''')
+        connection.commit()
+
+
+@pytest.fixture
+def clean_database(create_database):
     StoreLocator.store = PostgresSQLEventStore("postgresql://crm-pilates-test:example@localhost:5433/crm-pilates-test")
     yield
-    with psycopg.connect(StoreLocator.store.connection_url) as connection:
+    with psycopg.connect(settings.DATABASE_URL) as connection:
         connection.execute("DELETE FROM event")
+        connection.execute("DELETE FROM users")
+        connection.commit()
+
+
+@pytest.fixture
+def drop_tables():
+    yield
+    with psycopg.connect(settings.DATABASE_URL) as connection:
+        connection.execute("DROP TABLE users")
         connection.commit()
 
 

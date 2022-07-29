@@ -37,6 +37,10 @@ class EventStore:
     def get_all(self) -> List[Event]:
         ...
 
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> List[Event]:
+        ...
+
 
 class StoreLocator:
     store: EventStore = None

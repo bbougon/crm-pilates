@@ -23,7 +23,7 @@ class CustomEventEmitted(Event):
 
 
 @immobilus("2021-05-20 10:05:17.245")
-def test_should_persist_event_in_store(postgres_event_store):
+def test_should_persist_event_in_store(clean_database):
     root_id = uuid.uuid4()
     event_emitted: Event = CustomEventEmitted(root_id)
 
@@ -33,7 +33,7 @@ def test_should_persist_event_in_store(postgres_event_store):
 
 
 @immobilus("2021-05-20 10:05:17.245")
-def test_should_retrieve_all_events_in_store(postgres_event_store):
+def test_should_retrieve_all_events_in_store(clean_database):
     first_event_root_id = uuid.uuid4()
     CustomEventEmitted(first_event_root_id)
     second_event_root_id = uuid.uuid4()

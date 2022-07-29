@@ -14,17 +14,22 @@ class Migration:
         self.encoders = MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder)
 
     def migrate(self):
-        self.__migrate_to_version_1()
+        self.__migrate_events_to_version_1()
+        self.__create_user_table()
 
     def get_event(self, id: UUID):
         with psycopg.connect(self.connection_url) as connection:
             row = connection.execute("SELECT * FROM event WHERE id = %(event_id)s", {"event_id": str(id)}).fetchone()
             return row
 
-    def __migrate_to_version_1(self):
+    def __migrate_events_to_version_1(self):
         with psycopg.connect(self.connection_url) as connection:
             connection.execute("UPDATE event SET payload = jsonb_set(payload, '{subject}', '\"MACHINE_TRIO\"', true) WHERE payload ->> 'position' = '3' AND UPPER(payload ->> 'name') LIKE UPPER('%machine%') AND payload ->> 'version' IS NULL")
             connection.execute("UPDATE event SET payload = jsonb_set(payload, '{subject}', '\"MACHINE_DUO\"', true) WHERE payload ->> 'position' = '2' AND UPPER(payload ->> 'name') LIKE UPPER('%machine%') AND payload ->> 'version' IS NULL")
             connection.execute("UPDATE event SET payload = jsonb_set(payload, '{subject}', '\"MAT\"', true) WHERE UPPER(payload ->> 'name') NOT LIKE UPPER('%machine%') AND payload ->> 'version' IS NULL")
             connection.execute("UPDATE event SET payload = jsonb_set(payload, '{version}', '\"1\"', true) WHERE payload ->> 'version' IS NULL")
             connection.commit()
+
+    def __create_user_table(self):
+        with psycopg.connect(self.connection_url) as connection:
+            connection.execute('''CREATE TABLE IF NOT EXISTS users (id text, username text, password text, config text)''')

@@ -7,6 +7,7 @@ class User(AggregateRoot):
         super().__init__()
         self._username = username
         self._password = password
+        self.config = ""
 
     @property
     def password(self):
