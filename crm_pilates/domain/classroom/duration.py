@@ -6,7 +6,6 @@ from typing import Type
 
 
 class TimeUnit:
-
     def __init__(self, value: int) -> None:
         super().__init__()
         self._value = value
@@ -21,20 +20,14 @@ class TimeUnit:
 
 
 class HourTimeUnit(TimeUnit):
-    units: dict = {
-        "MinuteTimeUnit": 60,
-        "HourTimeUnit": 1
-    }
+    units: dict = {"MinuteTimeUnit": 60, "HourTimeUnit": 1}
 
     def to_unit(self, to_unit: Type[TimeUnit]) -> TimeUnit:
         return to_unit(self._value * self.units[to_unit.__name__])
 
 
 class MinuteTimeUnit(TimeUnit):
-    units: dict = {
-        "MinuteTimeUnit": 1,
-        "HourTimeUnit": 1 / 60
-    }
+    units: dict = {"MinuteTimeUnit": 1, "HourTimeUnit": 1 / 60}
 
     def to_unit(self, to_unit: Type[TimeUnit]) -> TimeUnit:
         return to_unit(self._value * self.units[to_unit.__name__])
@@ -42,10 +35,7 @@ class MinuteTimeUnit(TimeUnit):
 
 class TimeUnits:
 
-    time_units: dict = {
-        "HOUR": HourTimeUnit,
-        "MINUTE": MinuteTimeUnit
-    }
+    time_units: dict = {"HOUR": HourTimeUnit, "MINUTE": MinuteTimeUnit}
 
     @classmethod
     def from_duration(cls, unit, duration) -> TimeUnit:
@@ -57,5 +47,8 @@ class Duration:
     time_unit: TimeUnit
 
     def __eq__(self, o: object) -> bool:
-        return isinstance(o, Duration) and isinstance(o.time_unit,
-                                                      self.time_unit.__class__) and self.time_unit.value == o.time_unit.value
+        return (
+            isinstance(o, Duration)
+            and isinstance(o.time_unit, self.time_unit.__class__)
+            and self.time_unit.value == o.time_unit.value
+        )

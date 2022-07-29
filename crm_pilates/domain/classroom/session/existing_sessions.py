@@ -6,7 +6,6 @@ from crm_pilates.event.event_store import Event
 
 
 class ExistingSessions(Event):
-
     def __init__(self, sessions: [ExistingSession], root_id: UUID = None) -> None:
         super().__init__(root_id)
         self.sessions = sessions
@@ -16,7 +15,6 @@ class ExistingSessions(Event):
 
 
 class ExistingSession(Event):
-
     def __init__(self, session: Session, root_id: UUID = None) -> None:
         super().__init__(root_id)
         self.root_id = session.id

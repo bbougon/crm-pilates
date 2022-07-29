@@ -16,7 +16,6 @@ class Status(Enum):
 
 
 class CommandHandler:
-
     @abstractmethod
     def execute(self, command: Command) -> Tuple[Event, Status]:
         pass

@@ -4,7 +4,6 @@ from typing import List
 
 
 class EventBus:
-
     def __init__(self) -> None:
         super().__init__()
         self.subscribers: List[EventSubscriber] = []
@@ -19,7 +18,6 @@ class EventBus:
 
 
 class EventSubscriber:
-
     def __init__(self, event: str) -> None:
         super().__init__()
         self.event = event

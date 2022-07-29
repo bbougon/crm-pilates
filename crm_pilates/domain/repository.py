@@ -13,8 +13,7 @@ class AggregateRoot:
         return self._id
 
 
-class Repository():
-
+class Repository:
     @abstractmethod
     def persist(self, entity: AggregateRoot):
         pass

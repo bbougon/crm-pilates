@@ -11,7 +11,6 @@ from crm_pilates.infrastructure.event_bus_provider import EventBusProvider
 
 
 class Event:
-
     def __init__(self, root_id: UUID) -> None:
         super().__init__()
         self.id: UUID = uuid.uuid4()
@@ -28,7 +27,6 @@ class Event:
 
 
 class EventStore:
-
     @abstractmethod
     def persist(self, event: Event):
         ...
@@ -47,7 +45,6 @@ class StoreLocator:
 
 
 class EventSourced:
-
     def __init__(self, event) -> None:
         self.event = event
 

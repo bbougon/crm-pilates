@@ -5,13 +5,11 @@ from crm_pilates.authenticating.authenticating_user import AuthenticatingUser
 
 
 class AuthenticationException(Exception):
-
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
 
 class AuthenticationService:
-
     @abstractmethod
     def authenticate(self, user: AuthenticatingUser):
         pass

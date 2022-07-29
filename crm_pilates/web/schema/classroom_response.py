@@ -42,4 +42,7 @@ class ClassroomReadResponse(ClassroomResponse):
 
     @classmethod
     def to_duration(cls, duration: Duration):
-        return {"duration": duration.time_unit.value, "time_unit": Units.units()[duration.time_unit.__class__.__name__]}
+        return {
+            "duration": duration.time_unit.value,
+            "time_unit": Units.units()[duration.time_unit.__class__.__name__],
+        }

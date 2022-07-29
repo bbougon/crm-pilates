@@ -5,7 +5,6 @@ from crm_pilates.command.response import Response
 
 
 class CommandBus:
-
     def __init__(self, handlers: dict, saga_handlers: dict) -> None:
         super().__init__()
         self.handlers = handlers

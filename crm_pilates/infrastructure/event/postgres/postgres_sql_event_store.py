@@ -11,11 +11,12 @@ from psycopg.rows import Row
 from psycopg.types.json import Jsonb
 
 from crm_pilates.event.event_store import EventStore, Event
-from crm_pilates.infrastructure.event.sqlite.sqlite_event_store import MultipleJsonEncoders
+from crm_pilates.infrastructure.event.sqlite.sqlite_event_store import (
+    MultipleJsonEncoders,
+)
 
 
 class UUIDEncoder(json.JSONEncoder):
-
     def default(self, o: Any) -> Any:
         if isinstance(o, UUID):
             return str(o)
@@ -37,35 +38,46 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class PostgresSQLEventStore(EventStore):
-
     def __init__(self, db_url: str) -> None:
         super().__init__()
         self.connection_url = db_url
         with psycopg.connect(self.connection_url) as connection:
-            connection.execute("CREATE TABLE IF NOT EXISTS event (id uuid, root_id uuid, type varchar(100), timestamp_ timestamp, payload jsonb)")
+            connection.execute(
+                "CREATE TABLE IF NOT EXISTS event (id uuid, root_id uuid, type varchar(100), timestamp_ timestamp, payload jsonb)"
+            )
             connection.commit()
 
     def persist(self, event: Event):
         with psycopg.connect(self.connection_url) as connection:
-            uuid_dumps = partial(json.dumps, cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder))
-            connection.execute("INSERT INTO event VALUES (%(id)s, %(root_id)s, %(type)s, %(timestamp_)s, %(payload)s)", {
-                "id": event.id,
-                "root_id": event.root_id,
-                "type": event.type,
-                "timestamp_": event.timestamp.isoformat(),
-                "payload": Jsonb(event.payload, dumps=uuid_dumps)
-            })
+            uuid_dumps = partial(
+                json.dumps,
+                cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder),
+            )
+            connection.execute(
+                "INSERT INTO event VALUES (%(id)s, %(root_id)s, %(type)s, %(timestamp_)s, %(payload)s)",
+                {
+                    "id": event.id,
+                    "root_id": event.root_id,
+                    "type": event.type,
+                    "timestamp_": event.timestamp.isoformat(),
+                    "payload": Jsonb(event.payload, dumps=uuid_dumps),
+                },
+            )
             connection.commit()
 
     def get_all(self) -> List[Event]:
         with psycopg.connect(self.connection_url) as connection:
-            rows: List[Row] = connection.execute("SELECT * FROM EVENT ORDER BY event.timestamp_ ASC").fetchall()
+            rows: List[Row] = connection.execute(
+                "SELECT * FROM EVENT ORDER BY event.timestamp_ ASC"
+            ).fetchall()
             events: List[Event] = list(map(lambda event: self.__map(event), rows))
             return events
 
     def get_by_id(self, id: UUID) -> Event:
         with psycopg.connect(self.connection_url) as connection:
-            row = connection.execute("SELECT * FROM event WHERE id = %(event_id)s", {"event_id": str(id)}).fetchone()
+            row = connection.execute(
+                "SELECT * FROM event WHERE id = %(event_id)s", {"event_id": str(id)}
+            ).fetchone()
             return self.__map(row)
 
     def __map(self, row) -> Event:

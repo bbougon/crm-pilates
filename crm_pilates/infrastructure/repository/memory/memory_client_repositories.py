@@ -3,7 +3,9 @@ from uuid import UUID
 
 from crm_pilates.domain.client.client_repository import ClientRepository
 from crm_pilates.domain.repository import AggregateRoot
-from crm_pilates.infrastructure.repository.memory.memory_repository import MemoryRepository
+from crm_pilates.infrastructure.repository.memory.memory_repository import (
+    MemoryRepository,
+)
 
 
 class MemoryClientRepository(ClientRepository, MemoryRepository):
@@ -11,7 +13,6 @@ class MemoryClientRepository(ClientRepository, MemoryRepository):
 
 
 class MemoryClientReadRepository(ClientRepository, MemoryRepository):
-
     def __init__(self, repository: ClientRepository) -> None:
         super().__init__()
         self.__repository = repository

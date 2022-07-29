@@ -11,5 +11,7 @@ class SessionRepository(Repository):
         return Session.__name__
 
     @abstractmethod
-    def get_by_classroom_id_and_date(self, classroom_id: UUID, date: datetime) -> Session:
+    def get_by_classroom_id_and_date(
+        self, classroom_id: UUID, date: datetime
+    ) -> Session:
         pass

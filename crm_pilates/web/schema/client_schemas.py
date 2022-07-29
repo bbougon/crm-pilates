@@ -10,10 +10,12 @@ class Credits(BaseModel):
     value: int
     subject: ClassroomSubject
 
-    @validator('value')
+    @validator("value")
     def credit_must_be_positive(cls, v):
         if v < 1:
-            raise ValueError("Credits cannot be null or negative, please provide a positive credit.")
+            raise ValueError(
+                "Credits cannot be null or negative, please provide a positive credit."
+            )
         return v
 
 
@@ -22,14 +24,14 @@ class ClientCreation(BaseModel):
     lastname: str
     credits: Optional[List[Credits]]
 
-    @validator('firstname')
+    @validator("firstname")
     def lastname_must_not_be_empty(cls, v):
         if not v:
-            raise ValueError('You must provide the client firstname')
+            raise ValueError("You must provide the client firstname")
         return v.title()
 
-    @validator('lastname')
+    @validator("lastname")
     def firstname_must_not_be_empty(cls, v):
         if not v:
-            raise ValueError('You must provide the client lastname')
+            raise ValueError("You must provide the client lastname")
         return v.title()

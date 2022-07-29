@@ -9,7 +9,6 @@ from crm_pilates.domain.repository import Repository, AggregateRoot
 
 
 class Mapper:
-
     @abstractmethod
     def table(self) -> str:
         pass
@@ -24,7 +23,6 @@ class Mapper:
 
 
 class PostgresRepository(Repository):
-
     def __init__(self, connection_url: str) -> None:
         super().__init__()
         self.__connection_url = connection_url
@@ -41,8 +39,10 @@ class PostgresRepository(Repository):
         with psycopg.connect(self.__connection_url) as connection:
             mapper: Mapper = self._mapper(entity)
             query = sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
-                sql.Identifier(mapper.table()), sql.SQL(",").join(map(sql.Identifier, mapper.fields())),
-                sql.SQL(",").join(map(sql.Literal, mapper.values())))
+                sql.Identifier(mapper.table()),
+                sql.SQL(",").join(map(sql.Identifier, mapper.fields())),
+                sql.SQL(",").join(map(sql.Literal, mapper.values())),
+            )
             connection.execute(query)
             connection.commit()
 

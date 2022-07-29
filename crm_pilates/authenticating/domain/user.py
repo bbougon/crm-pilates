@@ -2,7 +2,6 @@ from crm_pilates.domain.repository import AggregateRoot
 
 
 class User(AggregateRoot):
-
     def __init__(self, username: str, password: str):
         super().__init__()
         self._username = username

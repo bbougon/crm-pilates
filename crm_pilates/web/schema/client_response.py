@@ -8,8 +8,7 @@ from crm_pilates.web.schema.client_schemas import Credits
 
 
 class CreditsRead(Credits):
-
-    @validator('value')
+    @validator("value")
     def credit_must_be_positive(cls, v):
         return v
 

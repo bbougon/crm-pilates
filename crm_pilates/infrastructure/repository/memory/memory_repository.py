@@ -6,7 +6,6 @@ from crm_pilates.domain.repository import Repository, AggregateRoot
 
 
 class MemoryRepository(Repository):
-
     def __init__(self) -> None:
         super().__init__()
         self.entities = []

@@ -16,7 +16,11 @@ class SessionCheckinSaga(Saga):
 
     @property
     def session_date(self) -> datetime:
-        return self._session_date.astimezone(pytz.utc) if self._session_date.tzinfo is None else self._session_date
+        return (
+            self._session_date.astimezone(pytz.utc)
+            if self._session_date.tzinfo is None
+            else self._session_date
+        )
 
 
 @dataclass
@@ -27,4 +31,8 @@ class AttendeeSessionCancellationSaga(Command):
 
     @property
     def session_date(self) -> datetime:
-        return self._session_date.astimezone(pytz.utc) if self._session_date.tzinfo is None else self._session_date
+        return (
+            self._session_date.astimezone(pytz.utc)
+            if self._session_date.tzinfo is None
+            else self._session_date
+        )

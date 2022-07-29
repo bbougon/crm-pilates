@@ -9,7 +9,7 @@ from uuid import UUID
 from crm_pilates.event.event_store import EventStore, Event
 
 
-class MultipleJsonEncoders():
+class MultipleJsonEncoders:
     def __init__(self, *encoders):
         self.encoders = encoders
         self.args = ()
@@ -21,7 +21,9 @@ class MultipleJsonEncoders():
                 return encoder(*self.args, **self.kwargs).default(obj)
             except TypeError:
                 pass
-        raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+        raise TypeError(
+            f"Object of type {obj.__class__.__name__} is not JSON serializable"
+        )
 
     def __call__(self, *args, **kwargs):
         self.args = args
@@ -32,7 +34,6 @@ class MultipleJsonEncoders():
 
 
 class UUIDEncoder(json.JSONEncoder):
-
     def default(self, o: Any) -> Any:
         if isinstance(o, UUID):
             return o.hex
@@ -54,16 +55,25 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class SQLiteEventStore(EventStore):
-
     def __init__(self, db_file: str) -> None:
         super().__init__()
         self.db_file = db_file
 
     def persist(self, event: Event):
         connect, cursor = self.__connect_and_get_cursor()
-        cursor.execute("INSERT INTO event VALUES (?, ?, ?, ?, ?)", (
-            str(event.id), str(event.root_id), event.type, event.timestamp.isoformat(),
-            json.dumps(event.payload, cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder))))
+        cursor.execute(
+            "INSERT INTO event VALUES (?, ?, ?, ?, ?)",
+            (
+                str(event.id),
+                str(event.root_id),
+                event.type,
+                event.timestamp.isoformat(),
+                json.dumps(
+                    event.payload,
+                    cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder),
+                ),
+            ),
+        )
         connect.commit()
         connect.close()
         pass

@@ -4,7 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from crm_pilates import settings
 from crm_pilates.api import api_router
 from crm_pilates.event.event_store import StoreLocator
-from crm_pilates.infrastructure.event.postgres.postgres_sql_event_store import PostgresSQLEventStore
+from crm_pilates.infrastructure.event.postgres.postgres_sql_event_store import (
+    PostgresSQLEventStore,
+)
 from crm_pilates.infrastructure.event_to_domain_loader import EventToDomainLoader
 from crm_pilates.infrastructure.migration.migration import Migration
 
@@ -22,7 +24,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["x-link", "X-Link"]
+    expose_headers=["x-link", "X-Link"],
 )
 
 

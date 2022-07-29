@@ -11,7 +11,6 @@ from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
 @EventSourced
 class SessionCheckedOut(Event):
-
     def __init__(self, root_id: UUID, attendee: Attendee) -> None:
         self.checked_out_attendee = attendee
         super().__init__(root_id)
@@ -19,12 +18,19 @@ class SessionCheckedOut(Event):
     def _to_payload(self):
         return {
             "session_id": self.root_id,
-            "attendee": {"id": self.checked_out_attendee.id, "attendance": self.checked_out_attendee.attendance.value}
+            "attendee": {
+                "id": self.checked_out_attendee.id,
+                "attendance": self.checked_out_attendee.attendance.value,
+            },
         }
 
 
 class SessionCheckoutCommandHandler(CommandHandler):
-    def execute(self, command: SessionCheckoutCommand) -> Tuple[SessionCheckedOut, Status]:
-        session: ConfirmedSession = RepositoryProvider.write_repositories.session.get_by_id(command.session_id)
+    def execute(
+        self, command: SessionCheckoutCommand
+    ) -> Tuple[SessionCheckedOut, Status]:
+        session: ConfirmedSession = (
+            RepositoryProvider.write_repositories.session.get_by_id(command.session_id)
+        )
         attendee: Attendee = session.checkout(Attendee.create(command.attendee))
         return SessionCheckedOut(session.id, attendee), Status.CREATED

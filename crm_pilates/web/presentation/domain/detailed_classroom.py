@@ -8,7 +8,6 @@ from crm_pilates.web.presentation.domain.units import Units
 
 
 class Duration:
-
     def __init__(self, duration: int, time_unit: str) -> None:
         super().__init__()
         self.duration = duration
@@ -16,7 +15,6 @@ class Duration:
 
 
 class DetailedClassroom:
-
     def __init__(self, classroom: Classroom, attendees: List[DetailedAttendee]) -> None:
         super().__init__()
         self.id: UUID = classroom.id
@@ -24,6 +22,11 @@ class DetailedClassroom:
         self.subject: ClassroomSubject = classroom.subject
         self.position: int = classroom.position
         self.start: str = classroom.schedule.start.isoformat()
-        self.stop: str = classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
-        self.duration: Duration = Duration(classroom.duration.time_unit.value, Units.units()[classroom.duration.time_unit.__class__.__name__])
+        self.stop: str = (
+            classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
+        )
+        self.duration: Duration = Duration(
+            classroom.duration.time_unit.value,
+            Units.units()[classroom.duration.time_unit.__class__.__name__],
+        )
         self.attendees: List[DetailedAttendee] = attendees

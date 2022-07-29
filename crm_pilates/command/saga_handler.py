@@ -11,7 +11,6 @@ class Saga(Command):
 
 
 class SagaHandler:
-
     def __init__(self, command_bus: CommandBus) -> None:
         super().__init__()
         self._command_bus = command_bus

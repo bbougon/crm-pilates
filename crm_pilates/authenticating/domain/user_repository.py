@@ -5,7 +5,6 @@ from crm_pilates.domain.repository import Repository
 
 
 class UserRepository(Repository):
-
     def _get_entity_type(self) -> str:
         return User.__name__
 

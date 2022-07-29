@@ -29,7 +29,9 @@ def check_unique_attendees(v):
     for item in v:
         unique_ids.add(item["id"])
     if len(v) != len(unique_ids):
-        raise ValueError("You provided the same attendee twice or more, please check the attendees and retry")
+        raise ValueError(
+            "You provided the same attendee twice or more, please check the attendees and retry"
+        )
     return v
 
 

@@ -7,7 +7,6 @@ from crm_pilates.domain.repository import AggregateRoot
 
 
 class Attendee(AggregateRoot):
-
     def __init__(self, id: UUID) -> None:
         super().__init__()
         self._id: UUID = id
@@ -26,7 +25,9 @@ class Attendee(AggregateRoot):
 
     def checkout(self):
         if self.attendance is not Attendance.CHECKED_IN:
-            raise DomainException("Cannot checkout as attendee is already registered (i.e not checked in).")
+            raise DomainException(
+                "Cannot checkout as attendee is already registered (i.e not checked in)."
+            )
         self.attendance = Attendance.REGISTERED
 
     def __eq__(self, o: object) -> bool:

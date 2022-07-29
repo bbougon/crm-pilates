@@ -15,5 +15,7 @@ class ClassroomRepository(Repository):
         pass
 
     @abstractmethod
-    def get_classrooms_in_range(self, start_date: datetime, end_date: datetime) -> List[Classroom]:
+    def get_classrooms_in_range(
+        self, start_date: datetime, end_date: datetime
+    ) -> List[Classroom]:
         pass

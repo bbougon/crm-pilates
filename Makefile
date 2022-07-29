@@ -48,4 +48,4 @@ run:
 	./run.sh
 
 linter:
-	flake8 --verbose --ignore E501 --exclude $(virtualenv_path)
+	flake8 --verbose --ignore E501,W503 --exclude $(virtualenv_path)
