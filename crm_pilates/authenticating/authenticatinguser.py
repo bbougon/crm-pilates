@@ -2,6 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class User:
+class AuthenticatingUser:
     username: str
     password: str

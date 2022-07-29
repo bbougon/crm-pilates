@@ -17,6 +17,7 @@ from crm_pilates.infrastructure.repository.memory.memory_client_repositories imp
     MemoryClientReadRepository
 from crm_pilates.infrastructure.repository.memory.memory_session_repository import MemorySessionRepository, \
     MemorySessionReadRepository
+from crm_pilates.infrastructure.repository.memory.memory_user_repository import MemoryUserRepository
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
@@ -89,11 +90,13 @@ def memory_repositories():
     client_repository = MemoryClientRepository()
     attendee_repository = MemoryAttendeeRepository(client_repository)
     session_repository = MemorySessionRepository()
+    user_repository = MemoryUserRepository()
     RepositoryProvider.write_repositories = Repositories({
         "classroom": classroom_repository,
         "client": client_repository,
         "session": session_repository,
-        "attendee": attendee_repository
+        "attendee": attendee_repository,
+        "user": user_repository
     })
     RepositoryProvider.read_repositories = Repositories({
         "classroom": MemoryClassRoomReadRepository(classroom_repository),

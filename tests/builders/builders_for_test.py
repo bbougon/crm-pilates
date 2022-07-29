@@ -10,6 +10,7 @@ from uuid import UUID
 import pytz
 from mimesis import Person, Text, Numeric, Datetime
 
+from crm_pilates.authenticating.domain.user import User
 from crm_pilates.domain.classroom.attendee import Attendee
 from crm_pilates.domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession
 from crm_pilates.domain.classroom.classroom_creation_command_handler import ClassroomCreated
@@ -32,6 +33,7 @@ from crm_pilates.infrastructure.repository.memory.memory_client_repositories imp
 from crm_pilates.infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.web.schema.classroom_schemas import TimeUnit, ClassroomPatch
+from passlib.context import CryptContext
 
 
 class Builder:
@@ -573,3 +575,24 @@ class EventBuilderForTest(Builder):
 
     def __to_event(self, _call, _args):
         return _call(*_args)
+
+
+class UserBuilderForTest(Builder):
+
+    def __init__(self) -> None:
+        super().__init__()
+        person = Person()
+        self._username = person.username()
+        self._password = person.password()
+
+    def build(self) -> User:
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        return User(self._username, pwd_context.hash(self._password))
+
+    def username(self, username) -> UserBuilderForTest:
+        self._username = username
+        return self
+
+    def password(self, password) -> UserBuilderForTest:
+        self._password = password
+        return self
