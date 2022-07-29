@@ -10,16 +10,12 @@ from crm_pilates.event.event_store import Event, EventSourced, StoreLocator
 
 @EventSourced
 class CustomEventEmitted(Event):
-
     def __init__(self, root_id: UUID) -> None:
         self.name = "custom_event"
         super().__init__(root_id)
 
     def _to_payload(self):
-        return {
-            "id": self.root_id,
-            "name": self.name
-        }
+        return {"id": self.root_id, "name": self.name}
 
 
 @immobilus("2021-05-20 10:05:17.245")
@@ -50,5 +46,7 @@ def assert_event(event: Event, root_id: UUID):
     assert isinstance(event.id, UUID)
     assert event.root_id == root_id
     assert event.type == "CustomEventEmitted"
-    assert event.timestamp == datetime.datetime(2021, 5, 20, 10, 5, 17, 245000, tzinfo=pytz.utc)
+    assert event.timestamp == datetime.datetime(
+        2021, 5, 20, 10, 5, 17, 245000, tzinfo=pytz.utc
+    )
     assert event.payload == {"version": "1", "id": str(root_id), "name": "custom_event"}

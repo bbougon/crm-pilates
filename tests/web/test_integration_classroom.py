@@ -6,8 +6,12 @@ from fastapi.testclient import TestClient
 from crm_pilates.domain.classroom.classroom import Classroom
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.main import app
-from tests.builders.builders_for_test import ClassroomJsonBuilderForTest, ClientContextBuilderForTest, \
-    ClassroomContextBuilderForTest, ClassroomBuilderForTest
+from tests.builders.builders_for_test import (
+    ClassroomJsonBuilderForTest,
+    ClientContextBuilderForTest,
+    ClassroomContextBuilderForTest,
+    ClassroomBuilderForTest,
+)
 
 client = TestClient(app)
 
@@ -20,14 +24,20 @@ def test_create_classroom(persisted_event_store):
 
 
 def test_create_classroom_with_attendees(persisted_event_store):
-    repository, clients = ClientContextBuilderForTest().with_one_client().persist(
-        RepositoryProvider.write_repositories.client).build()
-    classroom: dict = ClassroomJsonBuilderForTest().with_attendees([clients[0]._id]).build()
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_one_client()
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    classroom: dict = (
+        ClassroomJsonBuilderForTest().with_attendees([clients[0]._id]).build()
+    )
 
     response = client.post("/classrooms", json=classroom)
 
     assert response.status_code == status.HTTP_201_CREATED
-    classroom_id = response.json()['id']
+    classroom_id = response.json()["id"]
     assert response.headers["Location"] == f"/classrooms/{classroom_id}"
     assert response.json() == {
         "name": classroom["name"],
@@ -35,29 +45,38 @@ def test_create_classroom_with_attendees(persisted_event_store):
         "position": classroom["position"],
         "subject": classroom["subject"],
         "schedule": {
-            "start": arrow.get(classroom["start_date"], tzinfo=tzutc()).datetime.isoformat(),
-            "stop": arrow.get(classroom["start_date"], tzinfo=tzutc()).shift(hours=+1).datetime.isoformat()
+            "start": arrow.get(
+                classroom["start_date"], tzinfo=tzutc()
+            ).datetime.isoformat(),
+            "stop": arrow.get(classroom["start_date"], tzinfo=tzutc())
+            .shift(hours=+1)
+            .datetime.isoformat(),
         },
-        "duration": {
-            "time_unit": "HOUR",
-            "duration": 1
-        },
+        "duration": {"time_unit": "HOUR", "duration": 1},
         "attendees": [
             {"id": str(clients[0].id)},
-        ]
+        ],
     }
 
 
 def test_get_classroom(memory_repositories):
-    client_repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
-        RepositoryProvider.write_repositories.client).build()
-    repository, classrooms = ClassroomContextBuilderForTest()\
-        .with_classroom(ClassroomBuilderForTest()
-                        .with_attendee(clients[0]._id)
-                        .with_attendee(clients[1]._id)
-                        .with_position(2))\
-        .persist(RepositoryProvider.write_repositories.classroom)\
+    client_repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(2)
+        .persist(RepositoryProvider.write_repositories.client)
         .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classroom(
+            ClassroomBuilderForTest()
+            .with_attendee(clients[0]._id)
+            .with_attendee(clients[1]._id)
+            .with_position(2)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
     classroom: Classroom = classrooms[0]
 
     response: Response = client.get(f"/classrooms/{classroom._id}")
@@ -70,27 +89,48 @@ def test_get_classroom(memory_repositories):
         "subject": classroom.subject.value,
         "schedule": {
             "start": classroom.schedule.start.isoformat(),
-            "stop": classroom.schedule.stop.isoformat() if classroom.schedule.stop else None
+            "stop": classroom.schedule.stop.isoformat()
+            if classroom.schedule.stop
+            else None,
         },
         "duration": {
             "time_unit": "HOUR",
-            "duration": classroom.duration.time_unit.value
+            "duration": classroom.duration.time_unit.value,
         },
         "attendees": [
-            {"id": str(clients[0].id), "firstname": clients[0].firstname, "lastname": clients[0].lastname},
-            {"id": str(clients[1].id), "firstname": clients[1].firstname, "lastname": clients[1].lastname}
-        ]
+            {
+                "id": str(clients[0].id),
+                "firstname": clients[0].firstname,
+                "lastname": clients[0].lastname,
+            },
+            {
+                "id": str(clients[1].id),
+                "firstname": clients[1].firstname,
+                "lastname": clients[1].lastname,
+            },
+        ],
     }
 
 
 def test_add_attendee_to_a_classroom():
-    repository, clients = ClientContextBuilderForTest().with_clients(2).persist(
-        RepositoryProvider.write_repositories.client).build()
-    repository, classrooms = ClassroomContextBuilderForTest().with_classroom(
-        ClassroomBuilderForTest().with_position(2).with_attendee(clients[0]._id)).persist(
-        RepositoryProvider.write_repositories.classroom).build()
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(2)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classroom(
+            ClassroomBuilderForTest().with_position(2).with_attendee(clients[0]._id)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
 
-    response: Response = client.patch(f"/classrooms/{classrooms[0]._id}",
-                                      json={"attendees": [{"id": clients[1]._id.hex}]})
+    response: Response = client.patch(
+        f"/classrooms/{classrooms[0]._id}",
+        json={"attendees": [{"id": clients[1]._id.hex}]},
+    )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT

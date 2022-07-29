@@ -21,7 +21,6 @@ class SimpleCommandExecuted(Event):
 
 
 class SimpleCommandHandler(CommandHandler):
-
     def execute(self, command: SimpleCommand) -> Tuple[SimpleCommandExecuted, Status]:
         return SimpleCommandExecuted(name=command.name), Status.NONE
 

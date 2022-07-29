@@ -3,7 +3,9 @@ import pytest
 from crm_pilates import settings
 from crm_pilates.authenticating.domain.user import User
 from crm_pilates.domain.exceptions import AggregateNotFoundException
-from crm_pilates.infrastructure.repository.postgres.user_repository import PostgresUserRepository
+from crm_pilates.infrastructure.repository.postgres.user_repository import (
+    PostgresUserRepository,
+)
 
 
 def test_should_return_desired_user(clean_database):

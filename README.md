@@ -19,7 +19,7 @@ Nat Pryce [ADR tools](https://github.com/npryce/adr-tools)
 ADR index is kept [here](./adr/README.md)
 
 ### Installation
-  
+
   `make install` will install the virtual env, all needed dependencies, setup your local environment and setup local sqlite database
 
 ### Tests
@@ -45,7 +45,7 @@ There is also a `docker-compose.yml` file
 - `docker-compose --env-file .env.local up` will:
     1. boot a postgres database container named `crm-pilates-postgres` (login: `crm-pilates`, password: `example`)
     2. boot an adminer container
-    3. boot the `crm-pilates-api` and load the events persisted in database 
+    3. boot the `crm-pilates-api` and load the events persisted in database
 
 ### API
 

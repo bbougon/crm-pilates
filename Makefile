@@ -26,7 +26,10 @@ install-persistent:
 create-local-database:
 	python ./scripts/create_database.py
 
-install: install-virtualenv install-persistent settings create-local-database
+pre-commit:
+	pre-commit install
+
+install: install-virtualenv pre-commit install-persistent settings create-local-database
 
 install-docker: install-virtualenv install-persistent settings-docker create-local-database
 

@@ -12,25 +12,50 @@ from mimesis import Person, Text, Numeric, Datetime
 
 from crm_pilates.authenticating.domain.user import User
 from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.classroom import Classroom, ScheduledSession, ConfirmedSession
-from crm_pilates.domain.classroom.classroom_creation_command_handler import ClassroomCreated
-from crm_pilates.domain.classroom.classroom_patch_command_handler import AllAttendeesAdded
+from crm_pilates.domain.classroom.classroom import (
+    Classroom,
+    ScheduledSession,
+    ConfirmedSession,
+)
+from crm_pilates.domain.classroom.classroom_creation_command_handler import (
+    ClassroomCreated,
+)
+from crm_pilates.domain.classroom.classroom_patch_command_handler import (
+    AllAttendeesAdded,
+)
 from crm_pilates.domain.classroom.classroom_repository import ClassroomRepository
 from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
 from crm_pilates.domain.classroom.duration import Duration, HourTimeUnit
-from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import AttendeeSessionCancelled
-from crm_pilates.domain.classroom.session.session_checkin_saga_handler import SessionCheckedIn
-from crm_pilates.domain.classroom.session.session_checkout_command_handler import SessionCheckedOut
-from crm_pilates.domain.classroom.session.session_creation_command_handler import ConfirmedSessionEvent
+from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
+    AttendeeSessionCancelled,
+)
+from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
+    SessionCheckedIn,
+)
+from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
+    SessionCheckedOut,
+)
+from crm_pilates.domain.classroom.session.session_creation_command_handler import (
+    ConfirmedSessionEvent,
+)
 from crm_pilates.domain.classroom.session.session_repository import SessionRepository
 from crm_pilates.domain.client.client import Client, Credits
-from crm_pilates.domain.client.client_command_handlers import ClientCreated, ClientCreditsUpdated
+from crm_pilates.domain.client.client_command_handlers import (
+    ClientCreated,
+    ClientCreditsUpdated,
+)
 from crm_pilates.domain.commands import ClientCredits
 from crm_pilates.domain.repository import Repository
 from crm_pilates.event.event_store import Event, EventSourced
-from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import MemoryClassroomRepository
-from crm_pilates.infrastructure.repository.memory.memory_client_repositories import MemoryClientRepository
-from crm_pilates.infrastructure.repository.memory.memory_session_repository import MemorySessionRepository
+from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
+    MemoryClassroomRepository,
+)
+from crm_pilates.infrastructure.repository.memory.memory_client_repositories import (
+    MemoryClientRepository,
+)
+from crm_pilates.infrastructure.repository.memory.memory_session_repository import (
+    MemorySessionRepository,
+)
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.web.schema.classroom_schemas import TimeUnit, ClassroomPatch
 from passlib.context import CryptContext
@@ -43,7 +68,6 @@ class Builder:
 
 
 class ClientBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         person = Person()
@@ -54,7 +78,9 @@ class ClientBuilderForTest(Builder):
     def build(self) -> Client:
         return Client.create(self.firstname, self.lastname, self.credits)
 
-    def with_credit(self, nb_credits: int, subject: ClassroomSubject) -> ClientBuilderForTest:
+    def with_credit(
+        self, nb_credits: int, subject: ClassroomSubject
+    ) -> ClientBuilderForTest:
         self.credits.append(ClientCredits(nb_credits, subject))
         return self
 
@@ -76,7 +102,6 @@ class ClientBuilderForTest(Builder):
 
 
 class ClientContextBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.repository = MemoryClientRepository()
@@ -106,7 +131,6 @@ class ClientContextBuilderForTest(Builder):
 
 
 class ClientJsonBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         person: Person = Person()
@@ -115,7 +139,11 @@ class ClientJsonBuilderForTest(Builder):
         self.credits = []
 
     def build(self) -> dict:
-        client = {"firstname": self.firstname, "lastname": self.lastname, "credits": self.credits}
+        client = {
+            "firstname": self.firstname,
+            "lastname": self.lastname,
+            "credits": self.credits,
+        }
         return client
 
     def with_credits(self, nb_credits: int, classroom_subject: ClassroomSubject):
@@ -124,7 +152,6 @@ class ClientJsonBuilderForTest(Builder):
 
 
 class CreditsJsonBuilderForTest(Builder):
-
     def __init__(self) -> None:
         self.credits: dict = None
 
@@ -144,7 +171,6 @@ class CreditsJsonBuilderForTest(Builder):
 
 
 class ClassroomBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.name: str = Text().title()
@@ -158,7 +184,14 @@ class ClassroomBuilderForTest(Builder):
     def build(self) -> Classroom:
         if self.position < len(self.attendees):
             self.position = len(self.attendees)
-        classroom = Classroom.create(self.name, self.start_date, self.position, self.subject, self.stop_date, duration=self.duration)
+        classroom = Classroom.create(
+            self.name,
+            self.start_date,
+            self.position,
+            self.subject,
+            self.stop_date,
+            duration=self.duration,
+        )
         if self.attendees:
             classroom.all_attendees(self.attendees)
         return classroom
@@ -176,13 +209,27 @@ class ClassroomBuilderForTest(Builder):
         return self
 
     def starting_at(self, start_at: datetime) -> ClassroomBuilderForTest:
-        self.start_date = datetime(start_at.year, start_at.month, start_at.day, start_at.hour, start_at.minute,
-                                   start_at.second, tzinfo=start_at.tzinfo or pytz.utc)
+        self.start_date = datetime(
+            start_at.year,
+            start_at.month,
+            start_at.day,
+            start_at.hour,
+            start_at.minute,
+            start_at.second,
+            tzinfo=start_at.tzinfo or pytz.utc,
+        )
         return self
 
     def ending_at(self, ends_at: datetime) -> ClassroomBuilderForTest:
-        self.stop_date = datetime(ends_at.year, ends_at.month, ends_at.day, ends_at.hour, ends_at.minute,
-                                  ends_at.second, tzinfo=ends_at.tzinfo or pytz.utc)
+        self.stop_date = datetime(
+            ends_at.year,
+            ends_at.month,
+            ends_at.day,
+            ends_at.hour,
+            ends_at.minute,
+            ends_at.second,
+            tzinfo=ends_at.tzinfo or pytz.utc,
+        )
         return self
 
     def with_duration(self, duration: Duration) -> ClassroomBuilderForTest:
@@ -199,7 +246,6 @@ class ClassroomBuilderForTest(Builder):
 
 
 class ClassroomContextBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.repository = None
@@ -208,7 +254,9 @@ class ClassroomContextBuilderForTest(Builder):
     def build(self):
         if not self.classroom_builders_for_test:
             self.classroom_builders_for_test.append(ClassroomBuilderForTest())
-        classrooms: List[Classroom] = list(map(lambda builder: builder.build(), self.classroom_builders_for_test))
+        classrooms: List[Classroom] = list(
+            map(lambda builder: builder.build(), self.classroom_builders_for_test)
+        )
         if self.repository:
             for classroom in classrooms:
                 self.repository.persist(classroom)
@@ -218,18 +266,21 @@ class ClassroomContextBuilderForTest(Builder):
         self.repository = repository if repository else MemoryClassroomRepository()
         return self
 
-    def with_classroom(self, classroom_builder: ClassroomBuilderForTest) -> ClassroomContextBuilderForTest:
+    def with_classroom(
+        self, classroom_builder: ClassroomBuilderForTest
+    ) -> ClassroomContextBuilderForTest:
         self.classroom_builders_for_test.append(classroom_builder)
         return self
 
-    def with_classrooms(self, *classroom_builders: ClassroomBuilderForTest) -> ClassroomContextBuilderForTest:
+    def with_classrooms(
+        self, *classroom_builders: ClassroomBuilderForTest
+    ) -> ClassroomContextBuilderForTest:
         for builder in classroom_builders:
             self.classroom_builders_for_test.append(builder)
         return self
 
 
 class ClassroomJsonBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.classroom_name: str = Text().title()
@@ -241,9 +292,16 @@ class ClassroomJsonBuilderForTest(Builder):
         self.duration: dict = None
 
     def build(self):
-        classroom = {"name": self.classroom_name, "position": self.position, "subject": self.subject.value, "start_date": self.start_date.isoformat()}
+        classroom = {
+            "name": self.classroom_name,
+            "position": self.position,
+            "subject": self.subject.value,
+            "start_date": self.start_date.isoformat(),
+        }
         if self.attendees:
-            classroom["attendees"] = list(map(lambda attendee: {"id": attendee.hex}, self.attendees))
+            classroom["attendees"] = list(
+                map(lambda attendee: {"id": attendee.hex}, self.attendees)
+            )
         if self.stop_date:
             classroom["stop_date"] = self.stop_date.astimezone(pytz.utc).isoformat()
         if self.duration:
@@ -270,7 +328,9 @@ class ClassroomJsonBuilderForTest(Builder):
         self.position = position
         return self
 
-    def with_duration(self, duration: int, time_unit: TimeUnit) -> ClassroomJsonBuilderForTest:
+    def with_duration(
+        self, duration: int, time_unit: TimeUnit
+    ) -> ClassroomJsonBuilderForTest:
         self.duration = {"duration": duration, "unit": time_unit.value}
         return self
 
@@ -288,7 +348,6 @@ class ClassroomJsonBuilderForTest(Builder):
 
 
 class SessionContextBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.classroom = ClassroomBuilderForTest().build()
@@ -299,7 +358,9 @@ class SessionContextBuilderForTest(Builder):
         self.cancelled_attendee: UUID = None
 
     def build(self):
-        session: ConfirmedSession = getattr(self.classroom, self.session_to_create)(self.date)
+        session: ConfirmedSession = getattr(self.classroom, self.session_to_create)(
+            self.date
+        )
         if self.client_checkin:
             session.checkin(Attendee.create(self.client_checkin))
         if self.cancelled_attendee:
@@ -316,7 +377,9 @@ class SessionContextBuilderForTest(Builder):
         self.date = date.replace(tzinfo=date.tzinfo or pytz.utc)
         return self
 
-    def persist(self, repository: ClassroomRepository = None) -> SessionContextBuilderForTest:
+    def persist(
+        self, repository: ClassroomRepository = None
+    ) -> SessionContextBuilderForTest:
         self.repository = repository if repository else MemoryClassroomRepository()
         return self
 
@@ -334,7 +397,6 @@ class SessionContextBuilderForTest(Builder):
 
 
 class ClassroomPatchJsonBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.attendees = []
@@ -348,32 +410,42 @@ class ClassroomPatchJsonBuilderForTest(Builder):
 
 
 class SessionCheckinJsonBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.attendee: UUID = None
         self.session_date: datetime = None
-        repository, classrooms = ClassroomContextBuilderForTest().persist(
-            RepositoryProvider.write_repositories.classroom).build()
+        repository, classrooms = (
+            ClassroomContextBuilderForTest()
+            .persist(RepositoryProvider.write_repositories.classroom)
+            .build()
+        )
         self.classroom: Classroom = classrooms[0]
         self.classroom_id = self.classroom.id
 
     def build(self):
         if not self.attendee:
-            repository, clients = ClientContextBuilderForTest().persist(
-                RepositoryProvider.write_repositories.client).build()
+            repository, clients = (
+                ClientContextBuilderForTest()
+                .persist(RepositoryProvider.write_repositories.client)
+                .build()
+            )
             self.attendee = clients[0].id
             self.classroom.all_attendees([Attendee.create(self.attendee)])
         if not self.session_date:
             self.session_date = self.classroom.schedule.start
-        return {"classroom_id": str(self.classroom_id), "session_date": self.session_date.isoformat(),
-                "attendee": str(self.attendee)}
+        return {
+            "classroom_id": str(self.classroom_id),
+            "session_date": self.session_date.isoformat(),
+            "attendee": str(self.attendee),
+        }
 
     def for_classroom(self, classroom: Classroom) -> SessionCheckinJsonBuilderForTest:
         self.classroom_id = classroom.id
         return self
 
-    def for_session(self, session: ScheduledSession) -> SessionCheckinJsonBuilderForTest:
+    def for_session(
+        self, session: ScheduledSession
+    ) -> SessionCheckinJsonBuilderForTest:
         self.classroom_id: UUID = session.classroom_id
         self.session_date: datetime = session.start
         return self
@@ -392,22 +464,26 @@ class SessionCheckinJsonBuilderForTest(Builder):
 
 
 class AttendeeSessionCancellationJsonBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.session_date: datetime = None
-        repository, classrooms = ClassroomContextBuilderForTest().persist(
-            RepositoryProvider.write_repositories.classroom).build()
+        repository, classrooms = (
+            ClassroomContextBuilderForTest()
+            .persist(RepositoryProvider.write_repositories.classroom)
+            .build()
+        )
         self.classroom: Classroom = classrooms[0]
         self.classroom_id = self.classroom.id
 
     def build(self):
         return {
             "classroom_id": str(self.classroom_id),
-            "session_date": self.session_date.isoformat()
+            "session_date": self.session_date.isoformat(),
         }
 
-    def for_classroom(self, classroom: Classroom) -> AttendeeSessionCancellationJsonBuilderForTest:
+    def for_classroom(
+        self, classroom: Classroom
+    ) -> AttendeeSessionCancellationJsonBuilderForTest:
         self.classroom_id = classroom.id
         return self
 
@@ -417,7 +493,6 @@ class AttendeeSessionCancellationJsonBuilderForTest(Builder):
 
 
 class ConfirmedSessionBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.classroom = ClassroomBuilderForTest().build()
@@ -438,7 +513,6 @@ class ConfirmedSessionBuilderForTest(Builder):
 
 
 class ConfirmedSessionContextBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.classroom: Classroom = ClassroomBuilderForTest().build()
@@ -451,19 +525,22 @@ class ConfirmedSessionContextBuilderForTest(Builder):
             self.repository.persist(session)
         return self.repository, session
 
-    def for_classroom(self, classroom: Classroom) -> ConfirmedSessionContextBuilderForTest:
+    def for_classroom(
+        self, classroom: Classroom
+    ) -> ConfirmedSessionContextBuilderForTest:
         self.classroom = classroom
         self.start_at: datetime = self.classroom.schedule.start.replace(tzinfo=pytz.utc)
         return self
 
-    def persist(self, repository: SessionRepository) -> ConfirmedSessionContextBuilderForTest:
+    def persist(
+        self, repository: SessionRepository
+    ) -> ConfirmedSessionContextBuilderForTest:
         self.repository = repository
         return self
 
 
 @EventSourced
 class UnknownEvent(Event):
-
     def __init__(self, root_id: UUID, value: str) -> None:
         self.value = value
         super().__init__(root_id)
@@ -473,7 +550,6 @@ class UnknownEvent(Event):
 
 
 class EventBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         self.events = List[Event]
@@ -484,7 +560,9 @@ class EventBuilderForTest(Builder):
         self.sessions = []
 
     def build(self):
-        self.events = [self.__to_event(event, value) for event, value in self.event_to_store]
+        self.events = [
+            self.__to_event(event, value) for event, value in self.event_to_store
+        ]
         return self.events
 
     def classroom(self, classroom: Classroom = None) -> EventBuilderForTest:
@@ -494,47 +572,106 @@ class EventBuilderForTest(Builder):
         return self
 
     def nb_client(self, nb_clients: int) -> EventBuilderForTest:
-        clients: List[Client] = [ClientBuilderForTest().build() for _ in range(nb_clients)]
+        clients: List[Client] = [
+            ClientBuilderForTest().build() for _ in range(nb_clients)
+        ]
         self.event_to_store.extend(
-            [(ClientCreated, (client.id, client.firstname, client.lastname)) for client in clients])
+            [
+                (ClientCreated, (client.id, client.firstname, client.lastname))
+                for client in clients
+            ]
+        )
         self.clients.extend(clients)
         return self
 
     def client(self, client: Client) -> EventBuilderForTest:
-        self.event_to_store.append((ClientCreated, (client.id, client.firstname, client.lastname, client.credits)))
+        self.event_to_store.append(
+            (
+                ClientCreated,
+                (client.id, client.firstname, client.lastname, client.credits),
+            )
+        )
         self.clients.append(client)
         return self
 
     def added_credits_for_machine_duo(self, client, nb_credits) -> EventBuilderForTest:
-        self.event_to_store.append((ClientCreditsUpdated, (client.id, [Credits(nb_credits, ClassroomSubject.MACHINE_DUO)])))
+        self.event_to_store.append(
+            (
+                ClientCreditsUpdated,
+                (client.id, [Credits(nb_credits, ClassroomSubject.MACHINE_DUO)]),
+            )
+        )
         return self
 
     def classroom_with_attendees(self, nb_attendees: int):
-        attendees: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.nb_client(
-            nb_attendees).clients
-        classroom = ClassroomBuilderForTest().with_attendees(list(map(lambda client: client.id, attendees))).build()
+        attendees: [Client] = (
+            list(itertools.islice(self.clients, nb_attendees))
+            if self.clients
+            else self.nb_client(nb_attendees).clients
+        )
+        classroom = (
+            ClassroomBuilderForTest()
+            .with_attendees(list(map(lambda client: client.id, attendees)))
+            .build()
+        )
         self.event_to_store.append(self.__classroom_created(attendees, classroom))
         self.classrooms.append(classroom)
         return self
 
     def __classroom_created(self, attendees, classroom):
-        return (ClassroomCreated, (classroom.id, classroom.name, classroom.position, classroom.subject, classroom.duration, classroom.schedule, attendees))
+        return (
+            ClassroomCreated,
+            (
+                classroom.id,
+                classroom.name,
+                classroom.position,
+                classroom.subject,
+                classroom.duration,
+                classroom.schedule,
+                attendees,
+            ),
+        )
 
-    def confirmed_session(self, confirmed_session: ConfirmedSession = None) -> EventBuilderForTest:
+    def confirmed_session(
+        self, confirmed_session: ConfirmedSession = None
+    ) -> EventBuilderForTest:
         def get_confirmed_session(_confirmed_session: ConfirmedSession):
             if not confirmed_session:
-                classroom: Classroom = self.classrooms[0] if self.classrooms else ClassroomBuilderForTest().build()
-                _confirmed_session = ConfirmedSessionBuilderForTest().for_classroom(classroom).build()
+                classroom: Classroom = (
+                    self.classrooms[0]
+                    if self.classrooms
+                    else ClassroomBuilderForTest().build()
+                )
+                _confirmed_session = (
+                    ConfirmedSessionBuilderForTest().for_classroom(classroom).build()
+                )
             return _confirmed_session
 
         confirmed_session = get_confirmed_session(confirmed_session)
-        self.event_to_store.append((ConfirmedSessionEvent, (confirmed_session.id, confirmed_session.classroom_id, confirmed_session.name, confirmed_session.position, confirmed_session.subject, confirmed_session.start, confirmed_session.stop, confirmed_session.attendees)))
+        self.event_to_store.append(
+            (
+                ConfirmedSessionEvent,
+                (
+                    confirmed_session.id,
+                    confirmed_session.classroom_id,
+                    confirmed_session.name,
+                    confirmed_session.position,
+                    confirmed_session.subject,
+                    confirmed_session.start,
+                    confirmed_session.stop,
+                    confirmed_session.attendees,
+                ),
+            )
+        )
         self.sessions.append(confirmed_session)
         return self
 
     def attendees_added(self, nb_attendees: int) -> EventBuilderForTest:
-        clients: [Client] = list(itertools.islice(self.clients, nb_attendees)) if self.clients else self.nb_client(
-            nb_attendees).clients
+        clients: [Client] = (
+            list(itertools.islice(self.clients, nb_attendees))
+            if self.clients
+            else self.nb_client(nb_attendees).clients
+        )
         attendees = list(map(lambda client: Attendee(client.id), clients))
         classroom: Classroom = self.classrooms[0]
         classroom._attendees = attendees
@@ -544,20 +681,42 @@ class EventBuilderForTest(Builder):
     def checked_in_attendees(self, attendees: [UUID]) -> EventBuilderForTest:
         confirmed_session: ConfirmedSession = self.sessions[0]
         for attendee_id in attendees:
-            attendee = next(filter(lambda confirm_attendee: confirm_attendee.id == attendee_id, confirmed_session.attendees), None)
-            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.checkin(attendee))))
+            attendee = next(
+                filter(
+                    lambda confirm_attendee: confirm_attendee.id == attendee_id,
+                    confirmed_session.attendees,
+                ),
+                None,
+            )
+            self.event_to_store.append(
+                (
+                    SessionCheckedIn,
+                    (confirmed_session.id, confirmed_session.checkin(attendee)),
+                )
+            )
         return self
 
     def checked_in(self, nb_attendees_checked_in: int) -> EventBuilderForTest:
         confirmed_session: ConfirmedSession = self.sessions[0]
         for i in range(nb_attendees_checked_in):
             attendee = confirmed_session.attendees[i - 1]
-            self.event_to_store.append((SessionCheckedIn, (confirmed_session.id, confirmed_session.checkin(attendee))))
+            self.event_to_store.append(
+                (
+                    SessionCheckedIn,
+                    (confirmed_session.id, confirmed_session.checkin(attendee)),
+                )
+            )
         return self
 
-    def checked_out(self, session_id: UUID, attendees_ids: [UUID]) -> EventBuilderForTest:
+    def checked_out(
+        self, session_id: UUID, attendees_ids: [UUID]
+    ) -> EventBuilderForTest:
         all_attendees = next(map(lambda session: session.attendees, self.sessions))
-        attendees = [attendee for index, attendee in enumerate(all_attendees) if attendee.id in attendees_ids]
+        attendees = [
+            attendee
+            for index, attendee in enumerate(all_attendees)
+            if attendee.id in attendees_ids
+        ]
         for attendee in attendees:
             attendee.checkout()
             self.event_to_store.append((SessionCheckedOut, (session_id, attendee)))
@@ -566,7 +725,9 @@ class EventBuilderForTest(Builder):
     def cancel_attendee(self, session_id: UUID, cancel_attendees_ids: [int]):
         for id in cancel_attendees_ids:
             attendee = Attendee.create(id)
-            self.event_to_store.append((AttendeeSessionCancelled, (session_id, attendee)))
+            self.event_to_store.append(
+                (AttendeeSessionCancelled, (session_id, attendee))
+            )
         return self
 
     def unknown_event(self):
@@ -578,7 +739,6 @@ class EventBuilderForTest(Builder):
 
 
 class UserBuilderForTest(Builder):
-
     def __init__(self) -> None:
         super().__init__()
         person = Person()
