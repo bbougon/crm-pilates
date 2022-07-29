@@ -20,4 +20,4 @@ class AuthenticationService:
 @dataclass
 class Token:
     token: str
-    bearer: str = "bearer"
+    type: str = "bearer"
