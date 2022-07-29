@@ -1,6 +1,9 @@
 [tool.pytest.ini_options]
 addopts = "--strict-markers --durations=10 --color=yes --showlocals"
 python_files="test_*.py tests.py *_test.py"
+filterwarnings = [
+    "ignore::RuntimeWarning",
+]
 
 [pycodestyle]
 max-line-length = 100
