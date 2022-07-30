@@ -7,4 +7,4 @@ def test_authentication_service_has_token_loaded(mocker):
 
     authentication_service("a-token", concrete_authentication_service)
 
-    concrete_authentication_service.load_token.assert_called_once_with("a-token")
+    concrete_authentication_service.validate_token.assert_called_once_with("a-token")

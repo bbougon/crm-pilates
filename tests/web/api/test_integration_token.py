@@ -11,7 +11,7 @@ from tests.faker.custom_authentication_service import (
 client = TestClient(app)
 
 
-def test_should_create_token_for_user(authenticated_user_over_http):
+def test_should_create_token_for_user(authenticated_user):
     app.dependency_overrides[
         concrete_authentication_service
     ] = CustomAuthenticationService

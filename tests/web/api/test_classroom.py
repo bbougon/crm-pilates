@@ -5,7 +5,7 @@ import arrow
 import pytest
 import pytz
 from fastapi import HTTPException
-from fastapi import Response, status
+from fastapi import Response
 
 from crm_pilates.domain.classroom.attendee import Attendee
 from crm_pilates.domain.classroom.classroom import Classroom
@@ -17,7 +17,6 @@ from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories 
 from crm_pilates.infrastructure.repository.memory.memory_client_repositories import (
     MemoryClientRepository,
 )
-from crm_pilates.web.api.authentication import authentication_service
 from crm_pilates.web.api.classroom import (
     create_classroom,
     update_classroom,
@@ -35,12 +34,9 @@ from tests.builders.providers_for_test import (
     CommandBusProviderForTest,
     RepositoryProviderForTest,
 )
-from tests.faker.custom_authentication_service import (
-    AuthenticationExceptionAuthenticationService,
-)
 
 
-def test_should_create_classroom(memory_event_store, authenticated_user):
+def test_should_create_classroom(memory_event_store):
     repository = MemoryClassroomRepository()
     classroom_json = (
         ClassroomJsonBuilderForTest()
@@ -57,7 +53,6 @@ def test_should_create_classroom(memory_event_store, authenticated_user):
         ClassroomCreation.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
-        authenticated_user,
     )
 
     assert_response_has_expected_values(
@@ -73,7 +68,7 @@ def test_should_create_classroom(memory_event_store, authenticated_user):
     assert repository.get_by_id(response["id"])
 
 
-def test_should_create_scheduled_classroom(memory_event_store, authenticated_user):
+def test_should_create_scheduled_classroom(memory_event_store):
     start_date = datetime(2020, 2, 11, 10, 0).astimezone(pytz.timezone("Europe/Paris"))
     stop_date = datetime(2020, 3, 11, 10, 0).astimezone(pytz.timezone("Europe/Paris"))
     classroom_json = (
@@ -88,7 +83,6 @@ def test_should_create_scheduled_classroom(memory_event_store, authenticated_use
         ClassroomCreation.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
-        authenticated_user,
     )
 
     assert_response_has_expected_values(
@@ -101,7 +95,7 @@ def test_should_create_scheduled_classroom(memory_event_store, authenticated_use
     )
 
 
-def test_should_create_classroom_with_timezone(memory_event_store, authenticated_user):
+def test_should_create_classroom_with_timezone(memory_event_store):
     repository = MemoryClassroomRepository()
     classroom_json = (
         ClassroomJsonBuilderForTest()
@@ -118,7 +112,6 @@ def test_should_create_classroom_with_timezone(memory_event_store, authenticated
         ClassroomCreation.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
-        authenticated_user,
     )
 
     assert_response_has_expected_values(
@@ -134,7 +127,7 @@ def test_should_create_classroom_with_timezone(memory_event_store, authenticated
     assert repository.get_by_id(response["id"])
 
 
-def test_should_create_classroom_with_attendees(memory_event_store, authenticated_user):
+def test_should_create_classroom_with_attendees(memory_event_store):
     client_repository, clients = (
         ClientContextBuilderForTest().with_clients(2).persist().build()
     )
@@ -151,7 +144,6 @@ def test_should_create_classroom_with_attendees(memory_event_store, authenticate
         ClassroomCreation.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
-        authenticated_user,
     )
 
     assert_response_has_expected_values(
@@ -167,7 +159,7 @@ def test_should_create_classroom_with_attendees(memory_event_store, authenticate
 
 
 def test_should_handle_business_exception_on_classroom_creation(
-    memory_event_store, mocker, authenticated_user
+    memory_event_store, mocker
 ):
     mocker.patch.object(
         Classroom,
@@ -181,7 +173,6 @@ def test_should_handle_business_exception_on_classroom_creation(
             ClassroomCreation.parse_obj(classroom_json),
             Response(),
             CommandBusProviderForTest().provide(),
-            authenticated_user,
         )
     except HTTPException as e:
         assert e.status_code == 409
@@ -189,7 +180,7 @@ def test_should_handle_business_exception_on_classroom_creation(
 
 
 def test_handle_aggregate_not_found_exception_on_classroom_creation(
-    memory_event_store, mocker, authenticated_user
+    memory_event_store, mocker
 ):
     unknown_uuid = uuid.uuid4()
     mocker.patch.object(
@@ -206,7 +197,6 @@ def test_handle_aggregate_not_found_exception_on_classroom_creation(
             ClassroomCreation.parse_obj(classroom_json),
             Response(),
             CommandBusProviderForTest().provide(),
-            authenticated_user,
         )
     except HTTPException as e:
         assert e.status_code == 404
@@ -317,35 +307,6 @@ def test_classroom_not_found():
 
     assert e.value.status_code == 404
     assert e.value.detail == f"Classroom with id '{str(unknown_uuid)}' not found"
-
-
-def test_should_not_create_a_classroom_if_not_authenticated(memory_event_store, mocker):
-    repository = MemoryClassroomRepository()
-    classroom_json = (
-        ClassroomJsonBuilderForTest()
-        .with_name("advanced classroom")
-        .with_start_date(datetime(2020, 2, 11, 10))
-        .with_position(3)
-        .for_mat()
-        .with_duration(45, TimeUnit.MINUTE)
-        .build()
-    )
-    RepositoryProviderForTest().for_classroom(repository).provide()
-    mocker.patch(
-        "tests.web.api.test_classroom.authentication_service",
-        new_callable=AuthenticationExceptionAuthenticationService,
-    )
-
-    with pytest.raises(HTTPException) as e:
-        create_classroom(
-            ClassroomCreation.parse_obj(classroom_json),
-            Response(),
-            CommandBusProviderForTest().provide(),
-            authentication_service,
-        )
-
-    assert e.value.status_code == status.HTTP_401_UNAUTHORIZED
-    assert e.value.detail == "Unauthorized"
 
 
 def assert_response_has_expected_values(

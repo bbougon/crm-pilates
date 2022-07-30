@@ -1,18 +1,15 @@
 import uuid
 
+from crm_pilates.authenticating.authenticating_user import AuthenticatingUser
 from crm_pilates.authenticating.authentication import (
     AuthenticationService,
     AuthenticationException,
 )
-from crm_pilates.authenticating.authenticating_user import AuthenticatingUser
 from crm_pilates.domain.exceptions import AggregateNotFoundException
 
 
 class CustomAuthenticationService(AuthenticationService):
-    def load_token(self, token: str):
-        pass
-
-    def validate_token(self):
+    def validate_token(self, token):
         pass
 
     def authenticate(self, user: AuthenticatingUser):
@@ -20,10 +17,7 @@ class CustomAuthenticationService(AuthenticationService):
 
 
 class UnauthorizedAuthenticationService(AuthenticationService):
-    def load_token(self, token: str):
-        pass
-
-    def validate_token(self):
+    def validate_token(self, token):
         pass
 
     def authenticate(self, user: AuthenticatingUser):
@@ -31,10 +25,7 @@ class UnauthorizedAuthenticationService(AuthenticationService):
 
 
 class AuthenticationExceptionAuthenticationService(AuthenticationService):
-    def load_token(self, token: str):
-        pass
-
-    def validate_token(self):
+    def validate_token(self, token):
         raise AuthenticationException
 
     def authenticate(self, user: AuthenticatingUser):

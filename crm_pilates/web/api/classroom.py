@@ -4,10 +4,6 @@ from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends, HTTPException
 
-from crm_pilates.authenticating.authentication import (
-    AuthenticationService,
-    AuthenticationException,
-)
 from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.classroom.classroom_creation_command_handler import (
     ClassroomCreated,
@@ -27,7 +23,7 @@ from crm_pilates.web.schema.classroom_response import (
 )
 from crm_pilates.web.schema.classroom_schemas import ClassroomCreation, ClassroomPatch
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(authentication_service)])
 
 
 @router.post(
@@ -53,10 +49,8 @@ def create_classroom(
     classroom_creation: ClassroomCreation,
     response: Response,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
-    authentication_service: AuthenticationService = Depends(authentication_service),
 ):
     try:
-        authentication_service.validate_token()
         command = ClassroomCreationCommand(
             classroom_creation.name,
             classroom_creation.position,
@@ -89,11 +83,6 @@ def create_classroom(
         )
     except DomainException as e:
         raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
-    except AuthenticationException as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=e.message if e.message is not None else "Unauthorized",
-        )
 
 
 @router.get(

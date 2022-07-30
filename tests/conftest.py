@@ -126,18 +126,10 @@ def memory_event_store():
 
 
 @pytest.fixture
-def authenticated_user(mocker):
-    mocker.patch(
-        "tests.conftest.authentication_service",
-        new_callable=CustomAuthenticationService,
-    )
-    yield authentication_service
-
-
-@pytest.fixture
-def authenticated_user_over_http():
+def authenticated_user():
     app.dependency_overrides[authentication_service] = CustomAuthenticationService
     yield
+    app.dependency_overrides = {}
 
 
 @pytest.fixture(autouse=True)

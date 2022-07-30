@@ -16,16 +16,14 @@ from tests.builders.builders_for_test import (
 client = TestClient(app)
 
 
-def test_create_classroom(persisted_event_store, authenticated_user_over_http):
+def test_create_classroom(persisted_event_store, authenticated_user):
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().build())
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
 
 
-def test_create_classroom_with_attendees(
-    persisted_event_store, authenticated_user_over_http
-):
+def test_create_classroom_with_attendees(persisted_event_store, authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_one_client()
@@ -61,7 +59,14 @@ def test_create_classroom_with_attendees(
     }
 
 
-def test_get_classroom(memory_repositories):
+def test_should_not_create_a_classroom_if_not_authenticated(memory_event_store):
+    response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().build())
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Not authenticated"}
+
+
+def test_get_classroom(memory_repositories, authenticated_user):
     client_repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(2)
@@ -114,7 +119,7 @@ def test_get_classroom(memory_repositories):
     }
 
 
-def test_add_attendee_to_a_classroom():
+def test_add_attendee_to_a_classroom(authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(2)

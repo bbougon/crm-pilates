@@ -24,7 +24,6 @@ class JWTAuthenticationService(AuthenticationService):
 
     def __init__(self) -> None:
         super().__init__()
-        self.__token = ""
 
     def authenticate(self, user: AuthenticatingUser) -> Token:
         retrieved_user: User = (
@@ -45,13 +44,10 @@ class JWTAuthenticationService(AuthenticationService):
         )
         return Token(encoded_jwt)
 
-    def load_token(self, token: str):
-        self.__token = token
-
-    def validate_token(self):
+    def validate_token(self, token):
         try:
             decoded_jwt = jwt.decode(
-                self.__token, config("SECRET_KEY"), algorithms=[self.ALGORITHM]
+                token, config("SECRET_KEY"), algorithms=[self.ALGORITHM]
             )
             username: str = decoded_jwt.get("sub")
             if username is None:

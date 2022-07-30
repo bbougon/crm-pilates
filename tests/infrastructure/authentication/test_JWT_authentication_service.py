@@ -42,11 +42,9 @@ def test_should_validate_token(memory_event_store):
         UserBuilderForTest().username("charles").password("password").build()
     )
     jwt_authentication_service = JWTAuthenticationService()
-
-    jwt_authentication_service.load_token(
+    jwt_authentication_service.validate_token(
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwIjoxNjU5MTEyOTI4fQ.u3ig8KW8yBmWa3awfqpwf__1sxHJHvOdBlmWpu1SxMw"
     )
-    jwt_authentication_service.validate_token()
 
 
 @immobilus("2022-07-29T16:22:08.473979")
@@ -56,11 +54,9 @@ def test_should_not_validate_token_when_not_signed_with_private_key(memory_event
             UserBuilderForTest().username("charles").password("password").build()
         )
         jwt_authentication_service = JWTAuthenticationService()
-
-        jwt_authentication_service.load_token(
+        jwt_authentication_service.validate_token(
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwaXJlIjoiMjAyMi0wNy0yOVQxNjo0MjowOC40NzM5NzkifQ.XjOYrRWqxCMujBUd2RjdQnV-TTdReVn-MKq_xYkXyL0"
         )
-        jwt_authentication_service.validate_token()
 
     assert e.value.message == "Invalid token provided"
 
@@ -72,11 +68,9 @@ def test_should_not_validate_token_when_unexpected_payload(memory_event_store):
             UserBuilderForTest().username("charles").password("password").build()
         )
         jwt_authentication_service = JWTAuthenticationService()
-
-        jwt_authentication_service.load_token(
+        jwt_authentication_service.validate_token(
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3cm9uZy1lbnRyeSI6ImJhYWFkIiwiZXhwaXJlIjoiMjAyMi0wNy0yOVQxNjo0MjowOC40NzM5NzkifQ.d2OAvH3B51xYWVqn6TVOEs0rCrthZLVQ68hUwX0OU8s"
         )
-        jwt_authentication_service.validate_token()
 
     assert e.value.message == "Invalid token provided"
 
@@ -88,11 +82,9 @@ def test_should_not_validate_token_when_user_is_not_found(memory_event_store):
             UserBuilderForTest().username("Henri").password("password").build()
         )
         jwt_authentication_service = JWTAuthenticationService()
-
-        jwt_authentication_service.load_token(
+        jwt_authentication_service.validate_token(
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwIjoiMjAyMi0wNy0yOVQxNjo0MjowOC40NzM5NzkifQ.xC-yioYqk5hxRSuBjzb5I3RuyZq0tKDRMXl39rgYABM"
         )
-        jwt_authentication_service.validate_token()
 
     assert e.value.message == "Invalid token provided"
 
@@ -104,10 +96,8 @@ def test_should_not_validate_if_token_expired(memory_event_store):
             UserBuilderForTest().username("Henri").password("password").build()
         )
         jwt_authentication_service = JWTAuthenticationService()
-
-        jwt_authentication_service.load_token(
+        jwt_authentication_service.validate_token(
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwIjoxNjU5MTAyOTI4fQ.Utk5qODV20JyXVBUsa6NmTWV0hMwvfQ-7QqE5I5IXtI"
         )
-        jwt_authentication_service.validate_token()
 
     assert e.value.message == "Token expired"

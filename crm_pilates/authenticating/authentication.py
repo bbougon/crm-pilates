@@ -17,11 +17,7 @@ class AuthenticationService:
         pass
 
     @abstractmethod
-    def load_token(self, token: str):
-        pass
-
-    @abstractmethod
-    def validate_token(self):
+    def validate_token(self, token):
         pass
 
 
