@@ -4,6 +4,10 @@ from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends, HTTPException
 
+from crm_pilates.authenticating.authentication import (
+    AuthenticationService,
+    AuthenticationException,
+)
 from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.classroom.classroom_creation_command_handler import (
     ClassroomCreated,
@@ -12,6 +16,7 @@ from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
 from crm_pilates.domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
 from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
+from crm_pilates.web.api.authentication import authentication_service
 from crm_pilates.web.presentation.domain.detailed_classroom import DetailedClassroom
 from crm_pilates.web.presentation.service.classroom_service import (
     get_detailed_classroom,
@@ -48,8 +53,10 @@ def create_classroom(
     classroom_creation: ClassroomCreation,
     response: Response,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
+    authentication_service: AuthenticationService = Depends(authentication_service),
 ):
     try:
+        authentication_service.validate_token()
         command = ClassroomCreationCommand(
             classroom_creation.name,
             classroom_creation.position,
@@ -82,6 +89,8 @@ def create_classroom(
         )
     except DomainException as e:
         raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
+    except AuthenticationException:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 @router.get(

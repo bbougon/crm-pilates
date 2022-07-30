@@ -9,15 +9,33 @@ from crm_pilates.domain.exceptions import AggregateNotFoundException
 
 
 class CustomAuthenticationService(AuthenticationService):
+    def load_token(self, token: str):
+        pass
+
+    def validate_token(self):
+        pass
+
     def authenticate(self, user: AuthenticatingUser):
         return {"token": "my-token", "type": "bearer"}
 
 
 class UnauthorizedAuthenticationService(AuthenticationService):
+    def load_token(self, token: str):
+        pass
+
+    def validate_token(self):
+        pass
+
     def authenticate(self, user: AuthenticatingUser):
         raise AggregateNotFoundException(uuid.uuid4(), "User")
 
 
 class AuthenticationExceptionAuthenticationService(AuthenticationService):
+    def load_token(self, token: str):
+        pass
+
+    def validate_token(self):
+        raise AuthenticationException
+
     def authenticate(self, user: AuthenticatingUser):
         raise AuthenticationException

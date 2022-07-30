@@ -32,6 +32,9 @@ from crm_pilates.infrastructure.repository.memory.memory_user_repository import 
     MemoryUserRepository,
 )
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.main import app
+from crm_pilates.web.api.authentication import authentication_service
+from tests.faker.custom_authentication_service import CustomAuthenticationService
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
 
 
@@ -120,6 +123,21 @@ def sqlite_event_store(tmpdir):
 def memory_event_store():
     StoreLocator.store = MemoryEventStore()
     yield StoreLocator.store
+
+
+@pytest.fixture
+def authenticated_user(mocker):
+    mocker.patch(
+        "tests.conftest.authentication_service",
+        new_callable=CustomAuthenticationService,
+    )
+    yield authentication_service
+
+
+@pytest.fixture
+def authenticated_user_over_http():
+    app.dependency_overrides[authentication_service] = CustomAuthenticationService
+    yield
 
 
 @pytest.fixture(autouse=True)

@@ -16,14 +16,16 @@ from tests.builders.builders_for_test import (
 client = TestClient(app)
 
 
-def test_create_classroom(persisted_event_store):
+def test_create_classroom(persisted_event_store, authenticated_user_over_http):
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().build())
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.headers["Location"] == f"/classrooms/{response.json()['id']}"
 
 
-def test_create_classroom_with_attendees(persisted_event_store):
+def test_create_classroom_with_attendees(
+    persisted_event_store, authenticated_user_over_http
+):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_one_client()

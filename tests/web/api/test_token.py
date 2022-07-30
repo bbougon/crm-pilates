@@ -12,7 +12,7 @@ from tests.faker.custom_authentication_service import (
 
 def test_should_create_token_for_user(mocker):
     mocker.patch(
-        "tests.web.test_token.concrete_authentication_service",
+        "tests.web.api.test_token.concrete_authentication_service",
         new_callable=CustomAuthenticationService,
     )
 
@@ -26,7 +26,7 @@ def test_should_create_token_for_user(mocker):
 
 def test_should_handle_authentication_verification(mocker):
     mocker.patch(
-        "tests.web.test_token.concrete_authentication_service",
+        "tests.web.api.test_token.concrete_authentication_service",
         new_callable=AuthenticationExceptionAuthenticationService,
     )
     with pytest.raises(HTTPException) as e:
