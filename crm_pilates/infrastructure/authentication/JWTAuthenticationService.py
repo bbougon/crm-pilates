@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 
 from crm_pilates.authenticating.authenticating_user import AuthenticatingUser
@@ -10,6 +10,7 @@ from crm_pilates.authenticating.authentication import (
     AuthenticationException,
 )
 from crm_pilates.authenticating.domain.user import User
+from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.settings import config
 
@@ -20,6 +21,10 @@ class JWTAuthenticationService(AuthenticationService):
 
     ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.__token = ""
 
     def authenticate(self, user: AuthenticatingUser) -> Token:
         retrieved_user: User = (
@@ -39,3 +44,18 @@ class JWTAuthenticationService(AuthenticationService):
             algorithm=self.ALGORITHM,
         )
         return Token(encoded_jwt)
+
+    def load_token(self, token: str):
+        self.__token = token
+
+    def validate_token(self):
+        try:
+            decoded_jwt = jwt.decode(
+                self.__token, config("SECRET_KEY"), algorithms=[self.ALGORITHM]
+            )
+            username: str = decoded_jwt.get("sub")
+            if username is None:
+                raise AuthenticationException("Invalid token provided")
+            RepositoryProvider.write_repositories.user.get_by_username(username)
+        except (JWTError, AggregateNotFoundException):
+            raise AuthenticationException("Invalid token provided")
