@@ -20,7 +20,7 @@ def test_should_authenticate_user_by_creating_a_JWT_token(memory_repositories):
 
     assert (
         token.token
-        == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwaXJlIjoiMjAyMi0wNy0yOVQxNjo0MjowOC40NzM5NzkifQ.ApB012Q9g6ohPGtRPFezTxclicClsmXYYywLOaJ8N6g"
+        == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwIjoxNjU5MTEyOTI4fQ.u3ig8KW8yBmWa3awfqpwf__1sxHJHvOdBlmWpu1SxMw"
     )
 
 
@@ -44,7 +44,7 @@ def test_should_validate_token(memory_event_store):
     jwt_authentication_service = JWTAuthenticationService()
 
     jwt_authentication_service.load_token(
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwaXJlIjoiMjAyMi0wNy0yOVQxNjo0MjowOC40NzM5NzkifQ.ApB012Q9g6ohPGtRPFezTxclicClsmXYYywLOaJ8N6g"
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwIjoxNjU5MTEyOTI4fQ.u3ig8KW8yBmWa3awfqpwf__1sxHJHvOdBlmWpu1SxMw"
     )
     jwt_authentication_service.validate_token()
 
@@ -90,7 +90,7 @@ def test_should_not_validate_token_when_user_is_not_found(memory_event_store):
         jwt_authentication_service = JWTAuthenticationService()
 
         jwt_authentication_service.load_token(
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwaXJlIjoiMjAyMi0wNy0yOVQxNjo0MjowOC40NzM5NzkifQ.ApB012Q9g6ohPGtRPFezTxclicClsmXYYywLOaJ8N6g"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwIjoiMjAyMi0wNy0yOVQxNjo0MjowOC40NzM5NzkifQ.xC-yioYqk5hxRSuBjzb5I3RuyZq0tKDRMXl39rgYABM"
         )
         jwt_authentication_service.validate_token()
 

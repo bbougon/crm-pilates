@@ -38,7 +38,7 @@ class JWTAuthenticationService(AuthenticationService):
         encoded_jwt = jwt.encode(
             {
                 "sub": retrieved_user.username,
-                "expire": access_token_expires.isoformat(),
+                "exp": access_token_expires,
             },
             config("SECRET_KEY"),
             algorithm=self.ALGORITHM,
