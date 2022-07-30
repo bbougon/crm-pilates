@@ -95,3 +95,19 @@ def test_should_not_validate_token_when_user_is_not_found(memory_event_store):
         jwt_authentication_service.validate_token()
 
     assert e.value.message == "Invalid token provided"
+
+
+@immobilus("2022-07-29T16:22:08.473979")
+def test_should_not_validate_if_token_expired(memory_event_store):
+    with pytest.raises(AuthenticationException) as e:
+        RepositoryProvider.write_repositories.user.persist(
+            UserBuilderForTest().username("Henri").password("password").build()
+        )
+        jwt_authentication_service = JWTAuthenticationService()
+
+        jwt_authentication_service.load_token(
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaGFybGVzIiwiZXhwIjoxNjU5MTAyOTI4fQ.Utk5qODV20JyXVBUsa6NmTWV0hMwvfQ-7QqE5I5IXtI"
+        )
+        jwt_authentication_service.validate_token()
+
+    assert e.value.message == "Token expired"

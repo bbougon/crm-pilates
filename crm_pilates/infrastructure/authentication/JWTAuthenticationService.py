@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 
-from jose import jwt, JWTError
+from jose import ExpiredSignatureError, jwt, JWTError
 from passlib.context import CryptContext
 
 from crm_pilates.authenticating.authenticating_user import AuthenticatingUser
@@ -57,5 +57,7 @@ class JWTAuthenticationService(AuthenticationService):
             if username is None:
                 raise AuthenticationException("Invalid token provided")
             RepositoryProvider.write_repositories.user.get_by_username(username)
+        except ExpiredSignatureError:
+            raise AuthenticationException("Token expired")
         except (JWTError, AggregateNotFoundException):
             raise AuthenticationException("Invalid token provided")

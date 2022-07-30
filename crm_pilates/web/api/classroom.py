@@ -89,8 +89,11 @@ def create_classroom(
         )
     except DomainException as e:
         raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
-    except AuthenticationException:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except AuthenticationException as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=e.message if e.message is not None else "Unauthorized",
+        )
 
 
 @router.get(
