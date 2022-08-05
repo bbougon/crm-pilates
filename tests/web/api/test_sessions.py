@@ -80,10 +80,12 @@ def test_should_handle_domain_exception_on_invalid_confirmed_session():
         )
     except HTTPException as e:
         assert e.status_code == status.HTTP_400_BAD_REQUEST
-        assert (
-            e.detail
-            == f"Classroom '{classroom.name}' starting at '2019-05-07T10:00:00+00:00' cannot be set at '2019-05-08T10:30:00+00:00', closest possible dates are '2019-05-07T10:00:00+00:00' or '2019-05-14T10:00:00+00:00'"
-        )
+        assert e.detail == [
+            {
+                "msg": f"Classroom '{classroom.name}' starting at '2019-05-07T10:00:00+00:00' cannot be set at '2019-05-08T10:30:00+00:00', closest possible dates are '2019-05-07T10:00:00+00:00' or '2019-05-14T10:00:00+00:00'",
+                "type": "session_checkin",
+            }
+        ]
 
 
 def test_should_handle_aggregate_not_found_exception_on_checkin(mocker):
@@ -106,7 +108,12 @@ def test_should_handle_aggregate_not_found_exception_on_checkin(mocker):
         )
     except HTTPException as e:
         assert e.status_code == status.HTTP_404_NOT_FOUND
-        assert e.detail == f"Classroom with id '{str(classroom_id)}' not found"
+        assert e.detail == [
+            {
+                "msg": f"Classroom with id '{str(classroom_id)}' not found",
+                "type": "session_checkin",
+            }
+        ]
 
 
 @immobilus(pytz.timezone("Europe/Paris").localize(datetime(2020, 3, 19, 8, 24)))
@@ -721,7 +728,12 @@ def test_should_handle_unexisting_session_on_checkout():
         )
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail == f"Session with id '{str(session_id)}' not found"
+    assert e.value.detail == [
+        {
+            "msg": f"Session with id '{str(session_id)}' not found",
+            "type": "session_checkout",
+        }
+    ]
 
 
 def test_should_handle_attendee_that_cannot_checkout():
@@ -760,10 +772,12 @@ def test_should_handle_attendee_that_cannot_checkout():
         )
 
     assert e.value.status_code == HTTPStatus.BAD_REQUEST
-    assert (
-        e.value.detail
-        == f"Attendee with id {str(unknown_attendee_id)} could not be checked out"
-    )
+    assert e.value.detail == [
+        {
+            "msg": f"Attendee with id {str(unknown_attendee_id)} could not be checked out",
+            "type": "session_checkout",
+        }
+    ]
 
 
 def test_should_cancel_attendee():
@@ -852,10 +866,12 @@ def test_should_handle_unexisting_session_on_attendee_cancellation():
         )
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert (
-        e.value.detail
-        == "Cannot cancel attendee for the session starting at 2020-05-19T10:00:30+00:00. Session could not be found"
-    )
+    assert e.value.detail == [
+        {
+            "msg": "Cannot cancel attendee for the session starting at 2020-05-19T10:00:30+00:00. Session could not be found",
+            "type": "attendee_session_cancellation",
+        }
+    ]
 
 
 def test_should_handle_unexisting_classroom_on_attendee_cancellation():
@@ -887,7 +903,12 @@ def test_should_handle_unexisting_classroom_on_attendee_cancellation():
         )
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail == f"Aggregate 'Classroom' with id '{classroom.id}' not found"
+    assert e.value.detail == [
+        {
+            "msg": f"Aggregate 'Classroom' with id '{classroom.id}' not found",
+            "type": "attendee_session_cancellation",
+        }
+    ]
 
 
 @immobilus("2019-07-05 10:20:15.230")

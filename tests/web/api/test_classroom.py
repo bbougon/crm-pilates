@@ -176,7 +176,9 @@ def test_should_handle_business_exception_on_classroom_creation(
         )
     except HTTPException as e:
         assert e.status_code == 409
-        assert e.detail == "something wrong occurred"
+        assert e.detail == [
+            {"msg": "something wrong occurred", "type": "create_classroom"}
+        ]
 
 
 def test_handle_aggregate_not_found_exception_on_classroom_creation(
@@ -200,10 +202,12 @@ def test_handle_aggregate_not_found_exception_on_classroom_creation(
         )
     except HTTPException as e:
         assert e.status_code == 404
-        assert (
-            e.detail
-            == f"One of the attendees with id '{unknown_uuid}' has not been found"
-        )
+        assert e.detail == [
+            {
+                "msg": f"One of the attendees with id '{unknown_uuid}' has not been found",
+                "type": "create_classroom",
+            }
+        ]
 
 
 def test_add_attendee_to_classroom(memory_event_store):
@@ -266,10 +270,12 @@ def test_handle_aggregate_not_found_on_classroom_patch(mocker):
         )
     except HTTPException as e:
         assert e.status_code == 404
-        assert (
-            e.detail
-            == f"One of the attendees with id '{unknown_uuid}' has not been found"
-        )
+        assert e.detail == [
+            {
+                "msg": f"One of the attendees with id '{unknown_uuid}' has not been found",
+                "type": "update_classroom",
+            }
+        ]
 
 
 def test_handle_business_exception_on_classroom_patch(mocker):
@@ -297,7 +303,7 @@ def test_handle_business_exception_on_classroom_patch(mocker):
         )
     except HTTPException as e:
         assert e.status_code == 409
-        assert e.detail == "error occurred"
+        assert e.detail == [{"msg": "error occurred", "type": "update_classroom"}]
 
 
 def test_classroom_not_found():
@@ -306,7 +312,12 @@ def test_classroom_not_found():
         get_classroom(unknown_uuid)
 
     assert e.value.status_code == 404
-    assert e.value.detail == f"Classroom with id '{str(unknown_uuid)}' not found"
+    assert e.value.detail == [
+        {
+            "msg": f"Classroom with id '{str(unknown_uuid)}' not found",
+            "type": "get_classroom",
+        }
+    ]
 
 
 def assert_response_has_expected_values(

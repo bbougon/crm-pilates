@@ -34,4 +34,6 @@ def test_should_return_unauthorized_if_authentication_fails():
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json() == {"detail": "Incorrect username or password"}
+    assert response.json() == {
+        "detail": [{"msg": "Incorrect username or password", "type": "authenticate"}]
+    }

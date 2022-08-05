@@ -150,7 +150,12 @@ def test_should_return_an_error_when_client_not_found():
             CommandBusProviderForTest().provide(),
         )
 
-    assert e.value.detail == f"The client with id '{uuid_}' has not been found"
+    assert e.value.detail == [
+        {
+            "msg": f"The client with id '{uuid_}' has not been found",
+            "type": "add_credits_to_client",
+        }
+    ]
     assert e.value.status_code == HTTPStatus.NOT_FOUND
 
 

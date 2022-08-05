@@ -35,5 +35,7 @@ def test_should_handle_authentication_verification(mocker):
             concrete_authentication_service,
         )
 
-    assert e.value.detail == "Incorrect username or password"
+    assert e.value.detail == [
+        {"msg": "Incorrect username or password", "type": "authenticate"}
+    ]
     assert e.value.status_code == status.HTTP_401_UNAUTHORIZED

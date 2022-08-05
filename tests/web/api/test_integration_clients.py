@@ -123,7 +123,9 @@ def test_client_is_not_found():
     response: Response = http_client.get(f"/clients/{unknown_uuid}")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json()["detail"] == f"Client with id '{unknown_uuid}' not found"
+    assert response.json()["detail"] == [
+        {"msg": f"Client with id '{unknown_uuid}' not found", "type": "get_client"}
+    ]
 
 
 def test_get_clients_should_return_all_clients():

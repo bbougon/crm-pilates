@@ -8,18 +8,18 @@ from uuid import UUID
 import arrow
 import pytz
 from arrow import Arrow
-from fastapi import status, APIRouter, Depends, Response, HTTPException
+from fastapi import status, APIRouter, Depends, Response
 
 from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.classroom.classroom import Session
+from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
+    AttendeeSessionCancelled,
+)
 from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
     SessionCheckedIn,
 )
 from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
     SessionCheckedOut,
-)
-from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
-    AttendeeSessionCancelled,
 )
 from crm_pilates.domain.commands import (
     GetNextSessionsCommand,
@@ -30,6 +30,7 @@ from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundExce
 from crm_pilates.domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.presentation.service.classroom_service import to_detailed_attendee
 from crm_pilates.web.schema.session_response import SessionResponse
 from crm_pilates.web.schema.session_schemas import (
@@ -137,12 +138,12 @@ def session_checkin(
             response.status_code = status.HTTP_200_OK
         return __map_session(result.root_id, session)
     except AggregateNotFoundException as e:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found",
         )
     except DomainException as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
+        raise APIHTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
 
 
 @router.post(
@@ -170,12 +171,12 @@ def session_checkout(
         )
         return __map_session(result.root_id, session)
     except AggregateNotFoundException as e:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found",
         )
     except DomainException as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
+        raise APIHTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
 
 
 @router.post(
@@ -208,9 +209,9 @@ def attendee_session_cancellation(
         )
         return __map_session(result.root_id, session)
     except AggregateNotFoundException as e:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=e.message)
+        raise APIHTTPException(status_code=HTTPStatus.NOT_FOUND, detail=e.message)
     except DomainException:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"Cannot cancel attendee for the session starting at {arrow.get(session_cancellation.session_date)}. Session could not be found",
         )

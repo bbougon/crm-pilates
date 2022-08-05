@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Tuple
 from uuid import UUID
 
-from fastapi import status, APIRouter, Response, Depends, HTTPException
+from fastapi import status, APIRouter, Response, Depends
 
 from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.classroom.classroom_creation_command_handler import (
@@ -13,6 +13,7 @@ from crm_pilates.domain.commands import ClassroomCreationCommand, ClassroomPatch
 from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.web.api.authentication import authentication_service
+from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.presentation.domain.detailed_classroom import DetailedClassroom
 from crm_pilates.web.presentation.service.classroom_service import (
     get_detailed_classroom,
@@ -77,12 +78,12 @@ def create_classroom(
             ),
         }
     except AggregateNotFoundException as e:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"One of the attendees with id '{e.unknown_id}' has not been found",
         )
     except DomainException as e:
-        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
+        raise APIHTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
 
 
 @router.get(
@@ -110,7 +111,7 @@ def get_classroom(id: UUID):
             "attendees": detailed_classroom.attendees,
         }
     except AggregateNotFoundException:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"Classroom with id '{str(id)}' not found",
         )
@@ -141,9 +142,9 @@ def update_classroom(
             )
         )
     except AggregateNotFoundException as e:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"One of the attendees with id '{e.unknown_id}' has not been found",
         )
     except DomainException as e:
-        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
+        raise APIHTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)

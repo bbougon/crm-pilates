@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Tuple, List, Union
 from uuid import UUID
 
-from fastapi import status, APIRouter, Response, Depends, HTTPException
+from fastapi import status, APIRouter, Response, Depends
 
 from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.client.client import Client
@@ -15,6 +15,7 @@ from crm_pilates.domain.commands import (
 from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.schema.client_response import ClientReadResponse
 from crm_pilates.web.schema.client_schemas import ClientCreation, Credits
 
@@ -72,7 +73,7 @@ def get_client(id: UUID):
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(id)
         return __map_client(client)
     except AggregateNotFoundException as e:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Client with id '{e.unknown_id}' not found",
         )
@@ -114,7 +115,7 @@ def add_credits_to_client(
             AddCreditsToClientCommand(id, __to_client_credits(_credits))
         )
     except AggregateNotFoundException as e:
-        raise HTTPException(
+        raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"The client with id '{e.unknown_id}' has not been found",
         )

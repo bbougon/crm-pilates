@@ -1,11 +1,10 @@
-import uuid
+from fastapi import status
 
 from crm_pilates.authenticating.authenticating_user import AuthenticatingUser
 from crm_pilates.authenticating.authentication import (
     AuthenticationService,
-    AuthenticationException,
 )
-from crm_pilates.domain.exceptions import AggregateNotFoundException
+from crm_pilates.web.api.exceptions import APIHTTPException
 
 
 class CustomAuthenticationService(AuthenticationService):
@@ -21,12 +20,21 @@ class UnauthorizedAuthenticationService(AuthenticationService):
         pass
 
     def authenticate(self, user: AuthenticatingUser):
-        raise AggregateNotFoundException(uuid.uuid4(), "User")
+        raise APIHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
 
 
 class AuthenticationExceptionAuthenticationService(AuthenticationService):
     def validate_token(self, token):
-        raise AuthenticationException
+        raise APIHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
 
     def authenticate(self, user: AuthenticatingUser):
-        raise AuthenticationException
+        raise APIHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
