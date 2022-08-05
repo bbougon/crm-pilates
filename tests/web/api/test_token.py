@@ -36,6 +36,6 @@ def test_should_handle_authentication_verification(mocker):
         )
 
     assert e.value.detail == [
-        {"msg": "Incorrect username or password", "type": "authenticate"}
+        {"msg": "Incorrect username or password", "type": "create_token"}
     ]
     assert e.value.status_code == status.HTTP_401_UNAUTHORIZED
