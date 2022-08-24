@@ -7,6 +7,8 @@ CRM Pilates is an application to manage Pilates classroom for small and medium P
 
 - CRM Pilates is made over `python 3.9.9`
 - You need to install postgres and libpq in order to run tests and run the app locally
+- You will need a private key to encrypt / decrypt user password (default is provided for tests purpose only), to generate one, just run:
+  `openssl rand -hex 32` and keep this key in a safe place (provide the value to the environment key `SECRET_KEY`)
 
 [Documentation](https://miro.com/app/board/o9J_leSmQNU=/)
 
@@ -59,7 +61,7 @@ To retrieve a token, you need to authenticate on `/token` (see below)
 
 #### Authentication
 1. Run the API (see above section)
-2. Insert a user in user table (sign password with key provided in docker-compose for local installation)
+2. Insert a user in user table (encrypt your password with the key provided in docker-compose :warning: for local installation purpose only!)
 3. Use the `curl` command line as below
    ```bash
    curl -X POST http://localhost:8081/token -d 'username=[USERNAME]&password=[PASSWORD]' -H 'Content-Type: application/x-www-form-urlencoded' -v | jq
