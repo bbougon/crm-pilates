@@ -30,6 +30,7 @@ from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundExce
 from crm_pilates.domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.web.api.authentication import authentication_service
 from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.presentation.service.classroom_service import to_detailed_attendee
 from crm_pilates.web.schema.session_response import SessionResponse
@@ -39,7 +40,7 @@ from crm_pilates.web.schema.session_schemas import (
     AttendeeSessionCancellation,
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(authentication_service)])
 
 
 @router.get(

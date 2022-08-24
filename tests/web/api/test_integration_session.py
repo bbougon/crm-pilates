@@ -28,7 +28,7 @@ client = TestClient(app)
 
 
 @immobilus(pytz.timezone("Europe/Paris").localize(datetime(2019, 5, 7, 8, 24)))
-def test_get_next_sessions(memory_repositories, event_bus):
+def test_get_next_sessions(memory_repositories, event_bus, authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(3)
@@ -103,7 +103,7 @@ def test_get_next_sessions(memory_repositories, event_bus):
 
 
 @immobilus("2019-05-07 08:24:15.230")
-def test_register_checkin(memory_repositories, event_bus):
+def test_register_checkin(memory_repositories, event_bus, authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(3)
@@ -160,7 +160,9 @@ def test_register_checkin(memory_repositories, event_bus):
 
 
 @immobilus("2019-03-08 09:24:15.230")
-def test_updated_session_produces_ok_200(memory_event_store, event_bus):
+def test_updated_session_produces_ok_200(
+    memory_event_store, event_bus, authenticated_user
+):
     client_repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(2)
@@ -219,7 +221,9 @@ def test_updated_session_produces_ok_200(memory_event_store, event_bus):
 
 
 @immobilus("2021-09-02 10:00:00")
-def test_sessions_should_return_all_sessions_in_range(memory_repositories, event_bus):
+def test_sessions_should_return_all_sessions_in_range(
+    memory_repositories, event_bus, authenticated_user
+):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_client(
@@ -294,7 +298,7 @@ def test_sessions_should_return_all_sessions_in_range(memory_repositories, event
 
 @immobilus("2021-09-25 10:00:00", tz_offset=2)
 def test_sessions_should_return_all_sessions_from_classroom_for_current_month(
-    memory_repositories, event_bus
+    memory_repositories, event_bus, authenticated_user
 ):
     repository, classrooms = (
         ClassroomContextBuilderForTest()
@@ -361,7 +365,7 @@ def test_sessions_should_return_all_sessions_from_classroom_for_current_month(
     ]
 
 
-def test_register_checkout(memory_repositories, event_bus):
+def test_register_checkout(memory_repositories, event_bus, authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(3)
@@ -420,7 +424,7 @@ def test_register_checkout(memory_repositories, event_bus):
 
 
 @immobilus("2019-05-07 08:24:15.230")
-def test_register_cancellation(memory_repositories, event_bus):
+def test_register_cancellation(memory_repositories, event_bus, authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(3)

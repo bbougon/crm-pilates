@@ -127,5 +127,5 @@ To retrieve a token, you need to authenticate on `/token` (see below)
 1. Add attendees to a classroom (see above section)
 1. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8081/sessions/checkin -X POST --data '{"classroom_id": "CLASSROOM_ID", "session_date": "SESSION_DATE", "attendee": "ATTENDEE_ID"}' -H"Content-Type: application/json" -v | jq
+   curl http://localhost:8081/sessions/checkin -X POST --data '{"classroom_id": "CLASSROOM_ID", "session_date": "SESSION_DATE", "attendee": "ATTENDEE_ID"}' -H"Content-Type: application/json" -H "Authorization: Bearer [TOKEN_VALUE]" -v | jq
    ```
