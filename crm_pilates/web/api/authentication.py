@@ -14,12 +14,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def authentication_service(
     token: str = Depends(oauth2_scheme),
-    authentication_service: AuthenticationService = Depends(
-        concrete_authentication_service
-    ),
+    auth_service: AuthenticationService = Depends(concrete_authentication_service),
 ):
     try:
-        authentication_service.validate_token(token)
+        auth_service.validate_token(token)
     except AuthenticationException as e:
         raise APIHTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

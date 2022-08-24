@@ -30,7 +30,7 @@ ADR index is kept [here](./adr/README.md)
 
 **NB:**
 
-Postgres event store test use the postgres test connection
+- Postgres event store test use the postgres test connection (that means you need a postgres installed locally to run the tests)
 
 ### Run the API
 
@@ -54,11 +54,31 @@ The API documentation is available in 3 formats:
 - [swagger](http://localhost:8081/docs)
 - [redoc](http://localhost:8081/redoc)
 
+Resources are authenticated by a JWT with header `Authorization: Bearer TOKEN_VALUE`.
+To retrieve a token, you need to authenticate on `/token` (see below)
+
+#### Authentication
+1. Run the API (see above section)
+2. Insert a user in user table (sign password with key provided in docker-compose for local installation)
+3. Use the `curl` command line as below
+   ```bash
+   curl -X POST http://localhost:8081/token -d 'username=[USERNAME]&password=[PASSWORD]' -H 'Content-Type: application/x-www-form-urlencoded' -v | jq
+   ```
+   Expected result:
+   ```bash
+    {
+       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZXJ0cmFuZCIsImV4cCI6MTY2MTM2NjQ3Mn0.VM37LH4JR0AHn_sn1iGBADhpDh9SoOM9wDc4oDdzmYo",
+       "type": "bearer"
+    }
+   ```
+4. The token is valid during 30 minutes
+
+
 ##### Create a classroom
 1. Run the API (see above section)
 2. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8081/classrooms -X POST --data '{"name": "advanced class", "start_date": "2021-05-10T10:00", "position": 3, "duration": {"duration": 50, "unit": "MINUTE"}}' -H"Content-Type: application/json" -v | jq
+   curl http://localhost:8081/classrooms -X POST --data '{"name": "advanced class", "start_date": "2021-05-10T10:00", "position": 3, "duration": {"duration": 50, "unit": "MINUTE"}, "subject": "MAT"}' -H "Content-Type: application/json" -H "Authorization: Bearer [TOKEN_VALUE]" -v | jq
    ```
    Expected result:
    ```bash
@@ -79,7 +99,7 @@ The API documentation is available in 3 formats:
 1. Run the API (see above section)
 2. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8081/clients -X POST --data '{"firstname": "John", "lastname": "Doe"}' -H"Content-Type: application/json" -v | jq
+   curl http://localhost:8081/clients -X POST --data '{"firstname": "John", "lastname": "Doe"}' -H "Content-Type: application/json" -H "Authorization: Bearer [TOKEN_VALUE]" -v | jq
    ```
    Expected result:
    ```bash
@@ -95,7 +115,7 @@ The API documentation is available in 3 formats:
 1. Create a classroom (see above section)
 1. Use the `curl` command line as below
    ```bash
-   curl http://localhost:8081/classrooms/{id} -X PATCH --data '{"attendees": [{"id": "A_CLIENT_ID"}]}' -H"Content-Type: application/json" -v
+   curl http://localhost:8081/classrooms/{id} -X PATCH --data '{"attendees": [{"id": "A_CLIENT_ID"}]}' -H "Content-Type: application/json" -H "Authorization: Bearer [TOKEN_VALUE]" -v
    ```
    Expected result:
    ```bash

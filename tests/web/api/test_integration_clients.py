@@ -17,7 +17,7 @@ from tests.builders.builders_for_test import (
 http_client = TestClient(app)
 
 
-def test_should_create_client(persisted_event_store):
+def test_should_create_client(persisted_event_store, authenticated_user):
     client_builder = ClientJsonBuilderForTest()
     response = http_client.post("/clients", json=client_builder.build())
 
@@ -31,7 +31,7 @@ def test_should_create_client(persisted_event_store):
     }
 
 
-def test_should_create_client_with_credits(persisted_event_store):
+def test_should_create_client_with_credits(persisted_event_store, authenticated_user):
     client_builder = ClientJsonBuilderForTest().with_credits(
         2, ClassroomSubject.MACHINE_DUO
     )
@@ -49,7 +49,7 @@ def test_should_create_client_with_credits(persisted_event_store):
 
 
 def test_should_not_create_client_with_empty_lastname_or_firstname(
-    persisted_event_store,
+    persisted_event_store, authenticated_user
 ):
     response = http_client.post("/clients", json={"firstname": "", "lastname": ""})
 
@@ -70,7 +70,7 @@ def test_should_not_create_client_with_empty_lastname_or_firstname(
     }
 
 
-def test_should_not_accept_negative_credits():
+def test_should_not_accept_negative_credits(authenticated_user):
     client_builder = ClientJsonBuilderForTest().with_credits(
         -1, ClassroomSubject.MACHINE_DUO
     )
@@ -89,7 +89,7 @@ def test_should_not_accept_negative_credits():
     }
 
 
-def test_get_client():
+def test_get_client(authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_client(
@@ -117,7 +117,7 @@ def test_get_client():
     }
 
 
-def test_client_is_not_found():
+def test_client_is_not_found(authenticated_user):
     unknown_uuid = uuid.uuid4()
 
     response: Response = http_client.get(f"/clients/{unknown_uuid}")
@@ -128,7 +128,7 @@ def test_client_is_not_found():
     ]
 
 
-def test_get_clients_should_return_all_clients():
+def test_get_clients_should_return_all_clients(authenticated_user):
     ClientContextBuilderForTest().with_client(
         ClientBuilderForTest()
         .with_lastname("AA")
@@ -145,7 +145,7 @@ def test_get_clients_should_return_all_clients():
     assert payload[0]["credits"][0]["subject"] == "MACHINE_TRIO"
 
 
-def test_should_add_credits_to_client():
+def test_should_add_credits_to_client(authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_client(

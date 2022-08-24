@@ -15,11 +15,12 @@ from crm_pilates.domain.commands import (
 from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
+from crm_pilates.web.api.authentication import authentication_service
 from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.schema.client_response import ClientReadResponse
 from crm_pilates.web.schema.client_schemas import ClientCreation, Credits
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(authentication_service)])
 
 
 @router.post(
