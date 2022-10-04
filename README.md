@@ -6,6 +6,7 @@ CRM Pilates is an application to manage Pilates classroom for small and medium P
 ### Prerequisites
 
 - CRM Pilates is made over `python 3.9.9`
+- You need to install poetry
 - You need to install postgres and libpq in order to run tests and run the app locally
 - You will need a private key to encrypt / decrypt user password (default is provided for tests purpose only), to generate one, just run:
   `openssl rand -hex 32` and keep this key in a safe place (provide the value to the environment key `SECRET_KEY`)
@@ -13,6 +14,20 @@ CRM Pilates is an application to manage Pilates classroom for small and medium P
 [Documentation](https://miro.com/app/board/o9J_leSmQNU=/)
 
 Everything is in the Makefile
+
+### Create a user
+Run a python interpreter in your shell once everything is installed and run the following
+```shell
+>>> from passlib.context import CryptContext
+>>> pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+>>> pwd_context.hash('password')
+'$2b$12$t.OhZvTO6xAFtUrqdrxkgO9z23VlK0wzkMKg4fESjll6CwayKswXu'
+```
+
+And then execute the following SQL request on your database
+```sql
+INSERT INTO users VALUES (1, 'bertrand', '$2b$12$t.OhZvTO6xAFtUrqdrxkgO9z23VlK0wzkMKg4fESjll6CwayKswXu')
+```
 
 ### ADR
 
