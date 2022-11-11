@@ -5,9 +5,9 @@ from uuid import UUID
 
 import pytz
 
-from crm_pilates.domain.classroom.classroom import Classroom
-from crm_pilates.domain.classroom.classroom_repository import ClassroomRepository
-from crm_pilates.domain.classroom.date_time_comparator import DateTimeComparator
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_repository import ClassroomRepository
+from crm_pilates.domain.scheduling.date_time_comparator import DateTimeComparator
 from crm_pilates.domain.repository import AggregateRoot
 from crm_pilates.infrastructure.repository.memory.memory_repository import (
     MemoryRepository,

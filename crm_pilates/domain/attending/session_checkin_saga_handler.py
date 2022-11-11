@@ -4,9 +4,9 @@ from uuid import UUID
 from crm_pilates.command.command_bus import CommandBus
 from crm_pilates.command.command_handler import Status
 from crm_pilates.command.saga_handler import SagaHandler
-from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.classroom import ConfirmedSession
-from crm_pilates.domain.classroom.session.session_creation_command_handler import (
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.attending.session import ConfirmedSession
+from crm_pilates.domain.attending.session_creation_command_handler import (
     ConfirmedSessionEvent,
 )
 from crm_pilates.domain.commands import SessionCreationCommand

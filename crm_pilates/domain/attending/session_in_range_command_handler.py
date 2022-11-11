@@ -1,8 +1,10 @@
 from typing import Tuple, List
 
 from crm_pilates.command.command_handler import CommandHandler, Status
-from crm_pilates.domain.classroom.classroom import Classroom, Session
-from crm_pilates.domain.classroom.session.existing_sessions import (
+from crm_pilates.domain.attending.sessions import Sessions
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.attending.session import Session
+from crm_pilates.domain.attending.existing_sessions import (
     ExistingSessions,
     ExistingSession,
 )
@@ -20,8 +22,8 @@ class SessionInRangeCommandHandler(CommandHandler):
         )
         sessions = []
         for classroom in classrooms:
-            classroom_sessions: [Session] = classroom.sessions_in_range(
-                command.start_date, command.end_date
+            classroom_sessions: [Session] = Sessions.sessions_in_range(
+                classroom, command.start_date, command.end_date
             )
             for classroom_session in classroom_sessions:
                 session: Session = RepositoryProvider.read_repositories.session.get_by_classroom_id_and_date(

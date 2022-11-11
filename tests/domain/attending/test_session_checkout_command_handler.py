@@ -4,11 +4,11 @@ import pytest
 import pytz
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
+from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckinSagaHandler,
     SessionCheckedIn,
 )
-from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
+from crm_pilates.domain.attending.session_checkout_command_handler import (
     SessionCheckoutCommandHandler,
 )
 from crm_pilates.domain.commands import SessionCheckoutCommand

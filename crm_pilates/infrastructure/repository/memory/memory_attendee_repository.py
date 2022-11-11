@@ -1,8 +1,8 @@
 from typing import List
 from uuid import UUID
 
-from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.attendee_repository import AttendeeRepository
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.attendee_repository import AttendeeRepository
 from crm_pilates.domain.client.client import Client
 from crm_pilates.domain.client.client_repository import ClientRepository
 from crm_pilates.domain.repository import AggregateRoot

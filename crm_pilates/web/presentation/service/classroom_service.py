@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from crm_pilates.domain.classroom.classroom import Classroom
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client import Client
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.web.presentation.domain.detailed_attendee import (

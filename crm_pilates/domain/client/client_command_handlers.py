@@ -2,7 +2,7 @@ from typing import Tuple, List
 from uuid import UUID
 
 from crm_pilates.command.command_handler import CommandHandler, Status
-from crm_pilates.domain.classroom.classroom import Session
+from crm_pilates.domain.attending.session import Session
 from crm_pilates.domain.client.client import Client, Credits
 from crm_pilates.domain.commands import (
     ClientCreationCommand,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.commands import ClientCredits
 from crm_pilates.domain.exceptions import DomainException
 from crm_pilates.domain.repository import AggregateRoot

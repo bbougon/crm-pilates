@@ -5,10 +5,10 @@ from uuid import UUID
 from fastapi import status, APIRouter, Response, Depends
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.classroom.classroom_creation_command_handler import (
+from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
     ClassroomCreated,
 )
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
 from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic.main import BaseModel
 
-from crm_pilates.domain.classroom.duration import Duration
+from crm_pilates.domain.scheduling.duration import Duration
 from crm_pilates.web.presentation.domain.units import Units
 from crm_pilates.web.schema.classroom_schemas import TimeUnit, AttendeeSchema
 

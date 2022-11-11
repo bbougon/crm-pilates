@@ -1,8 +1,10 @@
 from typing import List, Tuple
 
 from crm_pilates.command.command_handler import CommandHandler, Status
-from crm_pilates.domain.classroom.classroom import Classroom, Session
-from crm_pilates.domain.classroom.session.existing_sessions import (
+from crm_pilates.domain.attending.sessions import Sessions
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.attending.session import Session
+from crm_pilates.domain.attending.existing_sessions import (
     ExistingSessions,
     ExistingSession,
 )
@@ -21,10 +23,10 @@ class NextSessionsCommandHandler(CommandHandler):
         )
         next_sessions = []
         for classroom in classrooms:
-            next_session = classroom.next_session()
-            if next_session:
+            _next_session = Sessions.next_session(classroom)
+            if _next_session:
                 session: Session = RepositoryProvider.read_repositories.session.get_by_classroom_id_and_date(
-                    classroom.id, next_session.start
+                    classroom.id, _next_session.start
                 )
-                next_sessions.append(ExistingSession(session or next_session))
+                next_sessions.append(ExistingSession(session or _next_session))
         return ExistingSessions(next_sessions), Status.NONE

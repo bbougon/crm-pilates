@@ -2,7 +2,7 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import List
 
-from crm_pilates.domain.classroom.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.repository import Repository
 
 

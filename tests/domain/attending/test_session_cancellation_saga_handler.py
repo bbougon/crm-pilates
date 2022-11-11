@@ -5,7 +5,7 @@ import pytz
 from immobilus import immobilus
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
+from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
     AttendeeSessionCancellationSagaHandler,
 )

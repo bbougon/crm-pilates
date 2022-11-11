@@ -11,7 +11,9 @@ CRM Pilates is an application to manage Pilates classroom for small and medium P
 - You will need a private key to encrypt / decrypt user password (default is provided for tests purpose only), to generate one, just run:
   `openssl rand -hex 32` and keep this key in a safe place (provide the value to the environment key `SECRET_KEY`)
 
-[Documentation](https://miro.com/app/board/o9J_leSmQNU=/)
+**Documentation:**
+- [New domain exploration](https://miro.com/app/board/uXjVOxwEdAo=/)
+- [Old domain exploration](https://miro.com/app/board/o9J_leSmQNU=/)
 
 Everything is in the Makefile
 

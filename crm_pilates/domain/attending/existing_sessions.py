@@ -1,7 +1,7 @@
 from __future__ import annotations
 from uuid import UUID
 
-from crm_pilates.domain.classroom.classroom import Session
+from crm_pilates.domain.attending.session import Session
 from crm_pilates.event.event_store import Event
 
 

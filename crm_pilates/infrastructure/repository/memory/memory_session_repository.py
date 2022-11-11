@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from crm_pilates.domain.classroom.classroom import Session
-from crm_pilates.domain.classroom.session.session_repository import SessionRepository
+from crm_pilates.domain.attending.session import Session
+from crm_pilates.domain.attending.session_repository import SessionRepository
 from crm_pilates.domain.repository import AggregateRoot
 from crm_pilates.infrastructure.repository.memory.memory_repository import (
     MemoryRepository,

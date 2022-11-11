@@ -1,8 +1,8 @@
 from crm_pilates.command.command_bus import CommandBus
-from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
+from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckedIn,
 )
-from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
+from crm_pilates.domain.attending.session_checkout_command_handler import (
     SessionCheckedOut,
 )
 from crm_pilates.domain.commands import (

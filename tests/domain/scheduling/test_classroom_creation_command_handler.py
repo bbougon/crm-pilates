@@ -5,11 +5,11 @@ import pytz
 from immobilus import immobilus
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.classroom.classroom_creation_command_handler import (
+from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
     ClassroomCreationCommandHandler,
     ClassroomCreated,
 )
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.commands import ClassroomCreationCommand
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider

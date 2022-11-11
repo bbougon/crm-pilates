@@ -11,34 +11,33 @@ import pytz
 from mimesis import Person, Text, Numeric, Datetime
 
 from crm_pilates.authenticating.domain.user import User
-from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.classroom import (
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom import (
     Classroom,
-    ScheduledSession,
-    ConfirmedSession,
 )
-from crm_pilates.domain.classroom.classroom_creation_command_handler import (
+from crm_pilates.domain.attending.session import ScheduledSession, ConfirmedSession
+from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
     ClassroomCreated,
 )
-from crm_pilates.domain.classroom.classroom_patch_command_handler import (
+from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     AllAttendeesAdded,
 )
-from crm_pilates.domain.classroom.classroom_repository import ClassroomRepository
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
-from crm_pilates.domain.classroom.duration import Duration, HourTimeUnit
-from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
+from crm_pilates.domain.scheduling.classroom_repository import ClassroomRepository
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.duration import Duration, HourTimeUnit
+from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
 )
-from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
+from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckedIn,
 )
-from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
+from crm_pilates.domain.attending.session_checkout_command_handler import (
     SessionCheckedOut,
 )
-from crm_pilates.domain.classroom.session.session_creation_command_handler import (
+from crm_pilates.domain.attending.session_creation_command_handler import (
     ConfirmedSessionEvent,
 )
-from crm_pilates.domain.classroom.session.session_repository import SessionRepository
+from crm_pilates.domain.attending.session_repository import SessionRepository
 from crm_pilates.domain.client.client import Client, Credits
 from crm_pilates.domain.client.client_command_handlers import (
     ClientCreated,
@@ -195,6 +194,10 @@ class ClassroomBuilderForTest(Builder):
         if self.attendees:
             classroom.all_attendees(self.attendees)
         return classroom
+
+    def with_name(self, name: str) -> ClassroomBuilderForTest:
+        self.name = name
+        return self
 
     def with_position(self, position: int) -> ClassroomBuilderForTest:
         self.position = position
@@ -358,9 +361,7 @@ class SessionContextBuilderForTest(Builder):
         self.cancelled_attendee: UUID = None
 
     def build(self):
-        session: ConfirmedSession = getattr(self.classroom, self.session_to_create)(
-            self.date
-        )
+        session: ConfirmedSession = ConfirmedSession.create(self.classroom, self.date)
         if self.client_checkin:
             session.checkin(Attendee.create(self.client_checkin))
         if self.cancelled_attendee:
@@ -385,10 +386,6 @@ class SessionContextBuilderForTest(Builder):
 
     def checkin(self, client_id: UUID) -> SessionContextBuilderForTest:
         self.client_checkin = client_id
-        return self
-
-    def confirm(self) -> SessionContextBuilderForTest:
-        self.session_to_create = "confirm_session_at"
         return self
 
     def cancel(self, client_id: UUID):

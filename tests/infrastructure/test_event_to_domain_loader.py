@@ -4,10 +4,11 @@ from uuid import UUID
 import pytz
 from immobilus import immobilus
 
-from crm_pilates.domain.classroom.classroom import Classroom, Session
-from crm_pilates.domain.classroom.attendee import Attendance
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
-from crm_pilates.domain.classroom.duration import Duration, MinuteTimeUnit
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.attending.session import Session, ConfirmedSession
+from crm_pilates.domain.scheduling.attendee import Attendance
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.duration import Duration, MinuteTimeUnit
 from crm_pilates.domain.client.client import Client
 from crm_pilates.infrastructure.event_to_domain_loader import EventToDomainLoader
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
@@ -154,8 +155,9 @@ def test_should_load_events_by_date_ascending(persisted_event_store):
         )
         classroom_builder.build()
     classroom: Classroom = classroom_builder.classrooms[0]
+    date = datetime(2020, 10, 16, 10, 5, tzinfo=pytz.utc)
     confirmed_session_builder = EventBuilderForTest().confirmed_session(
-        classroom.confirm_session_at(datetime(2020, 10, 16, 10, 5, tzinfo=pytz.utc))
+        ConfirmedSession.create(classroom, date)
     )
     with immobilus("2020-10-15 10:01:00"):
         EventBuilderForTest().cancel_attendee(

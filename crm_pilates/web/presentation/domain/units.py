@@ -1,4 +1,4 @@
-from crm_pilates.domain.classroom.duration import HourTimeUnit, MinuteTimeUnit
+from crm_pilates.domain.scheduling.duration import HourTimeUnit, MinuteTimeUnit
 
 
 class Units:

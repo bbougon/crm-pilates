@@ -5,10 +5,10 @@ import pytz
 from immobilus import immobilus
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.classroom.session.next_sessions_command_handler import (
+from crm_pilates.domain.attending.existing_sessions import ExistingSessions
+from crm_pilates.domain.attending.next_sessions_command_handler import (
     NextSessionsCommandHandler,
 )
-from crm_pilates.domain.classroom.session.existing_sessions import ExistingSessions
 from crm_pilates.domain.commands import GetNextSessionsCommand
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import (
@@ -55,7 +55,6 @@ def test_next_sessions_with_confirmed_sessions(memory_repositories):
     )
     repository, confirmed_session = (
         SessionContextBuilderForTest()
-        .confirm()
         .with_classroom(classrooms[0])
         .at(datetime(2021, 8, 23, 10))
         .persist(RepositoryProvider.write_repositories.session)

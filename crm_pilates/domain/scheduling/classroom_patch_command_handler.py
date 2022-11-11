@@ -2,8 +2,8 @@ from typing import List, Tuple
 from uuid import UUID
 
 from crm_pilates.command.command_handler import CommandHandler, Status
-from crm_pilates.domain.classroom.classroom import Classroom
-from crm_pilates.domain.classroom.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.commands import ClassroomPatchCommand
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider

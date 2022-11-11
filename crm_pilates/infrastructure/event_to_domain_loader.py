@@ -6,31 +6,34 @@ from typing import List
 
 import arrow
 
-from crm_pilates.domain.classroom.classroom import (
+from crm_pilates.domain.scheduling.classroom import (
     Classroom,
     Schedule,
-    ConfirmedSession,
-    Session,
 )
-from crm_pilates.domain.classroom.attendee import Attendee, Attendance
-from crm_pilates.domain.classroom.classroom_creation_command_handler import (
+from crm_pilates.domain.attending.session import Session, ConfirmedSession
+from crm_pilates.domain.scheduling.attendee import Attendee, Attendance
+from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
     ClassroomCreated,
 )
-from crm_pilates.domain.classroom.classroom_patch_command_handler import (
+from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     AllAttendeesAdded,
 )
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
-from crm_pilates.domain.classroom.duration import Duration, HourTimeUnit, MinuteTimeUnit
-from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.duration import (
+    Duration,
+    HourTimeUnit,
+    MinuteTimeUnit,
+)
+from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
 )
-from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
+from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckedIn,
 )
-from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
+from crm_pilates.domain.attending.session_checkout_command_handler import (
     SessionCheckedOut,
 )
-from crm_pilates.domain.classroom.session.session_creation_command_handler import (
+from crm_pilates.domain.attending.session_creation_command_handler import (
     ConfirmedSessionEvent,
 )
 from crm_pilates.domain.client.client import Client, Credits

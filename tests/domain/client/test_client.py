@@ -1,6 +1,6 @@
 import pytest
 
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client import Client
 from crm_pilates.domain.exceptions import DomainException
 

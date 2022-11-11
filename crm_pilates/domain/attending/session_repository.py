@@ -2,7 +2,7 @@ from abc import abstractmethod
 from datetime import datetime
 from uuid import UUID
 
-from crm_pilates.domain.classroom.classroom import Session
+from crm_pilates.domain.attending.session import Session
 from crm_pilates.domain.repository import Repository
 
 

@@ -11,14 +11,14 @@ from arrow import Arrow
 from fastapi import status, APIRouter, Depends, Response
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.classroom.classroom import Session
-from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
+from crm_pilates.domain.attending.session import Session
+from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
 )
-from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
+from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckedIn,
 )
-from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
+from crm_pilates.domain.attending.session_checkout_command_handler import (
     SessionCheckedOut,
 )
 from crm_pilates.domain.commands import (

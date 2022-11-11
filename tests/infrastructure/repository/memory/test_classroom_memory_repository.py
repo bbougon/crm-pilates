@@ -4,7 +4,7 @@ from typing import List
 import pytz
 from immobilus import immobilus
 
-from crm_pilates.domain.classroom.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
     MemoryClassroomRepository,
     MemoryClassRoomReadRepository,

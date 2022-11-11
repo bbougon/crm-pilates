@@ -3,181 +3,20 @@ from __future__ import annotations
 import uuid
 from abc import abstractmethod
 from copy import deepcopy
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List
 from uuid import UUID
 
-import arrow
 import pytz
 
-from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
-from crm_pilates.domain.classroom.date_time_comparator import (
-    DateTimeComparator,
-    DateComparator,
-)
-from crm_pilates.domain.classroom.duration import (
-    Duration,
-    MinuteTimeUnit,
-    HourTimeUnit,
-    TimeUnit,
-)
-from crm_pilates.domain.datetimes import Weekdays
 from crm_pilates.domain.exceptions import DomainException
 from crm_pilates.domain.repository import AggregateRoot
 
-
-@dataclass
-class Schedule:
-    start: datetime
-    stop: datetime
-
-
-class Classroom(AggregateRoot):
-    def __init__(
-        self,
-        name: str,
-        position: int,
-        schedule: Schedule,
-        subject: ClassroomSubject,
-        duration: Duration,
-    ):
-        super().__init__()
-        self._name = name
-        self._position = position
-        self._schedule = schedule
-        self._duration = duration
-        self._attendees: [Attendee] = []
-        self._subject = subject
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def position(self) -> int:
-        return self._position
-
-    @property
-    def schedule(self) -> Schedule:
-        return self._schedule
-
-    @property
-    def duration(self) -> Duration:
-        return self._duration
-
-    @property
-    def attendees(self) -> List[Attendee]:
-        return self._attendees
-
-    @property
-    def subject(self) -> ClassroomSubject:
-        return self._subject
-
-    @staticmethod
-    def create(
-        name: str,
-        start_date: datetime,
-        position: int,
-        subject: ClassroomSubject,
-        stop_date: datetime = None,
-        duration: Duration = Duration(HourTimeUnit(1)),
-    ) -> Classroom:
-        if not stop_date:
-            stop_date = start_date + timedelta(
-                hours=duration.time_unit.to_unit(HourTimeUnit).value
-            )
-        classroom = Classroom(
-            name,
-            position,
-            Schedule(start=start_date, stop=stop_date),
-            subject,
-            duration,
-        )
-        return classroom
-
-    def all_attendees(self, attendees: [Attendee]):
-        if self._position < len(attendees):
-            raise DomainException(
-                f"Cannot add anymore attendees (position available: {self._position - len(self._attendees)} - attendee(s) you try to add: {len(attendees)})"
-            )
-        self._attendees = attendees
-
-    def next_session(self) -> ScheduledSession:
-        if self.__has_session_today() or (
-            self.__today_is_sunday() and self.__next_session_on_monday()
-        ):
-            start: datetime = datetime.utcnow().replace(
-                hour=self._schedule.start.hour,
-                minute=self._schedule.start.minute,
-                second=0,
-                microsecond=0,
-                tzinfo=self._schedule.start.tzinfo or pytz.utc,
-            )
-            return ScheduledSession.create(self, start)
-
-    def __has_session_today(self) -> bool:
-        return DateTimeComparator(
-            self._schedule.start, datetime.now()
-        ).same_date().compare() or (
-            self._schedule.stop
-            and DateTimeComparator(datetime.now(), self._schedule.start)
-            .same_day()
-            .compare()
-        )
-
-    def __today_is_sunday(self):
-        return datetime.now().today().isoweekday() == Weekdays.SUNDAY
-
-    def __next_session_on_monday(self):
-        monday: datetime = datetime.now() + timedelta(days=1)
-        return monday.isoweekday() == Weekdays.MONDAY
-
-    def confirm_session_at(self, session_date: datetime) -> ConfirmedSession:
-        return ConfirmedSession.create(self, session_date)
-
-    def sessions_in_range(
-        self, start_date: datetime, end_date: datetime
-    ) -> List[Session]:
-        days: [datetime] = list(
-            map(
-                lambda day_range: day_range.date(),
-                arrow.Arrow.range("day", start_date, end_date),
-            )
-        )
-        sessions: [Session] = []
-        classroom_start_date = self.schedule.start
-        for day in days:
-            if (
-                DateComparator(classroom_start_date.date(), day)
-                .same_day()
-                .before()
-                .compare()
-                and DateComparator(day, end_date.date()).before().compare()
-                and DateComparator(day, self.schedule.stop.date()).before().compare()
-            ):
-                sessions.append(
-                    Session(
-                        self.id,
-                        self.name,
-                        self.position,
-                        self.subject,
-                        datetime(
-                            day.year,
-                            day.month,
-                            day.day,
-                            classroom_start_date.hour,
-                            classroom_start_date.minute,
-                            tzinfo=pytz.utc
-                            if classroom_start_date.tzinfo is None
-                            else classroom_start_date.tzinfo,
-                        ),
-                        self.duration.time_unit,
-                        self.attendees,
-                    )
-                )
-        return sessions
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.date_time_comparator import DateTimeComparator
+from crm_pilates.domain.scheduling.duration import TimeUnit, MinuteTimeUnit
 
 
 class Session:

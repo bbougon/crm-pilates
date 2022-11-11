@@ -1,23 +1,23 @@
 from crm_pilates.command.command_bus import CommandBus
-from crm_pilates.domain.classroom.classroom_creation_command_handler import (
+from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
     ClassroomCreationCommandHandler,
 )
-from crm_pilates.domain.classroom.classroom_patch_command_handler import (
+from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     ClassroomPatchCommandHandler,
 )
-from crm_pilates.domain.classroom.session.session_checkin_saga_handler import (
+from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckinSagaHandler,
 )
-from crm_pilates.domain.classroom.session.session_checkout_command_handler import (
+from crm_pilates.domain.attending.session_checkout_command_handler import (
     SessionCheckoutCommandHandler,
 )
-from crm_pilates.domain.classroom.session.session_creation_command_handler import (
+from crm_pilates.domain.attending.session_creation_command_handler import (
     SessionCreationCommandHandler,
 )
-from crm_pilates.domain.classroom.session.session_in_range_command_handler import (
+from crm_pilates.domain.attending.session_in_range_command_handler import (
     SessionInRangeCommandHandler,
 )
-from crm_pilates.domain.classroom.session.attendee_session_cancellation_saga_handler import (
+from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancellationSagaHandler,
 )
 from crm_pilates.domain.client.client_command_handlers import (
@@ -38,7 +38,7 @@ from crm_pilates.domain.commands import (
     DecreaseClientCreditsCommand,
     RefundClientCreditsCommand,
 )
-from crm_pilates.domain.classroom.session.next_sessions_command_handler import (
+from crm_pilates.domain.attending.next_sessions_command_handler import (
     NextSessionsCommandHandler,
 )
 from crm_pilates.domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga

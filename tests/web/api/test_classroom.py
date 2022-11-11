@@ -7,9 +7,9 @@ import pytz
 from fastapi import HTTPException
 from fastapi import Response
 
-from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.classroom import Classroom
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
     MemoryClassroomRepository,

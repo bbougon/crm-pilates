@@ -6,8 +6,8 @@ from uuid import UUID
 import pytz
 
 from crm_pilates.command.command_handler import Command
-from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.web.schema.classroom_schemas import Duration
 
 

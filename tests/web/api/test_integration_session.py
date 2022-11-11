@@ -7,9 +7,11 @@ from fastapi import status, Response
 from fastapi.testclient import TestClient
 from immobilus import immobilus
 
-from crm_pilates.domain.classroom.classroom import Classroom, ScheduledSession
-from crm_pilates.domain.classroom.attendee import Attendance
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.attending.sessions import Sessions
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.attending.session import ScheduledSession
+from crm_pilates.domain.scheduling.attendee import Attendance
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client import Client
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.main import app
@@ -123,7 +125,7 @@ def test_register_checkin(memory_repositories, event_bus, authenticated_user):
     )
 
     classroom: Classroom = classrooms[0]
-    session: ScheduledSession = classroom.next_session()
+    session: ScheduledSession = Sessions.next_session(classroom)
     response: Response = client.post(
         "/sessions/checkin",
         json=SessionCheckinJsonBuilderForTest()

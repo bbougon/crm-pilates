@@ -1,4 +1,4 @@
-from crm_pilates.domain.classroom.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom import Classroom
 
 
 def expected_session_response(

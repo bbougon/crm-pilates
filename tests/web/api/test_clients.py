@@ -4,7 +4,7 @@ from http import HTTPStatus
 import pytest
 from fastapi import Response, HTTPException
 
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client import Client
 from crm_pilates.infrastructure.repository.memory.memory_client_repositories import (
     MemoryClientRepository,

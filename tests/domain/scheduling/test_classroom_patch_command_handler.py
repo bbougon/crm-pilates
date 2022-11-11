@@ -5,8 +5,8 @@ import pytest
 import pytz
 from immobilus import immobilus
 
-from crm_pilates.domain.classroom.classroom import Classroom
-from crm_pilates.domain.classroom.classroom_patch_command_handler import (
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     ClassroomPatchCommandHandler,
 )
 from crm_pilates.domain.commands import ClassroomPatchCommand

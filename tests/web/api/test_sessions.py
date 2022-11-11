@@ -9,8 +9,8 @@ from fastapi import Response, HTTPException, status
 from immobilus import immobilus
 from mock.mock import ANY
 
-from crm_pilates.domain.classroom.classroom import Classroom
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client import Client
 from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
@@ -144,7 +144,6 @@ def test_get_next_sessions_with_confirmed_sessions():
         SessionContextBuilderForTest()
         .with_classroom(classrooms[1])
         .at(datetime(2020, 3, 19, 11))
-        .confirm()
         .persist(RepositoryProvider.write_repositories.session)
         .build()
     )
@@ -227,7 +226,6 @@ def test_sessions_should_return_sessions_in_current_month_range():
         SessionContextBuilderForTest()
         .with_classroom(classrooms[1])
         .at(datetime(2021, 9, 25, 11))
-        .confirm()
         .persist(RepositoryProvider.write_repositories.session)
         .build()
     )

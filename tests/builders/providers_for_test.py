@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 
 from crm_pilates.command.command_bus import CommandBus
-from crm_pilates.domain.classroom.classroom_repository import ClassroomRepository
+from crm_pilates.domain.scheduling.classroom_repository import ClassroomRepository
 from crm_pilates.domain.client.client_repository import ClientRepository
 from crm_pilates.infrastructure.command_bus_provider import (
     CommandBusProvider,

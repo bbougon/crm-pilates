@@ -5,8 +5,8 @@ import pytz
 from immobilus import immobilus
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.classroom.attendee import Attendee
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client_command_handlers import (
     ClientCreated,
     ClientCreationCommandHandler,

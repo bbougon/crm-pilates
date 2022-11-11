@@ -3,7 +3,7 @@ from typing import Optional, List
 from pydantic import validator
 from pydantic.main import BaseModel
 
-from crm_pilates.domain.classroom.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 
 
 class Credits(BaseModel):

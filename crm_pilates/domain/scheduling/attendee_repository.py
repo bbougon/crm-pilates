@@ -1,4 +1,4 @@
-from crm_pilates.domain.classroom.attendee import Attendee
+from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.repository import Repository
 
 
