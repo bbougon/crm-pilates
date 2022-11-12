@@ -8,13 +8,13 @@ from crm_pilates.infrastructure.migration.script_001_migrate_events_to_version_1
 from tests.infrastructure.migration.test_migration import set_event, PILATES_TEST
 
 
-def test_should_update_version(clean_database):
+def test_should_update_version(clean_database, connection_url_arg):
     id = uuid4()
     root_id = uuid4()
     date = datetime.now()
     set_event(id, root_id, "Custom", date, {"event": "my event"})
 
-    MigrateEventsToVersion1Script([f"--connection-url={PILATES_TEST}"]).execute()
+    MigrateEventsToVersion1Script(connection_url_arg).execute()
 
     event = Migration(
         "postgresql://crm-pilates-test:example@localhost:5433/crm-pilates-test"
@@ -26,13 +26,13 @@ def test_should_update_version(clean_database):
     assert event[4] == {"version": "1", "event": "my event"}
 
 
-def test_should_not_update_version_if_already_set(clean_database):
+def test_should_not_update_version_if_already_set(clean_database, connection_url_arg):
     id = uuid4()
     root_id = uuid4()
     date = datetime.now()
     set_event(id, root_id, "Custom", date, {"event": "my event", "version": "2"})
 
-    MigrateEventsToVersion1Script(PILATES_TEST).execute()
+    MigrateEventsToVersion1Script(connection_url_arg).execute()
 
     event = Migration(PILATES_TEST).get_event(id)
     assert event[0] == id
@@ -42,7 +42,9 @@ def test_should_not_update_version_if_already_set(clean_database):
     assert event[4] == {"version": "2", "event": "my event"}
 
 
-def test_should_update_created_classroom_with_subject(clean_database):
+def test_should_update_created_classroom_with_subject(
+    clean_database, connection_url_arg
+):
     id = uuid4()
     second_id = uuid4()
     third_id = uuid4()
@@ -102,7 +104,7 @@ def test_should_update_created_classroom_with_subject(clean_database):
         },
     )
 
-    MigrateEventsToVersion1Script(PILATES_TEST).execute()
+    MigrateEventsToVersion1Script(connection_url_arg).execute()
 
     custom_event = Migration(PILATES_TEST).get_event(custom_id)
     event = Migration(PILATES_TEST).get_event(id)

@@ -5,8 +5,8 @@ from tests.infrastructure.migration.test_migration import PILATES_TEST
 import psycopg
 
 
-def test_should_create_table_user(drop_tables):
-    CreateUserTableScript(PILATES_TEST).execute()
+def test_should_create_table_user(drop_tables, connection_url_arg):
+    CreateUserTableScript(connection_url_arg).execute()
 
     with psycopg.connect(PILATES_TEST) as connection:
         result = connection.execute(

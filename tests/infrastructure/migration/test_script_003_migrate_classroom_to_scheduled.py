@@ -9,7 +9,7 @@ from tests.infrastructure.migration.test_migration import PILATES_TEST, set_even
 
 
 def test_should_update_classroom_created_event_type_to_classroom_scheduled(
-    clean_database,
+    clean_database, connection_url_arg
 ):
     id = uuid4()
     root_id = uuid4()
@@ -34,7 +34,7 @@ def test_should_update_classroom_created_event_type_to_classroom_scheduled(
         },
     )
 
-    MigrateClassroomToScheduledScript(PILATES_TEST).execute()
+    MigrateClassroomToScheduledScript(connection_url_arg).execute()
 
     custom_event = Migration(PILATES_TEST).get_event(custom_id)
     event = Migration(PILATES_TEST).get_event(id)

@@ -36,6 +36,7 @@ from crm_pilates.main import app
 from crm_pilates.web.api.authentication import authentication_service
 from tests.faker.custom_authentication_service import CustomAuthenticationService
 from tests.infrastructure.event.memory_event_store import MemoryEventStore
+from tests.infrastructure.migration.test_migration import PILATES_TEST
 
 
 def pytest_addoption(parser):
@@ -161,3 +162,8 @@ def memory_repositories():
 def event_bus():
     if isinstance(EventBusProvider.event_bus, DummyEventBus):
         EventBusProvider.event_bus = EventBus()
+
+
+@pytest.fixture
+def connection_url_arg():
+    return [f"--connection-url={PILATES_TEST}"]
