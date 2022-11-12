@@ -3,7 +3,6 @@ from datetime import datetime
 import pytest
 import pytz
 
-from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckinSagaHandler,
     SessionCheckedIn,
@@ -45,7 +44,7 @@ def test_should_refund_client_credits_on_checkout_after_checkin(memory_event_sto
         .build()
     )
     classroom = classrooms[0]
-    result: [SessionCheckedIn, Status] = SessionCheckinSagaHandler(
+    result: SessionCheckedIn = SessionCheckinSagaHandler(
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
@@ -54,7 +53,7 @@ def test_should_refund_client_credits_on_checkout_after_checkin(memory_event_sto
     )
 
     SessionCheckoutCommandHandler().execute(
-        SessionCheckoutCommand(result[0].root_id, client.id)
+        SessionCheckoutCommand(result.root_id, client.id)
     )
 
     assert client.credits[0].value == 10
@@ -83,7 +82,7 @@ def test_should_not_refund_client_credits_on_two_consecutives_checkout_after_che
         .build()
     )
     classroom = classrooms[0]
-    result: [SessionCheckedIn, Status] = SessionCheckinSagaHandler(
+    result: SessionCheckedIn = SessionCheckinSagaHandler(
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
@@ -93,10 +92,10 @@ def test_should_not_refund_client_credits_on_two_consecutives_checkout_after_che
 
     with pytest.raises(DomainException) as e:
         SessionCheckoutCommandHandler().execute(
-            SessionCheckoutCommand(result[0].root_id, client.id)
+            SessionCheckoutCommand(result.root_id, client.id)
         )
         SessionCheckoutCommandHandler().execute(
-            SessionCheckoutCommand(result[0].root_id, client.id)
+            SessionCheckoutCommand(result.root_id, client.id)
         )
 
     assert client.credits[0].value == 10

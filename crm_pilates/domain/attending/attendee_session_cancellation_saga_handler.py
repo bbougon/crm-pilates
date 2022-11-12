@@ -1,15 +1,13 @@
-from typing import Tuple
 from uuid import UUID
 
-from crm_pilates.command.command_handler import Status
 from crm_pilates.command.saga_handler import SagaHandler
 from crm_pilates.domain.attending.session import Session, ConfirmedSession
-from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.attending.session_creation_command_handler import (
     ConfirmedSessionEvent,
 )
 from crm_pilates.domain.commands import SessionCreationCommand
 from crm_pilates.domain.sagas import AttendeeSessionCancellationSaga
+from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
@@ -30,7 +28,7 @@ class AttendeeSessionCancelled(Event):
 class AttendeeSessionCancellationSagaHandler(SagaHandler):
     def execute(
         self, saga: AttendeeSessionCancellationSaga
-    ) -> Tuple[AttendeeSessionCancelled, Status]:
+    ) -> AttendeeSessionCancelled:
         session: Session = (
             RepositoryProvider.write_repositories.session.get_by_classroom_id_and_date(
                 saga.classroom_id, saga.session_date
@@ -38,22 +36,15 @@ class AttendeeSessionCancellationSagaHandler(SagaHandler):
         )
         if session:
             session_id = session.id
-            status = Status.UPDATED
         else:
-            confirmed_session_event: Tuple[
-                ConfirmedSessionEvent, Status
-            ] = self._command_bus.send(
+            confirmed_session_event: ConfirmedSessionEvent = self._command_bus.send(
                 SessionCreationCommand(saga.classroom_id, saga.session_date)
             )
-            session_id = confirmed_session_event[0].event.root_id
-            status = Status.CREATED
+            session_id = confirmed_session_event.event.root_id
 
         confirmed_session: ConfirmedSession = (
             RepositoryProvider.write_repositories.session.get_by_id(session_id)
         )
         cancelled_attendee = Attendee.create(saga.attendee_id)
         confirmed_session.cancel(cancelled_attendee)
-        return (
-            AttendeeSessionCancelled(confirmed_session.id, cancelled_attendee),
-            status,
-        )
+        return AttendeeSessionCancelled(confirmed_session.id, cancelled_attendee)

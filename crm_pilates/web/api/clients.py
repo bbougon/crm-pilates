@@ -1,10 +1,9 @@
 from http import HTTPStatus
-from typing import Tuple, List, Union
+from typing import List, Union
 from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends
 
-from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.client.client import Client
 from crm_pilates.domain.client.client_command_handlers import ClientCreated
 from crm_pilates.domain.commands import (
@@ -47,14 +46,14 @@ def create_client(
 ):
     from crm_pilates.command.response import Response
 
-    result: Tuple[Response, Status] = command_bus_provider.command_bus.send(
+    result: Response = command_bus_provider.command_bus.send(
         ClientCreationCommand(
             client_creation.firstname,
             client_creation.lastname,
             __to_client_credits(client_creation.credits),
         )
     )
-    event: ClientCreated = result[0].event
+    event: ClientCreated = result.event
     response.headers["location"] = f"/clients/{event.root_id}"
     return __map_client(event)
 

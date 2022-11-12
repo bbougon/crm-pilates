@@ -1,7 +1,7 @@
 import calendar
 from datetime import datetime
 from http import HTTPStatus
-from typing import List, Tuple
+from typing import List
 from urllib.parse import urlencode
 from uuid import UUID
 
@@ -10,11 +10,10 @@ import pytz
 from arrow import Arrow
 from fastapi import status, APIRouter, Depends, Response
 
-from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.attending.session import Session
 from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
 )
+from crm_pilates.domain.attending.session import Session
 from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckedIn,
 )
@@ -53,10 +52,10 @@ def next_sessions(
 ):
     from crm_pilates.command.response import Response
 
-    next_sessions_result: Tuple[
-        Response, Status
-    ] = command_bus_provider.command_bus.send(GetNextSessionsCommand(datetime.utcnow()))
-    return __map_sessions(next_sessions_result[0].event)
+    next_sessions_result: Response = command_bus_provider.command_bus.send(
+        GetNextSessionsCommand(datetime.utcnow())
+    )
+    return __map_sessions(next_sessions_result.event)
 
 
 @router.get(
@@ -104,14 +103,14 @@ def sessions(
     __set_link_header(response, *__get_dates_for_period(start_date, end_date))
     from crm_pilates.command.response import Response
 
-    result: Tuple[Response, status] = command_bus_provider.command_bus.send(command)
-    return __map_sessions(result[0].event)
+    result: Response = command_bus_provider.command_bus.send(command)
+    return __map_sessions(result.event)
 
 
 @router.post(
     "/sessions/checkin",
     tags=["classroom", "sessions"],
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     response_model=SessionResponse,
 )
 def session_checkin(
@@ -122,21 +121,17 @@ def session_checkin(
     try:
         from crm_pilates.command.response import Response
 
-        checkin_event_result: Tuple[
-            Response, Status
-        ] = command_bus_provider.command_bus.send(
+        checkin_event_result: Response = command_bus_provider.command_bus.send(
             SessionCheckinSaga(
                 session_checkin.classroom_id,
                 session_checkin.session_date,
                 session_checkin.attendee,
             )
         )
-        result: SessionCheckedIn = checkin_event_result[0].event
+        result: SessionCheckedIn = checkin_event_result.event
         session: Session = RepositoryProvider.read_repositories.session.get_by_id(
             result.root_id
         )
-        if checkin_event_result[1] == Status.UPDATED:
-            response.status_code = status.HTTP_200_OK
         return __map_session(result.root_id, session)
     except AggregateNotFoundException as e:
         raise APIHTTPException(
@@ -161,12 +156,10 @@ def session_checkout(
     try:
         from crm_pilates.command.response import Response
 
-        checkout_event_result: Tuple[
-            Response, Status
-        ] = command_bus_provider.command_bus.send(
+        checkout_event_result: Response = command_bus_provider.command_bus.send(
             SessionCheckoutCommand(session_id, session_checkout.attendee)
         )
-        result: SessionCheckedOut = checkout_event_result[0].event
+        result: SessionCheckedOut = checkout_event_result.event
         session: Session = RepositoryProvider.read_repositories.session.get_by_id(
             result.root_id
         )
@@ -195,16 +188,14 @@ def attendee_session_cancellation(
     try:
         from crm_pilates.command.response import Response
 
-        checkout_event_result: Tuple[
-            Response, Status
-        ] = command_bus_provider.command_bus.send(
+        checkout_event_result: Response = command_bus_provider.command_bus.send(
             AttendeeSessionCancellationSaga(
                 attendee_id,
                 session_cancellation.classroom_id,
                 session_cancellation.session_date,
             )
         )
-        result: AttendeeSessionCancelled = checkout_event_result[0].event
+        result: AttendeeSessionCancelled = checkout_event_result.event
         session: Session = RepositoryProvider.read_repositories.session.get_by_id(
             result.root_id
         )

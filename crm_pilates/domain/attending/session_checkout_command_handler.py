@@ -1,10 +1,9 @@
-from typing import Tuple
 from uuid import UUID
 
-from crm_pilates.command.command_handler import CommandHandler, Status
+from crm_pilates.command.command_handler import CommandHandler
 from crm_pilates.domain.attending.session import ConfirmedSession
-from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.commands import SessionCheckoutCommand
+from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
@@ -26,11 +25,9 @@ class SessionCheckedOut(Event):
 
 
 class SessionCheckoutCommandHandler(CommandHandler):
-    def execute(
-        self, command: SessionCheckoutCommand
-    ) -> Tuple[SessionCheckedOut, Status]:
+    def execute(self, command: SessionCheckoutCommand) -> SessionCheckedOut:
         session: ConfirmedSession = (
             RepositoryProvider.write_repositories.session.get_by_id(command.session_id)
         )
         attendee: Attendee = session.checkout(Attendee.create(command.attendee))
-        return SessionCheckedOut(session.id, attendee), Status.CREATED
+        return SessionCheckedOut(session.id, attendee)

@@ -1,10 +1,8 @@
 from datetime import datetime
-from typing import Tuple
 
 import pytz
 from immobilus import immobilus
 
-from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
     AttendeeSessionCancellationSagaHandler,
@@ -43,9 +41,7 @@ def test_attendee_session_cancellation_event_should_be_stored(memory_event_store
     )
     classroom = classrooms[0]
 
-    session_result: Tuple[
-        AttendeeSessionCancelled, Status
-    ] = AttendeeSessionCancellationSagaHandler(
+    session_result: AttendeeSessionCancelled = AttendeeSessionCancellationSagaHandler(
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         AttendeeSessionCancellationSaga(
@@ -53,8 +49,6 @@ def test_attendee_session_cancellation_event_should_be_stored(memory_event_store
         )
     )
 
-    result = session_result[0]
-    assert session_result[1] == Status.CREATED
     events = StoreLocator.store.get_all()
     assert len(events) == 2
     assert events[0].type == "ConfirmedSessionEvent"
@@ -63,7 +57,7 @@ def test_attendee_session_cancellation_event_should_be_stored(memory_event_store
         2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc
     )
     EventAsserter.assert_attendee_session_cancelled(
-        events[1].payload, result.root_id, clients[1].id
+        events[1].payload, session_result.root_id, clients[1].id
     )
 
 
@@ -93,9 +87,7 @@ def test_attendee_session_cancellation_on_already_confirmed_session_should_be_up
         datetime(2020, 8, 3, 11, 0)
     ).persist(RepositoryProvider.write_repositories.session).build()
 
-    session_result: Tuple[
-        AttendeeSessionCancelled, Status
-    ] = AttendeeSessionCancellationSagaHandler(
+    session_result: AttendeeSessionCancelled = AttendeeSessionCancellationSagaHandler(
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         AttendeeSessionCancellationSaga(
@@ -103,11 +95,9 @@ def test_attendee_session_cancellation_on_already_confirmed_session_should_be_up
         )
     )
 
-    result = session_result[0]
-    assert session_result[1] == Status.UPDATED
     events = StoreLocator.store.get_all()
     assert len(events) == 1
     assert events[0].type == "AttendeeSessionCancelled"
     EventAsserter.assert_attendee_session_cancelled(
-        events[0].payload, result.root_id, clients[1].id
+        events[0].payload, session_result.root_id, clients[1].id
     )

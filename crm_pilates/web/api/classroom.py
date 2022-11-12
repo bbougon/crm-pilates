@@ -1,16 +1,14 @@
 from http import HTTPStatus
-from typing import Tuple
 from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends
 
-from crm_pilates.command.command_handler import Status
+from crm_pilates.domain.commands import ClassroomScheduleCommand, ClassroomPatchCommand
+from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
     ClassroomScheduled,
 )
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
-from crm_pilates.domain.commands import ClassroomScheduleCommand, ClassroomPatchCommand
-from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.web.api.authentication import authentication_service
 from crm_pilates.web.api.exceptions import APIHTTPException
@@ -63,8 +61,8 @@ def create_classroom(
         )
         from crm_pilates.command.response import Response
 
-        result: Tuple[Response, Status] = command_bus_provider.command_bus.send(command)
-        event: ClassroomScheduled = result[0].event
+        result: Response = command_bus_provider.command_bus.send(command)
+        event: ClassroomScheduled = result.event
         response.headers["location"] = f"/classrooms/{event.root_id}"
         return {
             "name": event.name,

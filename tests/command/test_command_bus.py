@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Tuple
 
 from crm_pilates.command.command_bus import CommandBus
-from crm_pilates.command.command_handler import CommandHandler, Command, Status
+from crm_pilates.command.command_handler import CommandHandler, Command
 from crm_pilates.event.event_store import Event
 
 
@@ -21,14 +20,14 @@ class SimpleCommandExecuted(Event):
 
 
 class SimpleCommandHandler(CommandHandler):
-    def execute(self, command: SimpleCommand) -> Tuple[SimpleCommandExecuted, Status]:
-        return SimpleCommandExecuted(name=command.name), Status.NONE
+    def execute(self, command: SimpleCommand) -> SimpleCommandExecuted:
+        return SimpleCommandExecuted(name=command.name)
 
 
 def test_send_a_command_and_retrieve_response():
     command_bus = CommandBus({"SimpleCommand": SimpleCommandHandler()}, {})
 
-    response, status = command_bus.send(SimpleCommand(name="name"))
+    response = command_bus.send(SimpleCommand(name="name"))
 
     assert isinstance(response.event, SimpleCommandExecuted)
     assert response.event.id == 123

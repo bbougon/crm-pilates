@@ -1,16 +1,12 @@
-from typing import Tuple
 from uuid import UUID
 
 from crm_pilates.command.command_bus import CommandBus
-from crm_pilates.command.command_handler import Status
+from crm_pilates.command.response import Response
 from crm_pilates.command.saga_handler import SagaHandler
-from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.attending.session import ConfirmedSession
-from crm_pilates.domain.attending.session_creation_command_handler import (
-    ConfirmedSessionEvent,
-)
 from crm_pilates.domain.commands import SessionCreationCommand
 from crm_pilates.domain.sagas import SessionCheckinSaga
+from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
@@ -35,7 +31,7 @@ class SessionCheckinSagaHandler(SagaHandler):
     def __init__(self, command_bus: CommandBus) -> None:
         super().__init__(command_bus)
 
-    def execute(self, saga: SessionCheckinSaga) -> Tuple[SessionCheckedIn, Status]:
+    def execute(self, saga: SessionCheckinSaga) -> SessionCheckedIn:
         session = (
             RepositoryProvider.write_repositories.session.get_by_classroom_id_and_date(
                 saga.classroom_id, saga.session_date
@@ -43,15 +39,11 @@ class SessionCheckinSagaHandler(SagaHandler):
         )
         if session:
             session_id = session.id
-            status = Status.UPDATED
         else:
-            confirmed_session_event: Tuple[
-                ConfirmedSessionEvent, Status
-            ] = self._command_bus.send(
+            confirmed_session_event: Response = self._command_bus.send(
                 SessionCreationCommand(saga.classroom_id, saga.session_date)
             )
-            session_id = confirmed_session_event[0].event.root_id
-            status = Status.CREATED
+            session_id = confirmed_session_event.event.root_id
 
         confirmed_session: ConfirmedSession = (
             RepositoryProvider.write_repositories.session.get_by_id(session_id)
@@ -59,4 +51,4 @@ class SessionCheckinSagaHandler(SagaHandler):
         checked_in_attendee: Attendee = confirmed_session.checkin(
             Attendee.create(saga.attendee)
         )
-        return SessionCheckedIn(confirmed_session.id, checked_in_attendee), status
+        return SessionCheckedIn(confirmed_session.id, checked_in_attendee)

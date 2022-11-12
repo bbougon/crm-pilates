@@ -1,12 +1,8 @@
 from datetime import datetime
-from typing import Tuple
 
 import pytz
 from immobilus import immobilus
 
-from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.scheduling.attendee import Attendee
-from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client_command_handlers import (
     ClientCreated,
     ClientCreationCommandHandler,
@@ -19,6 +15,8 @@ from crm_pilates.domain.commands import (
     AddCreditsToClientCommand,
     DecreaseClientCreditsCommand,
 )
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.asserters.event_asserter import EventAsserter
@@ -33,7 +31,7 @@ from tests.builders.builders_for_test import (
 
 @immobilus("2020-04-03 10:24:15.230")
 def test_classroom_creation_event_is_stored(memory_event_store):
-    result: Tuple[ClientCreated, Status] = ClientCreationCommandHandler().execute(
+    result: ClientCreated = ClientCreationCommandHandler().execute(
         ClientCreationCommand(firstname="John", lastname="Doe")
     )
 
@@ -44,13 +42,13 @@ def test_classroom_creation_event_is_stored(memory_event_store):
         2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc
     )
     EventAsserter.assert_client_created(
-        events[0].payload, result[0].root_id, "John", "Doe"
+        events[0].payload, result.root_id, "John", "Doe"
     )
 
 
 @immobilus("2020-04-03 10:24:15.230")
 def test_classroom_creation_event_is_stored_with_credits(memory_event_store):
-    result: Tuple[ClientCreated, Status] = ClientCreationCommandHandler().execute(
+    result: ClientCreated = ClientCreationCommandHandler().execute(
         ClientCreationCommand(
             firstname="John",
             lastname="Doe",
@@ -66,7 +64,7 @@ def test_classroom_creation_event_is_stored_with_credits(memory_event_store):
     )
     EventAsserter.assert_client_created(
         events[0].payload,
-        result[0].root_id,
+        result.root_id,
         "John",
         "Doe",
         [{"value": 2, "subject": "MAT"}],

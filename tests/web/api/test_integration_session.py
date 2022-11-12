@@ -135,7 +135,7 @@ def test_register_checkin(memory_repositories, event_bus, authenticated_user):
     )
 
     assert classroom.attendees[0].attendance == Attendance.REGISTERED
-    assert response.status_code == status.HTTP_201_CREATED
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_session_response(
         ANY,
         str(classroom.id),

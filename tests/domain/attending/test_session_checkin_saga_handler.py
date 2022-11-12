@@ -1,10 +1,8 @@
 from datetime import datetime
-from typing import Tuple
 
 import pytz
 from immobilus import immobilus
 
-from crm_pilates.command.command_handler import Status
 from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckinSagaHandler,
     SessionCheckedIn,
@@ -44,7 +42,7 @@ def test_session_checkin_event_is_stored(memory_event_store):
     )
     classroom = classrooms[0]
 
-    session_result: Tuple[SessionCheckedIn, Status] = SessionCheckinSagaHandler(
+    session_result: SessionCheckedIn = SessionCheckinSagaHandler(
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
@@ -52,8 +50,6 @@ def test_session_checkin_event_is_stored(memory_event_store):
         )
     )
 
-    result = session_result[0]
-    assert session_result[1] == Status.CREATED
     events = StoreLocator.store.get_all()
     assert len(events) == 3
     assert events[0].type == "ConfirmedSessionEvent"
@@ -62,7 +58,7 @@ def test_session_checkin_event_is_stored(memory_event_store):
         2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc
     )
     EventAsserter.assert_session_checkin(
-        events[1].payload, result.root_id, clients[1].id, "CHECKED_IN"
+        events[1].payload, session_result.root_id, clients[1].id, "CHECKED_IN"
     )
 
 
@@ -90,7 +86,7 @@ def test_session_checkin_on_already_confirmed_session(memory_event_store):
         datetime(2020, 8, 3, 11, 0)
     ).persist(RepositoryProvider.write_repositories.session).build()
 
-    session_result: Tuple[SessionCheckedIn, Status] = SessionCheckinSagaHandler(
+    session_result: SessionCheckedIn = SessionCheckinSagaHandler(
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
@@ -98,13 +94,11 @@ def test_session_checkin_on_already_confirmed_session(memory_event_store):
         )
     )
 
-    result = session_result[0]
-    assert session_result[1] == Status.UPDATED
     events = StoreLocator.store.get_all()
     assert len(events) == 2
     assert events[0].type == "SessionCheckedIn"
     EventAsserter.assert_session_checkin(
-        events[0].payload, result.root_id, clients[1].id, "CHECKED_IN"
+        events[0].payload, session_result.root_id, clients[1].id, "CHECKED_IN"
     )
 
 

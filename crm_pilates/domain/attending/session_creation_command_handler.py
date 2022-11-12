@@ -1,13 +1,13 @@
 from datetime import datetime
-from typing import List, Tuple
+from typing import List
 from uuid import UUID
 
-from crm_pilates.command.command_handler import CommandHandler, Status
-from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.command.command_handler import CommandHandler
 from crm_pilates.domain.attending.session import ConfirmedSession
-from crm_pilates.domain.scheduling.attendee import Attendee
-from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.commands import SessionCreationCommand
+from crm_pilates.domain.scheduling.attendee import Attendee
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
@@ -55,9 +55,7 @@ class ConfirmedSessionEvent(Event):
 
 
 class SessionCreationCommandHandler(CommandHandler):
-    def execute(
-        self, command: SessionCreationCommand
-    ) -> Tuple[ConfirmedSessionEvent, Status]:
+    def execute(self, command: SessionCreationCommand) -> ConfirmedSessionEvent:
         classroom: Classroom = (
             RepositoryProvider.write_repositories.classroom.get_by_id(
                 command.classroom_id
@@ -67,16 +65,13 @@ class SessionCreationCommandHandler(CommandHandler):
             classroom, command.session_date
         )
         RepositoryProvider.write_repositories.session.persist(session)
-        return (
-            ConfirmedSessionEvent(
-                session.id,
-                session.classroom_id,
-                session.name,
-                session.position,
-                session.subject,
-                session.start,
-                session.stop,
-                session.attendees,
-            ),
-            Status.CREATED,
+        return ConfirmedSessionEvent(
+            session.id,
+            session.classroom_id,
+            session.name,
+            session.position,
+            session.subject,
+            session.start,
+            session.stop,
+            session.attendees,
         )

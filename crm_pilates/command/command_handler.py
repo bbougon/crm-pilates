@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from enum import Enum
-from typing import Tuple
 
 from crm_pilates.event.event_store import Event
 
@@ -17,5 +16,5 @@ class Status(Enum):
 
 class CommandHandler:
     @abstractmethod
-    def execute(self, command: Command) -> Tuple[Event, None]:
+    def execute(self, command: Command) -> Event:
         pass

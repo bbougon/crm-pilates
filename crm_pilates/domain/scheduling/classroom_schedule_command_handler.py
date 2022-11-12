@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import List
 from uuid import UUID
 
-from crm_pilates.command.command_handler import CommandHandler, Status
+from crm_pilates.command.command_handler import CommandHandler
+from crm_pilates.domain.commands import ClassroomScheduleCommand
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom import Classroom, Schedule
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.scheduling.duration import Duration, TimeUnits, MinuteTimeUnit
-from crm_pilates.domain.commands import ClassroomScheduleCommand
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
@@ -59,9 +59,7 @@ class ClassroomScheduleCommandHandler(CommandHandler):
     def __init__(self) -> None:
         super().__init__()
 
-    def execute(
-        self, command: ClassroomScheduleCommand
-    ) -> Tuple[ClassroomScheduled, Status]:
+    def execute(self, command: ClassroomScheduleCommand) -> ClassroomScheduled:
         classroom = Classroom.create(
             command.name,
             command.start_date,
@@ -82,15 +80,12 @@ class ClassroomScheduleCommandHandler(CommandHandler):
         )
         classroom.all_attendees(attendees)
         RepositoryProvider.write_repositories.classroom.persist(classroom)
-        return (
-            ClassroomScheduled(
-                id=classroom.id,
-                name=classroom.name,
-                position=classroom.position,
-                subject=classroom.subject,
-                duration=classroom.duration,
-                schedule=classroom.schedule,
-                attendees=attendees,
-            ),
-            Status.CREATED,
+        return ClassroomScheduled(
+            id=classroom.id,
+            name=classroom.name,
+            position=classroom.position,
+            subject=classroom.subject,
+            duration=classroom.duration,
+            schedule=classroom.schedule,
+            attendees=attendees,
         )

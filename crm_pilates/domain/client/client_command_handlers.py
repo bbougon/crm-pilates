@@ -48,14 +48,11 @@ class ClientCreated(Event):
 
 
 class ClientCreationCommandHandler(CommandHandler):
-    def execute(self, command: ClientCreationCommand) -> Tuple[ClientCreated, Status]:
+    def execute(self, command: ClientCreationCommand) -> ClientCreated:
         client = Client.create(command.firstname, command.lastname, command.credits)
         RepositoryProvider.write_repositories.client.persist(client)
-        return (
-            ClientCreated(
-                client._id, client.firstname, client.lastname, client.credits
-            ),
-            Status.CREATED,
+        return ClientCreated(
+            client._id, client.firstname, client.lastname, client.credits
         )
 
 
