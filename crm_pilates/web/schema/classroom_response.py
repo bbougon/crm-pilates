@@ -33,7 +33,7 @@ class ClassroomResponse(BaseModel):
     duration: DurationReadResponse
 
 
-class ClassroomCreatedResponse(ClassroomResponse):
+class ClassroomScheduledResponse(ClassroomResponse):
     attendees: List[AttendeeSchema]
 
 

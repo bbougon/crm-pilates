@@ -12,7 +12,7 @@ from crm_pilates.web.schema.classroom_schemas import Duration
 
 
 @dataclass
-class ClassroomCreationCommand(Command):
+class ClassroomScheduleCommand(Command):
     name: str
     position: int
     duration: Duration

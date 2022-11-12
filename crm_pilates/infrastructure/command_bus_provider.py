@@ -1,6 +1,6 @@
 from crm_pilates.command.command_bus import CommandBus
-from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
-    ClassroomCreationCommandHandler,
+from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
+    ClassroomScheduleCommandHandler,
 )
 from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     ClassroomPatchCommandHandler,
@@ -27,7 +27,7 @@ from crm_pilates.domain.client.client_command_handlers import (
     RefundClientCreditsCommandHandler,
 )
 from crm_pilates.domain.commands import (
-    ClassroomCreationCommand,
+    ClassroomScheduleCommand,
     ClientCreationCommand,
     ClassroomPatchCommand,
     GetNextSessionsCommand,
@@ -54,7 +54,7 @@ class CommandBusProvider:
 
 
 command_handlers = {
-    ClassroomCreationCommand.__name__: ClassroomCreationCommandHandler(),
+    ClassroomScheduleCommand.__name__: ClassroomScheduleCommandHandler(),
     ClassroomPatchCommand.__name__: ClassroomPatchCommandHandler(),
     ClientCreationCommand.__name__: ClientCreationCommandHandler(),
     AddCreditsToClientCommand.__name__: AddCreditsToClientCommandHandler(),

@@ -22,7 +22,7 @@ from crm_pilates.web.api.classroom import (
     update_classroom,
     get_classroom,
 )
-from crm_pilates.web.schema.classroom_schemas import ClassroomCreation, TimeUnit
+from crm_pilates.web.schema.classroom_schemas import ClassroomSchedule, TimeUnit
 from tests.builders.builders_for_test import (
     ClassroomJsonBuilderForTest,
     ClientContextBuilderForTest,
@@ -50,7 +50,7 @@ def test_should_create_classroom(memory_event_store):
     RepositoryProviderForTest().for_classroom(repository).provide()
 
     response = create_classroom(
-        ClassroomCreation.parse_obj(classroom_json),
+        ClassroomSchedule.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
     )
@@ -80,7 +80,7 @@ def test_should_create_scheduled_classroom(memory_event_store):
     RepositoryProviderForTest().for_classroom().provide()
 
     response = create_classroom(
-        ClassroomCreation.parse_obj(classroom_json),
+        ClassroomSchedule.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
     )
@@ -109,7 +109,7 @@ def test_should_create_classroom_with_timezone(memory_event_store):
     RepositoryProviderForTest().for_classroom(repository).provide()
 
     response = create_classroom(
-        ClassroomCreation.parse_obj(classroom_json),
+        ClassroomSchedule.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
     )
@@ -141,7 +141,7 @@ def test_should_create_classroom_with_attendees(memory_event_store):
     )
 
     response = create_classroom(
-        ClassroomCreation.parse_obj(classroom_json),
+        ClassroomSchedule.parse_obj(classroom_json),
         Response(),
         CommandBusProviderForTest().provide(),
     )
@@ -170,7 +170,7 @@ def test_should_handle_business_exception_on_classroom_creation(
 
     try:
         create_classroom(
-            ClassroomCreation.parse_obj(classroom_json),
+            ClassroomSchedule.parse_obj(classroom_json),
             Response(),
             CommandBusProviderForTest().provide(),
         )
@@ -196,7 +196,7 @@ def test_handle_aggregate_not_found_exception_on_classroom_creation(
 
     try:
         create_classroom(
-            ClassroomCreation.parse_obj(classroom_json),
+            ClassroomSchedule.parse_obj(classroom_json),
             Response(),
             CommandBusProviderForTest().provide(),
         )

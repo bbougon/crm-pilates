@@ -5,11 +5,11 @@ from uuid import UUID
 from fastapi import status, APIRouter, Response, Depends
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
-    ClassroomCreated,
+from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
+    ClassroomScheduled,
 )
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
-from crm_pilates.domain.commands import ClassroomCreationCommand, ClassroomPatchCommand
+from crm_pilates.domain.commands import ClassroomScheduleCommand, ClassroomPatchCommand
 from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.web.api.authentication import authentication_service
@@ -20,16 +20,16 @@ from crm_pilates.web.presentation.service.classroom_service import (
 )
 from crm_pilates.web.schema.classroom_response import (
     ClassroomReadResponse,
-    ClassroomCreatedResponse,
+    ClassroomScheduledResponse,
 )
-from crm_pilates.web.schema.classroom_schemas import ClassroomCreation, ClassroomPatch
+from crm_pilates.web.schema.classroom_schemas import ClassroomSchedule, ClassroomPatch
 
 router = APIRouter(dependencies=[Depends(authentication_service)])
 
 
 @router.post(
     "/classrooms",
-    response_model=ClassroomCreatedResponse,
+    response_model=ClassroomScheduledResponse,
     status_code=status.HTTP_201_CREATED,
     tags=["classroom"],
     responses={
@@ -47,24 +47,24 @@ router = APIRouter(dependencies=[Depends(authentication_service)])
     },
 )
 def create_classroom(
-    classroom_creation: ClassroomCreation,
+    classroom_schedule: ClassroomSchedule,
     response: Response,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
     try:
-        command = ClassroomCreationCommand(
-            classroom_creation.name,
-            classroom_creation.position,
-            classroom_creation.duration,
-            ClassroomSubject[classroom_creation.subject],
-            classroom_creation.start_date,
-            classroom_creation.stop_date,
-            list(map(lambda attendee: attendee.id, classroom_creation.attendees)),
+        command = ClassroomScheduleCommand(
+            classroom_schedule.name,
+            classroom_schedule.position,
+            classroom_schedule.duration,
+            ClassroomSubject[classroom_schedule.subject],
+            classroom_schedule.start_date,
+            classroom_schedule.stop_date,
+            list(map(lambda attendee: attendee.id, classroom_schedule.attendees)),
         )
         from crm_pilates.command.response import Response
 
         result: Tuple[Response, Status] = command_bus_provider.command_bus.send(command)
-        event: ClassroomCreated = result[0].event
+        event: ClassroomScheduled = result[0].event
         response.headers["location"] = f"/classrooms/{event.root_id}"
         return {
             "name": event.name,

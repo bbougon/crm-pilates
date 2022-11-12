@@ -12,8 +12,8 @@ from crm_pilates.domain.scheduling.classroom import (
 )
 from crm_pilates.domain.attending.session import Session, ConfirmedSession
 from crm_pilates.domain.scheduling.attendee import Attendee, Attendance
-from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
-    ClassroomCreated,
+from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
+    ClassroomScheduled,
 )
 from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     AllAttendeesAdded,
@@ -60,7 +60,7 @@ class EventToClassroomMapper(EventToDomainMapper):
         super().__init__()
         self.classroom: Classroom = None
 
-    def map(self, event: ClassroomCreated) -> EventToDomainMapper:
+    def map(self, event: ClassroomScheduled) -> EventToDomainMapper:
         schedule_stop = event.payload["schedule"]["stop"]
         schedule_start = event.payload["schedule"]["start"]
         schedule = Schedule(
@@ -239,7 +239,7 @@ class CreditsToClientAddedMapper(EventToDomainMapper):
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
-            ClassroomCreated.event.__name__: EventToClassroomMapper,
+            ClassroomScheduled.event.__name__: EventToClassroomMapper,
             ClientCreated.event.__name__: EventToClientMapper,
             ConfirmedSessionEvent.event.__name__: EventToConfirmedSessionMapper,
             AllAttendeesAdded.event.__name__: EventToAttendeesAddedMapper,

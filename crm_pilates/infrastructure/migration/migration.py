@@ -1,13 +1,18 @@
+import logging
+import os
 from uuid import UUID
 
 import psycopg
 
+from crm_pilates import settings
 from crm_pilates.infrastructure.event.sqlite.sqlite_event_store import (
     MultipleJsonEncoders,
     UUIDEncoder,
     EnumEncoder,
     DateTimeEncoder,
 )
+
+logger = logging.getLogger("migration")
 
 
 class Migration:
@@ -17,8 +22,23 @@ class Migration:
         self.encoders = MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder)
 
     def migrate(self):
-        self.__migrate_events_to_version_1()
-        self.__create_user_table()
+        yield from self.run_scripts()
+
+    def run_scripts(self):
+        migration_scripts = []
+        for (dirpath, _, files) in os.walk(settings.MIGRATION_SCRIPTS):
+            migration_scripts.extend(
+                [
+                    os.path.join(dirpath, file)
+                    for file in files
+                    if file.split("/")[-1].startswith("script_0")
+                    and file.split("/")[-1].endswith(".py")
+                ]
+            )
+        migration_scripts.sort()
+        for script in migration_scripts:
+            logger.info(f"Run script {script}")
+            yield os.system(f"python {script} --connection-url={self.connection_url}")
 
     def get_event(self, id: UUID):
         with psycopg.connect(self.connection_url) as connection:
@@ -26,25 +46,3 @@ class Migration:
                 "SELECT * FROM event WHERE id = %(event_id)s", {"event_id": str(id)}
             ).fetchone()
             return row
-
-    def __migrate_events_to_version_1(self):
-        with psycopg.connect(self.connection_url) as connection:
-            connection.execute(
-                "UPDATE event SET payload = jsonb_set(payload, '{subject}', '\"MACHINE_TRIO\"', true) WHERE payload ->> 'position' = '3' AND UPPER(payload ->> 'name') LIKE UPPER('%machine%') AND payload ->> 'version' IS NULL"
-            )
-            connection.execute(
-                "UPDATE event SET payload = jsonb_set(payload, '{subject}', '\"MACHINE_DUO\"', true) WHERE payload ->> 'position' = '2' AND UPPER(payload ->> 'name') LIKE UPPER('%machine%') AND payload ->> 'version' IS NULL"
-            )
-            connection.execute(
-                "UPDATE event SET payload = jsonb_set(payload, '{subject}', '\"MAT\"', true) WHERE UPPER(payload ->> 'name') NOT LIKE UPPER('%machine%') AND payload ->> 'version' IS NULL"
-            )
-            connection.execute(
-                "UPDATE event SET payload = jsonb_set(payload, '{version}', '\"1\"', true) WHERE payload ->> 'version' IS NULL"
-            )
-            connection.commit()
-
-    def __create_user_table(self):
-        with psycopg.connect(self.connection_url) as connection:
-            connection.execute(
-                """CREATE TABLE IF NOT EXISTS users (id text, username text, password text, config text)"""
-            )

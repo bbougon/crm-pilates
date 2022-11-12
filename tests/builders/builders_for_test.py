@@ -16,8 +16,8 @@ from crm_pilates.domain.scheduling.classroom import (
     Classroom,
 )
 from crm_pilates.domain.attending.session import ScheduledSession, ConfirmedSession
-from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
-    ClassroomCreated,
+from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
+    ClassroomScheduled,
 )
 from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     AllAttendeesAdded,
@@ -617,7 +617,7 @@ class EventBuilderForTest(Builder):
 
     def __classroom_created(self, attendees, classroom):
         return (
-            ClassroomCreated,
+            ClassroomScheduled,
             (
                 classroom.id,
                 classroom.name,

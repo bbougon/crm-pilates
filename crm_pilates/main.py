@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -31,5 +33,8 @@ app.add_middleware(
 app.include_router(api_router)
 
 StoreLocator.store = PostgresSQLEventStore(settings.DATABASE_URL)
-Migration(settings.DATABASE_URL).migrate()
+logger = logging.getLogger("migration")
+migrations = [migration for migration in Migration(settings.DATABASE_URL).migrate()]
+logger.info(f"Migration run {len(migrations)} scripts")
+
 EventToDomainLoader().load()

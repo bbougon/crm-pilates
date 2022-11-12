@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 
 cores = multiprocessing.cpu_count()
@@ -26,3 +27,25 @@ workers_per_core = 1.0
 # workers = int(workers_per_core * cores)
 workers = 1
 worker_tmp_dir = "/dev/shm"
+
+logconfig_dict = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {"format": "%(asctime)s %(levelname)s %(message)s"},
+    },
+    "handlers": {
+        "error_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+            "stream": "ext://sys.stdout",
+            "level": logging.INFO,
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+            "stream": "ext://sys.stdout",
+            "level": logging.INFO,
+        },
+    },
+}

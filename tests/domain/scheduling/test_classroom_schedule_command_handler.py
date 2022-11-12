@@ -5,12 +5,12 @@ import pytz
 from immobilus import immobilus
 
 from crm_pilates.command.command_handler import Status
-from crm_pilates.domain.scheduling.classroom_creation_command_handler import (
-    ClassroomCreationCommandHandler,
-    ClassroomCreated,
+from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
+    ClassroomScheduleCommandHandler,
+    ClassroomScheduled,
 )
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
-from crm_pilates.domain.commands import ClassroomCreationCommand
+from crm_pilates.domain.commands import ClassroomScheduleCommand
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.asserters.event_asserter import EventAsserter
@@ -20,8 +20,10 @@ from crm_pilates.web.schema.classroom_schemas import Duration
 
 @immobilus("2020-04-03 10:24:15.230")
 def test_classroom_creation_event_is_stored(memory_event_store):
-    result: Tuple[ClassroomCreated, Status] = ClassroomCreationCommandHandler().execute(
-        ClassroomCreationCommand(
+    result: Tuple[
+        ClassroomScheduled, Status
+    ] = ClassroomScheduleCommandHandler().execute(
+        ClassroomScheduleCommand(
             name="classroom",
             position=2,
             _start_date=datetime(2020, 5, 7, 11, 0),
@@ -32,7 +34,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
 
     events = StoreLocator.store.get_all()
     assert len(events) == 1
-    assert events[0].type == "ClassroomCreated"
+    assert events[0].type == "ClassroomScheduled"
     assert events[0].timestamp == datetime(
         2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc
     )
@@ -60,8 +62,10 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
         .build()
     )
 
-    result: Tuple[ClassroomCreated, Status] = ClassroomCreationCommandHandler().execute(
-        ClassroomCreationCommand(
+    result: Tuple[
+        ClassroomScheduled, Status
+    ] = ClassroomScheduleCommandHandler().execute(
+        ClassroomScheduleCommand(
             name="classroom",
             position=2,
             _start_date=datetime(2019, 6, 7, 11, 0),
@@ -73,7 +77,7 @@ def test_classroom_creation_with_attendees_event_is_stored(memory_event_store):
 
     events = StoreLocator.store.get_all()
     assert len(events) == 1
-    assert events[0].type == "ClassroomCreated"
+    assert events[0].type == "ClassroomScheduled"
     assert events[0].timestamp == datetime(
         2019, 5, 7, 8, 24, 15, 230000, tzinfo=pytz.utc
     )

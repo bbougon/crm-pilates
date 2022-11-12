@@ -1,12 +1,12 @@
 import pytest
 from mimesis import Datetime
 
-from crm_pilates.web.schema.classroom_schemas import ClassroomCreation, ClassroomPatch
+from crm_pilates.web.schema.classroom_schemas import ClassroomSchedule, ClassroomPatch
 
 
 def test_attendees_are_unique_for_creation():
     with pytest.raises(ValueError) as e:
-        ClassroomCreation.parse_obj(
+        ClassroomSchedule.parse_obj(
             {
                 "name": "a name",
                 "position": 2,

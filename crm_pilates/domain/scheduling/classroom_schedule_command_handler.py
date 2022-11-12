@@ -8,13 +8,13 @@ from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom import Classroom, Schedule
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.scheduling.duration import Duration, TimeUnits, MinuteTimeUnit
-from crm_pilates.domain.commands import ClassroomCreationCommand
+from crm_pilates.domain.commands import ClassroomScheduleCommand
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
 
 @EventSourced
-class ClassroomCreated(Event):
+class ClassroomScheduled(Event):
     id: str
     name: str
     position: int
@@ -55,13 +55,13 @@ class ClassroomCreated(Event):
         }
 
 
-class ClassroomCreationCommandHandler(CommandHandler):
+class ClassroomScheduleCommandHandler(CommandHandler):
     def __init__(self) -> None:
         super().__init__()
 
     def execute(
-        self, command: ClassroomCreationCommand
-    ) -> Tuple[ClassroomCreated, Status]:
+        self, command: ClassroomScheduleCommand
+    ) -> Tuple[ClassroomScheduled, Status]:
         classroom = Classroom.create(
             command.name,
             command.start_date,
@@ -83,7 +83,7 @@ class ClassroomCreationCommandHandler(CommandHandler):
         classroom.all_attendees(attendees)
         RepositoryProvider.write_repositories.classroom.persist(classroom)
         return (
-            ClassroomCreated(
+            ClassroomScheduled(
                 id=classroom.id,
                 name=classroom.name,
                 position=classroom.position,

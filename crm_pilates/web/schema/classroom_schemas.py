@@ -35,7 +35,7 @@ def check_unique_attendees(v):
     return v
 
 
-class ClassroomCreation(BaseModel):
+class ClassroomSchedule(BaseModel):
     name: str
     position: int
     subject: str
