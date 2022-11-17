@@ -1,10 +1,12 @@
 import sqlite3
+from typing import Any
 
 import immobilus  # noqa
 import psycopg
 import pytest
 
 from crm_pilates import settings
+from crm_pilates.domain.services import CipherServiceProvider, CipherService
 from crm_pilates.event.event_bus import EventBus, EventSubscriber
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.event.postgres.postgres_sql_event_store import (
@@ -156,6 +158,21 @@ def memory_repositories():
             "session": MemorySessionReadRepository(session_repository),
         }
     )
+
+
+class DummyCipherService(CipherService):
+    def decrypt(self, encrypt_content: Any) -> bytes:
+        return bytes(
+            encrypt_content.decode("utf-8").removeprefix("encrypted_"), "utf-8"
+        )
+
+    def encrypt(self, content: bytes) -> bytes:
+        return bytes(f"encrypted_{content}", "utf-8")
+
+
+@pytest.fixture(autouse=True)
+def dummy_cipher():
+    CipherServiceProvider.service = DummyCipherService()
 
 
 @pytest.fixture

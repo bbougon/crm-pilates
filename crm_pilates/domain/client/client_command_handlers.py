@@ -10,6 +10,7 @@ from crm_pilates.domain.commands import (
     DecreaseClientCreditsCommand,
     RefundClientCreditsCommand,
 )
+from crm_pilates.domain.services import encrypt
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
@@ -28,6 +29,7 @@ class ClientCreated(Event):
         self.credits: List[Credits] = credits
         super().__init__(root_id)
 
+    @encrypt(model={"keys": ["firstname", "lastname"]})
     def _to_payload(self):
         payload = {
             "id": self.root_id,

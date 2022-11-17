@@ -6,27 +6,10 @@ from typing import List
 
 import arrow
 
-from crm_pilates.domain.scheduling.classroom import (
-    Classroom,
-    Schedule,
-)
-from crm_pilates.domain.attending.session import Session, ConfirmedSession
-from crm_pilates.domain.scheduling.attendee import Attendee, Attendance
-from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
-    ClassroomScheduled,
-)
-from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
-    AllAttendeesAdded,
-)
-from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
-from crm_pilates.domain.scheduling.duration import (
-    Duration,
-    HourTimeUnit,
-    MinuteTimeUnit,
-)
 from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
 )
+from crm_pilates.domain.attending.session import Session, ConfirmedSession
 from crm_pilates.domain.attending.session_checkin_saga_handler import (
     SessionCheckedIn,
 )
@@ -38,9 +21,27 @@ from crm_pilates.domain.attending.session_creation_command_handler import (
 )
 from crm_pilates.domain.client.client import Client, Credits
 from crm_pilates.domain.client.client_command_handlers import (
-    ClientCreated,
     ClientCreditsUpdated,
+    ClientCreated,
 )
+from crm_pilates.domain.scheduling.attendee import Attendee, Attendance
+from crm_pilates.domain.scheduling.classroom import (
+    Classroom,
+    Schedule,
+)
+from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
+    AllAttendeesAdded,
+)
+from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
+    ClassroomScheduled,
+)
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
+from crm_pilates.domain.scheduling.duration import (
+    Duration,
+    HourTimeUnit,
+    MinuteTimeUnit,
+)
+from crm_pilates.domain.services import CipherServiceProvider
 from crm_pilates.event.event_store import StoreLocator, Event
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 
@@ -103,7 +104,14 @@ class EventToClientMapper(EventToDomainMapper):
         self.client: Client = None
 
     def map(self, event: Event) -> EventToDomainMapper:
-        self.client = Client(event.payload["firstname"], event.payload["lastname"])
+        self.client = Client(
+            CipherServiceProvider.service.decrypt(
+                bytes(event.payload["firstname"], "utf-8")
+            ).decode("utf-8"),
+            CipherServiceProvider.service.decrypt(
+                bytes(event.payload["lastname"], "utf-8")
+            ).decode("utf-8"),
+        )
         self.client._id = uuid.UUID(event.payload["id"])
         if "credits" in event.payload:
             self.client.credits = list(

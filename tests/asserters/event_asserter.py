@@ -103,5 +103,5 @@ class EventAsserter:
 
     @classmethod
     def __assert_payload(cls, payload, expected_payload):
-        expected_payload["version"] = "1"
+        expected_payload["version"] = "2.1"
         assert payload == expected_payload

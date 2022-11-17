@@ -9,6 +9,8 @@ import pytz
 
 from crm_pilates.infrastructure.event_bus_provider import EventBusProvider
 
+EVENT_VERSION = "2.1"
+
 
 class Event:
     def __init__(self, root_id: UUID) -> None:
@@ -19,7 +21,7 @@ class Event:
         self.timestamp: datetime = datetime.now(tz=pytz.utc)
         self.payload: dict = self._to_payload()
         if self.payload:
-            self.payload["version"] = "1"
+            self.payload["version"] = EVENT_VERSION
 
     @abstractmethod
     def _to_payload(self) -> dict:

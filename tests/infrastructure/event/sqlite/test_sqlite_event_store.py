@@ -33,7 +33,7 @@ def test_persist_event_in_store(sqlite_event_store):
         2021, 5, 20, 10, 5, 17, 245000, tzinfo=pytz.utc
     )
     assert persisted_event.payload == {
-        "version": "1",
+        "version": "2.1",
         "id": root_id.hex,
         "name": "custom_event",
     }

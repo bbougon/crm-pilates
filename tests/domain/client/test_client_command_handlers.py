@@ -17,6 +17,7 @@ from crm_pilates.domain.commands import (
 )
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
+from crm_pilates.domain.services import CipherServiceProvider
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.asserters.event_asserter import EventAsserter
@@ -27,10 +28,12 @@ from tests.builders.builders_for_test import (
     ClassroomBuilderForTest,
     ConfirmedSessionContextBuilderForTest,
 )
+from tests.domain.services.test_services import MyDummyEncryptionService
 
 
 @immobilus("2020-04-03 10:24:15.230")
 def test_classroom_creation_event_is_stored(memory_event_store):
+    CipherServiceProvider.service = MyDummyEncryptionService()
     result: ClientCreated = ClientCreationCommandHandler().execute(
         ClientCreationCommand(firstname="John", lastname="Doe")
     )
@@ -48,6 +51,7 @@ def test_classroom_creation_event_is_stored(memory_event_store):
 
 @immobilus("2020-04-03 10:24:15.230")
 def test_classroom_creation_event_is_stored_with_credits(memory_event_store):
+    CipherServiceProvider.service = MyDummyEncryptionService()
     result: ClientCreated = ClientCreationCommandHandler().execute(
         ClientCreationCommand(
             firstname="John",

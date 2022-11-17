@@ -4,12 +4,12 @@ from uuid import UUID
 import pytz
 from immobilus import immobilus
 
-from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.attending.session import Session, ConfirmedSession
+from crm_pilates.domain.client.client import Client
 from crm_pilates.domain.scheduling.attendee import Attendance
+from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.scheduling.duration import Duration, MinuteTimeUnit
-from crm_pilates.domain.client.client import Client
 from crm_pilates.infrastructure.event_to_domain_loader import EventToDomainLoader
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from tests.builders.builders_for_test import (
@@ -88,7 +88,11 @@ def test_load_clients_and_classroom_with_attendees(persisted_event_store):
     assert len(classroom.attendees) == 2
     assert classroom.attendees[0].id == first_client_id
     assert classroom.attendees[1].id == second_client_id
-    assert RepositoryProvider.read_repositories.client.get_by_id(first_client_id)
+    first_client: Client = RepositoryProvider.read_repositories.client.get_by_id(
+        first_client_id
+    )
+    assert "encrypted_" not in first_client.firstname
+    assert "encrypted_" not in first_client.lastname
     assert RepositoryProvider.read_repositories.client.get_by_id(second_client_id)
     assert RepositoryProvider.read_repositories.client.get_by_id(third_client_id)
 
