@@ -48,7 +48,7 @@ def test_should_refund_client_credits_on_checkout_after_checkin(memory_event_sto
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
-            classroom.id, datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), client.id
+            datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), classroom.id, client.id
         )
     )
 
@@ -86,7 +86,7 @@ def test_should_not_refund_client_credits_on_two_consecutives_checkout_after_che
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
-            classroom.id, datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), client.id
+            datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), classroom.id, client.id
         )
     )
 

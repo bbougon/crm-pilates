@@ -10,6 +10,9 @@ import pytz
 from arrow import Arrow
 from fastapi import status, APIRouter, Depends, Response
 
+from crm_pilates.domain.attending.add_attendees_to_session_command_handler import (
+    AttendeesToSessionAdded,
+)
 from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
 )
@@ -26,7 +29,11 @@ from crm_pilates.domain.commands import (
     SessionCheckoutCommand,
 )
 from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
-from crm_pilates.domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
+from crm_pilates.domain.sagas import (
+    SessionCheckinSaga,
+    AttendeeSessionCancellationSaga,
+    AddAttendeesToSessionSaga,
+)
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.web.api.authentication import authentication_service
@@ -37,6 +44,7 @@ from crm_pilates.web.schema.session_schemas import (
     SessionCheckin,
     SessionCheckout,
     AttendeeSessionCancellation,
+    AttendeesAddition,
 )
 
 router = APIRouter(dependencies=[Depends(authentication_service)])
@@ -123,8 +131,8 @@ def session_checkin(
 
         checkin_event_result: Response = command_bus_provider.command_bus.send(
             SessionCheckinSaga(
-                session_checkin.classroom_id,
                 session_checkin.session_date,
+                session_checkin.classroom_id,
                 session_checkin.attendee,
             )
         )
@@ -190,9 +198,9 @@ def attendee_session_cancellation(
 
         checkout_event_result: Response = command_bus_provider.command_bus.send(
             AttendeeSessionCancellationSaga(
+                session_cancellation.session_date,
                 attendee_id,
                 session_cancellation.classroom_id,
-                session_cancellation.session_date,
             )
         )
         result: AttendeeSessionCancelled = checkout_event_result.event
@@ -206,6 +214,41 @@ def attendee_session_cancellation(
         raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"Cannot cancel attendee for the session starting at {arrow.get(session_cancellation.session_date)}. Session could not be found",
+        )
+
+
+@router.post(
+    "/sessions/attendees",
+    tags=["classroom", "sessions"],
+    status_code=status.HTTP_200_OK,
+    response_model=SessionResponse,
+)
+def add_attendees_to_session(
+    attendees_addition: AttendeesAddition,
+    command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
+):
+    try:
+        from crm_pilates.command.response import Response
+
+        add_attendees_result: Response = command_bus_provider.command_bus.send(
+            AddAttendeesToSessionSaga(
+                attendees_addition.session_date,
+                attendees_addition.classroom_id,
+                attendees_addition.attendees,
+            )
+        )
+
+        result: AttendeesToSessionAdded = add_attendees_result.event
+        session: Session = RepositoryProvider.read_repositories.session.get_by_id(
+            result.root_id
+        )
+        return __map_session(result.root_id, session)
+    except AggregateNotFoundException as e:
+        raise APIHTTPException(status_code=HTTPStatus.NOT_FOUND, detail=e.message)
+    except DomainException:
+        raise APIHTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Cannot add attendees for the session starting at {arrow.get(attendees_addition.session_date)}. Session could not be found",
         )
 
 

@@ -1,4 +1,7 @@
 from crm_pilates.command.command_bus import CommandBus
+from crm_pilates.domain.attending.add_attendees_to_session_command_handler import (
+    AddAttendeesToSessionSagaHandler,
+)
 from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
     ClassroomScheduleCommandHandler,
 )
@@ -41,7 +44,11 @@ from crm_pilates.domain.commands import (
 from crm_pilates.domain.attending.next_sessions_command_handler import (
     NextSessionsCommandHandler,
 )
-from crm_pilates.domain.sagas import SessionCheckinSaga, AttendeeSessionCancellationSaga
+from crm_pilates.domain.sagas import (
+    SessionCheckinSaga,
+    AttendeeSessionCancellationSaga,
+    AddAttendeesToSessionSaga,
+)
 from crm_pilates.event.event_subscribers import (
     SessionCheckedInEventSubscriber,
     SessionCheckedOutEventSubscriber,
@@ -69,6 +76,7 @@ command_handlers = {
 saga_handlers = {
     SessionCheckinSaga.__name__: SessionCheckinSagaHandler,
     AttendeeSessionCancellationSaga.__name__: AttendeeSessionCancellationSagaHandler,
+    AddAttendeesToSessionSaga.__name__: AddAttendeesToSessionSagaHandler,
 }
 
 CommandBusProvider.command_bus = CommandBus(command_handlers, saga_handlers)

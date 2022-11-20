@@ -102,6 +102,25 @@ class EventAsserter:
         cls.__assert_payload(payload, expected_payload)
 
     @classmethod
+    def assert_add_attendees_to_session(
+        cls,
+        payload: dict,
+        expected_id: UUID,
+        expected_attendee_ids: [UUID],
+        expected_attendance: str,
+    ):
+        expected_payload = {
+            "session_id": expected_id,
+            "attendees": list(
+                map(
+                    lambda attendee: {"id": attendee, "attendance": "REGISTERED"},
+                    expected_attendee_ids,
+                )
+            ),
+        }
+        cls.__assert_payload(payload, expected_payload)
+
+    @classmethod
     def __assert_payload(cls, payload, expected_payload):
         expected_payload["version"] = "2.1"
         assert payload == expected_payload

@@ -168,10 +168,7 @@ def test_checkin_unknown_attendee_should_be_handled():
         ClassroomBuilderForTest().starting_at(datetime(2019, 6, 7, 10)).build()
     )
     session: ConfirmedSession = (
-        ConfirmedSessionBuilderForTest()
-        .for_classroom(classroom)
-        .starting_at(datetime(2019, 6, 7, 10))
-        .build()
+        ConfirmedSessionBuilderForTest().for_classroom(classroom).build()
     )
     unknown_attendee_id = uuid.uuid4()
 
@@ -189,10 +186,7 @@ def test_checkout_unknown_attendee_should_be_handled():
         ClassroomBuilderForTest().starting_at(datetime(2019, 6, 7, 10)).build()
     )
     session: ConfirmedSession = (
-        ConfirmedSessionBuilderForTest()
-        .for_classroom(classroom)
-        .starting_at(datetime(2019, 6, 7, 10))
-        .build()
+        ConfirmedSessionBuilderForTest().for_classroom(classroom).build()
     )
     unknown_attendee_id = uuid.uuid4()
 
@@ -203,3 +197,47 @@ def test_checkout_unknown_attendee_should_be_handled():
         e.value.message
         == f"Attendee with id {str(unknown_attendee_id)} could not be checked out"
     )
+
+
+def test_should_not_add_more_attendees_than_position_available():
+    classroom: Classroom = (
+        ClassroomBuilderForTest()
+        .with_position(2)
+        .starting_at(datetime(2019, 6, 7, 10))
+        .build()
+    )
+    session: ConfirmedSession = (
+        ConfirmedSessionBuilderForTest().for_classroom(classroom).build()
+    )
+
+    with pytest.raises(DomainException) as e:
+        session.add_attendees(
+            [
+                Attendee.create(uuid.uuid4()),
+                Attendee.create(uuid.uuid4()),
+                Attendee.create(uuid.uuid4()),
+            ]
+        )
+
+    assert (
+        e.value.message
+        == "Cannot add attendees, there is 2 positions available, you tried to add 3 attendees"
+    )
+
+
+def test_should_not_duplicate_attendee():
+    existing_attendee = uuid.uuid4()
+    classroom: Classroom = (
+        ClassroomBuilderForTest()
+        .with_position(2)
+        .with_attendees([existing_attendee])
+        .starting_at(datetime(2019, 6, 7, 10))
+        .build()
+    )
+    session: ConfirmedSession = (
+        ConfirmedSessionBuilderForTest().for_classroom(classroom).build()
+    )
+
+    session.add_attendees([(Attendee.create(existing_attendee))])
+
+    assert len(session.attendees) == 1

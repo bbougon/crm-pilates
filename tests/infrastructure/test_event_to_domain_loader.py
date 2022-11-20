@@ -359,3 +359,72 @@ def test_missing_mapper_should_not_stop_execution(persisted_event_store):
     sessions = next(sessions_generator)
     assert len(sessions) == 1
     assert len(sessions[0].attendees) == 2
+
+
+def test_should_load_added_attendees(persisted_event_store):
+    confirmed_session_builder = (
+        EventBuilderForTest()
+        .nb_client(3)
+        .classroom(ClassroomBuilderForTest().build())
+        .attendees_added(2)
+        .confirmed_session()
+    )
+    confirmed_session_builder.build()
+    events = (
+        EventBuilderForTest()
+        .add_attendees(
+            confirmed_session_builder.sessions[0].id,
+            [confirmed_session_builder.clients[2].id],
+        )
+        .build()
+    )
+
+    payload = events[0].payload
+    session_id = payload["session_id"]
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(
+        session_id
+    )
+    assert confirmed_session
+    assert len(confirmed_session.attendees) == 3
+    assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
+    assert confirmed_session.attendees[1].attendance == Attendance.REGISTERED
+    assert confirmed_session.attendees[2].attendance == Attendance.REGISTERED
+
+
+def test_should_load_added_attendees_with_no_duplication(persisted_event_store):
+    confirmed_session_builder = (
+        EventBuilderForTest()
+        .nb_client(3)
+        .classroom(ClassroomBuilderForTest().build())
+        .attendees_added(2)
+        .confirmed_session()
+    )
+    confirmed_session_builder.build()
+    events = (
+        EventBuilderForTest()
+        .add_attendees(
+            confirmed_session_builder.sessions[0].id,
+            [
+                confirmed_session_builder.clients[2].id,
+                confirmed_session_builder.clients[1].id,
+            ],
+        )
+        .build()
+    )
+
+    payload = events[0].payload
+    session_id = payload["session_id"]
+
+    EventToDomainLoader().load()
+
+    confirmed_session: Session = RepositoryProvider.read_repositories.session.get_by_id(
+        session_id
+    )
+    assert confirmed_session
+    assert len(confirmed_session.attendees) == 3
+    assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
+    assert confirmed_session.attendees[1].attendance == Attendance.REGISTERED
+    assert confirmed_session.attendees[2].attendance == Attendance.REGISTERED

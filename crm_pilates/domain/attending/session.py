@@ -167,6 +167,13 @@ class ConfirmedSession(Session, AggregateRoot):
     def cancel(self, attendee: Attendee) -> None:
         self.attendees.remove(attendee)
 
+    def add_attendees(self, attendees: [Attendee]) -> None:
+        if len(attendees) > self.position:
+            raise DomainException(
+                f"Cannot add attendees, there is {self.position} positions available, you tried to add {len(attendees)} attendees"
+            )
+        self.attendees.extend(list(set(attendees) - set(self.attendees)))
+
 
 class InvalidSessionStartDateException(DomainException):
     def __init__(

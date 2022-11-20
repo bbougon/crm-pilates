@@ -135,7 +135,7 @@ def authenticated_user():
     app.dependency_overrides = {}
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="function")
 def memory_repositories():
     classroom_repository = MemoryClassroomRepository()
     client_repository = MemoryClientRepository()

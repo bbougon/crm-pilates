@@ -6,6 +6,9 @@ from typing import List
 
 import arrow
 
+from crm_pilates.domain.attending.add_attendees_to_session_command_handler import (
+    AttendeesToSessionAdded,
+)
 from crm_pilates.domain.attending.attendee_session_cancellation_saga_handler import (
     AttendeeSessionCancelled,
 )
@@ -204,6 +207,43 @@ class EventToSessionCheckedOutMapper(EventToSessionCheckedInMapper):
     pass
 
 
+class AttendeesToSessionAddedMapper(EventToDomainMapper):
+    def map(self, event: Event) -> EventToDomainMapper:
+        payload = event.payload
+        attendees = set(
+            list(
+                map(
+                    lambda attendee: Attendee.create(uuid.UUID(attendee["id"])),
+                    payload["attendees"],
+                )
+            )
+        )
+        session: Session = RepositoryProvider.write_repositories.session.get_by_id(
+            event.root_id
+        )
+
+        def attendees_in_session():
+            return list(
+                map(
+                    lambda attendee_in_session: attendee_in_session.id,
+                    session.attendees,
+                )
+            )
+
+        session.attendees.extend(
+            list(
+                filter(
+                    lambda attendee: attendee.id not in attendees_in_session(),
+                    attendees,
+                )
+            )
+        )
+        return self
+
+    def and_persist(self) -> None:
+        pass
+
+
 class EventToAttendeeSessionCancelledMapper(EventToDomainMapper):
     def map(self, event: Event) -> EventToDomainMapper:
         payload = event.payload
@@ -255,6 +295,7 @@ class EventToDomainLoader:
             SessionCheckedOut.event.__name__: EventToSessionCheckedOutMapper,
             AttendeeSessionCancelled.event.__name__: EventToAttendeeSessionCancelledMapper,
             ClientCreditsUpdated.event.__name__: CreditsToClientAddedMapper,
+            AttendeesToSessionAdded.event.__name__: AttendeesToSessionAddedMapper,
         }
 
     def load(self) -> None:

@@ -8,6 +8,7 @@ import pytz
 from fastapi import Response, HTTPException, status
 from immobilus import immobilus
 from mock.mock import ANY
+from pydantic.error_wrappers import ValidationError
 
 from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
@@ -34,6 +35,7 @@ from crm_pilates.web.api.session import (
     sessions,
     session_checkout,
     attendee_session_cancellation,
+    add_attendees_to_session,
 )
 from crm_pilates.web.presentation.domain.detailed_attendee import (
     DetailedAttendee,
@@ -43,6 +45,7 @@ from crm_pilates.web.schema.session_schemas import (
     SessionCheckin,
     SessionCheckout,
     AttendeeSessionCancellation,
+    AttendeesAddition,
 )
 
 
@@ -958,6 +961,98 @@ def test_should_return_sessions_for_uncredited_attendees():
             ],
         )
     ]
+
+
+@immobilus("2022-11-15 10:20:15.230")
+def test_should_return_404_if_classroom_not_found():
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_client(ClientBuilderForTest().build())
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    with pytest.raises(HTTPException) as e:
+        classroom_id = uuid.uuid4()
+        add_attendees_to_session(
+            AttendeesAddition(
+                classroom_id=classroom_id,
+                session_date=datetime.now(),
+                attendees=[clients[0].id],
+            ),
+            CommandBusProviderForTest().provide(),
+        )
+
+    assert e.value.status_code == HTTPStatus.NOT_FOUND
+    assert e.value.detail == [
+        {
+            "msg": f"Aggregate 'Classroom' with id '{classroom_id}' not found",
+            "type": "add_attendees_to_session",
+        }
+    ]
+
+
+@immobilus("2022-11-15 10:20:15.230")
+def test_should_return_404_if_session_not_at_expected_time():
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_client(ClientBuilderForTest().build())
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
+            .ending_at(arrow.get("2022-11-15T12:00:00+03:00").datetime)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+
+    with pytest.raises(HTTPException) as e:
+        add_attendees_to_session(
+            AttendeesAddition(
+                classroom_id=classrooms[0].id,
+                session_date=datetime.now(),
+                attendees=[clients[0].id],
+            ),
+            CommandBusProviderForTest().provide(),
+        )
+
+    assert e.value.status_code == HTTPStatus.NOT_FOUND
+    assert e.value.detail == [
+        {
+            "msg": f"Cannot add attendees for the session starting at {arrow.get(datetime.now())}. Session could not be found",
+            "type": "add_attendees_to_session",
+        }
+    ]
+
+
+@immobilus("2022-11-15 10:20:15.230")
+def test_should_not_validate_if_no_attendee_given():
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
+            .ending_at(arrow.get("2022-11-15T12:00:00+03:00").datetime)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+
+    with pytest.raises(ValidationError) as e:
+        add_attendees_to_session(
+            AttendeesAddition(
+                classroom_id=classrooms[0].id,
+                session_date=arrow.get("2022-11-15T11:00:00+03:00").datetime,
+                attendees=[],
+            ),
+            CommandBusProviderForTest().provide(),
+        )
+
+    assert e.value.raw_errors[0].exc.args[0] == "Please provide at least one attendee"
 
 
 def __to_available_credits(

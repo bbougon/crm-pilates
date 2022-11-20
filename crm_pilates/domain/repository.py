@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from abc import abstractmethod
 from typing import List
@@ -11,6 +13,10 @@ class AggregateRoot:
     @property
     def id(self) -> UUID:
         return self._id
+
+
+class ValueObject:
+    pass
 
 
 class Repository:

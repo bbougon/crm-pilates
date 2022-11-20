@@ -11,6 +11,9 @@ import pytz
 from mimesis import Person, Text, Numeric, Datetime
 
 from crm_pilates.authenticating.domain.user import User
+from crm_pilates.domain.attending.add_attendees_to_session_command_handler import (
+    AttendeesToSessionAdded,
+)
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom import (
     Classroom,
@@ -489,6 +492,40 @@ class AttendeeSessionCancellationJsonBuilderForTest(Builder):
         return self
 
 
+class SessionAddAttendeesJsonBuilderForTest(Builder):
+    def __init__(self) -> None:
+        super().__init__()
+        self.session_date: datetime = None
+        repository, classrooms = (
+            ClassroomContextBuilderForTest()
+            .persist(RepositoryProvider.write_repositories.classroom)
+            .build()
+        )
+        self.classroom_id = classrooms[0].id
+        self.attendees = []
+
+    def for_classroom(
+        self, classroom: Classroom
+    ) -> SessionAddAttendeesJsonBuilderForTest:
+        self.classroom_id = classroom.id
+        return self
+
+    def for_attendee(self, attendee_id: UUID) -> SessionAddAttendeesJsonBuilderForTest:
+        self.attendees.append(str(attendee_id))
+        return self
+
+    def at(self, date: datetime) -> SessionAddAttendeesJsonBuilderForTest:
+        self.session_date = date.replace(tzinfo=date.tzinfo or pytz.utc)
+        return self
+
+    def build(self):
+        return {
+            "classroom_id": str(self.classroom_id),
+            "session_date": self.session_date.isoformat(),
+            "attendees": self.attendees,
+        }
+
+
 class ConfirmedSessionBuilderForTest(Builder):
     def __init__(self) -> None:
         super().__init__()
@@ -719,7 +756,9 @@ class EventBuilderForTest(Builder):
             self.event_to_store.append((SessionCheckedOut, (session_id, attendee)))
         return self
 
-    def cancel_attendee(self, session_id: UUID, cancel_attendees_ids: [int]):
+    def cancel_attendee(
+        self, session_id: UUID, cancel_attendees_ids: [int]
+    ) -> EventBuilderForTest:
         for id in cancel_attendees_ids:
             attendee = Attendee.create(id)
             self.event_to_store.append(
@@ -727,8 +766,16 @@ class EventBuilderForTest(Builder):
             )
         return self
 
-    def unknown_event(self):
+    def unknown_event(self) -> EventBuilderForTest:
         self.event_to_store.append((UnknownEvent, (uuid.uuid4(), "unknown")))
+        return self
+
+    def add_attendees(
+        self, session_id: UUID, added_attendees: [UUID]
+    ) -> EventBuilderForTest:
+        attendees = [Attendee.create(attendee) for attendee in added_attendees]
+        self.event_to_store.append((AttendeesToSessionAdded, (session_id, attendees)))
+
         return self
 
     def __to_event(self, _call, _args):

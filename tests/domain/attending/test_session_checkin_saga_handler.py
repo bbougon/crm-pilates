@@ -46,7 +46,7 @@ def test_session_checkin_event_is_stored(memory_event_store):
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
-            classroom.id, datetime(2020, 4, 3, 11, 0, tzinfo=pytz.utc), clients[1].id
+            datetime(2020, 4, 3, 11, 0, tzinfo=pytz.utc), classroom.id, clients[1].id
         )
     )
 
@@ -90,7 +90,7 @@ def test_session_checkin_on_already_confirmed_session(memory_event_store):
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
-            classroom.id, datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), clients[1].id
+            datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), classroom.id, clients[1].id
         )
     )
 
@@ -128,7 +128,7 @@ def test_should_decrease_client_credits_on_checkin(memory_event_store):
         CommandBusProviderForTest().provide().command_bus
     ).execute(
         SessionCheckinSaga(
-            classroom.id, datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), client.id
+            datetime(2020, 8, 3, 11, 0, tzinfo=pytz.utc), classroom.id, client.id
         )
     )
 

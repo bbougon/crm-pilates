@@ -23,6 +23,7 @@ from tests.builders.builders_for_test import (
     SessionContextBuilderForTest,
     AttendeeSessionCancellationJsonBuilderForTest,
     ClientBuilderForTest,
+    SessionAddAttendeesJsonBuilderForTest,
 )
 from tests.helpers.helpers import expected_session_response
 
@@ -105,7 +106,7 @@ def test_get_next_sessions(memory_repositories, event_bus, authenticated_user):
 
 
 @immobilus("2019-05-07 08:24:15.230")
-def test_register_checkin(memory_repositories, event_bus, authenticated_user):
+def test_should_register_checkin(memory_repositories, event_bus, authenticated_user):
     repository, clients = (
         ClientContextBuilderForTest()
         .with_clients(3)
@@ -162,7 +163,7 @@ def test_register_checkin(memory_repositories, event_bus, authenticated_user):
 
 
 @immobilus("2019-03-08 09:24:15.230")
-def test_updated_session_produces_ok_200(
+def test_should_checkin_attendee_on_session_with_another_attendee_checked_in(
     memory_event_store, event_bus, authenticated_user
 ):
     client_repository, clients = (
@@ -470,6 +471,52 @@ def test_register_cancellation(memory_repositories, event_bus, authenticated_use
                 "attendance": "REGISTERED",
                 "credits": {"amount": __client_credits(clients[0]).value},
             }
+        ],
+    )
+
+
+@immobilus("2019-03-08 09:24:15.230")
+def test_should_add_attendees(memory_repositories, event_bus, authenticated_user):
+    client_repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(2)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classroom(
+            ClassroomBuilderForTest().starting_at(datetime(2020, 3, 8, 11, 0))
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+    classroom = classrooms[0]
+
+    response: Response = client.post(
+        "/sessions/attendees",
+        json=SessionAddAttendeesJsonBuilderForTest()
+        .for_classroom(classroom)
+        .for_attendee(clients[1]._id)
+        .at(datetime(2020, 3, 8, 11, 0))
+        .build(),
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == expected_session_response(
+        ANY,
+        str(classroom.id),
+        classroom,
+        "2020-03-08T11:00:00+00:00",
+        "2020-03-08T12:00:00+00:00",
+        [
+            {
+                "id": str(clients[1].id),
+                "firstname": clients[1].firstname,
+                "lastname": clients[1].lastname,
+                "attendance": "REGISTERED",
+                "credits": {"amount": __client_credits(clients[1]).value},
+            },
         ],
     )
 

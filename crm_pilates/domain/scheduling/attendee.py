@@ -3,10 +3,10 @@ from enum import Enum
 from uuid import UUID
 
 from crm_pilates.domain.exceptions import DomainException
-from crm_pilates.domain.repository import AggregateRoot
+from crm_pilates.domain.repository import ValueObject
 
 
-class Attendee(AggregateRoot):
+class Attendee(ValueObject):
     def __init__(self, id: UUID) -> None:
         super().__init__()
         self._id: UUID = id
@@ -32,6 +32,9 @@ class Attendee(AggregateRoot):
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Attendee) and self.id == o.id
+
+    def __hash__(self) -> int:
+        return hash(self.id)
 
 
 class Attendance(Enum):
