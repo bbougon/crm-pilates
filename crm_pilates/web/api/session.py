@@ -245,10 +245,10 @@ def add_attendees_to_session(
         return __map_session(result.root_id, session)
     except AggregateNotFoundException as e:
         raise APIHTTPException(status_code=HTTPStatus.NOT_FOUND, detail=e.message)
-    except DomainException:
+    except DomainException as e:
         raise APIHTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Cannot add attendees for the session starting at {arrow.get(attendees_addition.session_date)}. Session could not be found",
+            detail=f"Cannot add attendees for the session starting at {arrow.get(attendees_addition.session_date)}. {e.message}",
         )
 
 

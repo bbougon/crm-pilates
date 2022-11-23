@@ -10,25 +10,15 @@ from immobilus import immobilus
 from mock.mock import ANY
 from pydantic.error_wrappers import ValidationError
 
-from crm_pilates.domain.scheduling.classroom import Classroom
-from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client import Client
 from crm_pilates.domain.exceptions import AggregateNotFoundException
+from crm_pilates.domain.scheduling.classroom import Classroom
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
     MemoryClassroomRepository,
 )
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
-from tests.builders.builders_for_test import (
-    SessionCheckinJsonBuilderForTest,
-    ClientContextBuilderForTest,
-    ClassroomContextBuilderForTest,
-    ClassroomBuilderForTest,
-    SessionContextBuilderForTest,
-    AttendeeSessionCancellationJsonBuilderForTest,
-    ClientBuilderForTest,
-)
-from tests.builders.providers_for_test import CommandBusProviderForTest
-from tests.helpers.helpers import expected_session_response
+from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.api.session import (
     session_checkin,
     next_sessions,
@@ -47,6 +37,17 @@ from crm_pilates.web.schema.session_schemas import (
     AttendeeSessionCancellation,
     AttendeesAddition,
 )
+from tests.builders.builders_for_test import (
+    SessionCheckinJsonBuilderForTest,
+    ClientContextBuilderForTest,
+    ClassroomContextBuilderForTest,
+    ClassroomBuilderForTest,
+    SessionContextBuilderForTest,
+    AttendeeSessionCancellationJsonBuilderForTest,
+    ClientBuilderForTest,
+)
+from tests.builders.providers_for_test import CommandBusProviderForTest
+from tests.helpers.helpers import expected_session_response
 
 
 def test_should_handle_domain_exception_on_invalid_confirmed_session():
@@ -1021,12 +1022,10 @@ def test_should_return_404_if_session_not_at_expected_time():
         )
 
     assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail == [
-        {
-            "msg": f"Cannot add attendees for the session starting at {arrow.get(datetime.now())}. Session could not be found",
-            "type": "add_attendees_to_session",
-        }
-    ]
+    assert e.value.detail[0]["msg"].startswith(
+        f"Cannot add attendees for the session starting at {arrow.get(datetime.now())}"
+    )
+    assert e.value.detail[0]["type"] == "add_attendees_to_session"
 
 
 @immobilus("2022-11-15 10:20:15.230")
@@ -1053,6 +1052,42 @@ def test_should_not_validate_if_no_attendee_given():
         )
 
     assert e.value.raw_errors[0].exc.args[0] == "Please provide at least one attendee"
+
+
+@immobilus("2022-11-15 10:20:15.230")
+def test_should_not_validate_if_too_much_attendees_given():
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(4)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
+            .ending_at(arrow.get("2022-11-15T12:00:00+03:00").datetime)
+            .with_position(1)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+
+    with pytest.raises(APIHTTPException) as e:
+        add_attendees_to_session(
+            AttendeesAddition(
+                classroom_id=classrooms[0].id,
+                session_date=arrow.get("2022-11-15T11:00:00+03:00").datetime,
+                attendees=[clients[0].id, clients[1].id],
+            ),
+            CommandBusProviderForTest().provide(),
+        )
+
+    assert (
+        e.value.detail[0]["msg"]
+        == "Cannot add attendees for the session starting at 2022-11-15T11:00:00+03:00. Cannot add attendees, there is 1 position(s) available, you tried to add 2 attendee(s)"
+    )
 
 
 def __to_available_credits(

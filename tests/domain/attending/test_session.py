@@ -221,7 +221,7 @@ def test_should_not_add_more_attendees_than_position_available():
 
     assert (
         e.value.message
-        == "Cannot add attendees, there is 2 positions available, you tried to add 3 attendees"
+        == "Cannot add attendees, there is 2 position(s) available, you tried to add 3 attendee(s)"
     )
 
 
