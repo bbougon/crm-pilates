@@ -120,3 +120,8 @@ class DecreaseClientCreditsCommand(Command):
 class RefundClientCreditsCommand(Command):
     session_id: UUID
     attendee: Attendee
+
+
+@dataclass
+class DeleteClientCommand(Command):
+    id: UUID

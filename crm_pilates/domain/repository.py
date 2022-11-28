@@ -33,6 +33,10 @@ class Repository:
         pass
 
     @abstractmethod
+    def delete(self, entity: AggregateRoot):
+        pass
+
+    @abstractmethod
     def _get_entity_type(self) -> str:
         pass
 

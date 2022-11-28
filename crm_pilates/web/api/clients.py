@@ -10,6 +10,7 @@ from crm_pilates.domain.commands import (
     ClientCreationCommand,
     ClientCredits,
     AddCreditsToClientCommand,
+    DeleteClientCommand,
 )
 from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
@@ -56,6 +57,22 @@ def create_client(
     event: ClientCreated = result.event
     response.headers["location"] = f"/clients/{event.root_id}"
     return __map_client(event)
+
+
+@router.delete(
+    "/clients/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["clients"],
+    responses={
+        204: {"description": "Client has been deleted"},
+        404: {"description": "Client not found"},
+    },
+)
+def delete_client(
+    id: UUID, command_bus_provider: CommandBusProvider = Depends(CommandBusProvider)
+):
+    command_bus_provider.command_bus.send(DeleteClientCommand(id))
+    return
 
 
 @router.get(

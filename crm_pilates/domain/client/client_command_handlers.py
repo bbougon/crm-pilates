@@ -9,6 +9,7 @@ from crm_pilates.domain.commands import (
     AddCreditsToClientCommand,
     DecreaseClientCreditsCommand,
     RefundClientCreditsCommand,
+    DeleteClientCommand,
 )
 from crm_pilates.domain.services import encrypt
 from crm_pilates.event.event_store import Event, EventSourced
@@ -116,3 +117,10 @@ class RefundClientCreditsCommandHandler(CommandHandler):
         )
         client.refund_credits_for(session.subject)
         return ClientCreditsUpdated(client.id, client.credits), Status.UPDATED
+
+
+class DeleteClientCommandHandler(CommandHandler):
+    def execute(self, saga: DeleteClientCommand) -> Event:
+        client: Client = RepositoryProvider.write_repositories.client.get_by_id(saga.id)
+        RepositoryProvider.write_repositories.client.delete(client)
+        pass

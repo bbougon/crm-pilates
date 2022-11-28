@@ -9,7 +9,8 @@ from crm_pilates.infrastructure.repository.memory.memory_repository import (
 
 
 class MemoryClientRepository(ClientRepository, MemoryRepository):
-    pass
+    def delete(self, entity: AggregateRoot):
+        self.entities.remove(entity)
 
 
 class MemoryClientReadRepository(ClientRepository, MemoryRepository):
@@ -18,6 +19,9 @@ class MemoryClientReadRepository(ClientRepository, MemoryRepository):
         self.__repository = repository
 
     def persist(self, entity: AggregateRoot):
+        raise NotImplementedError
+
+    def delete(self, entity: AggregateRoot):
         raise NotImplementedError
 
     def get_by_id(self, id: UUID):

@@ -28,6 +28,7 @@ from crm_pilates.domain.client.client_command_handlers import (
     AddCreditsToClientCommandHandler,
     DecreaseClientCreditsCommandHandler,
     RefundClientCreditsCommandHandler,
+    DeleteClientCommandHandler,
 )
 from crm_pilates.domain.commands import (
     ClassroomScheduleCommand,
@@ -40,6 +41,7 @@ from crm_pilates.domain.commands import (
     AddCreditsToClientCommand,
     DecreaseClientCreditsCommand,
     RefundClientCreditsCommand,
+    DeleteClientCommand,
 )
 from crm_pilates.domain.attending.next_sessions_command_handler import (
     NextSessionsCommandHandler,
@@ -71,6 +73,7 @@ command_handlers = {
     SessionCheckoutCommand.__name__: SessionCheckoutCommandHandler(),
     DecreaseClientCreditsCommand.__name__: DecreaseClientCreditsCommandHandler(),
     RefundClientCreditsCommand.__name__: RefundClientCreditsCommandHandler(),
+    DeleteClientCommand.__name__: DeleteClientCommandHandler(),
 }
 
 saga_handlers = {

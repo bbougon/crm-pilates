@@ -8,12 +8,14 @@ from crm_pilates.domain.client.client_command_handlers import (
     ClientCreationCommandHandler,
     AddCreditsToClientCommandHandler,
     DecreaseClientCreditsCommandHandler,
+    DeleteClientCommandHandler,
 )
 from crm_pilates.domain.commands import (
     ClientCreationCommand,
     ClientCredits,
     AddCreditsToClientCommand,
     DecreaseClientCreditsCommand,
+    DeleteClientCommand,
 )
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
@@ -165,3 +167,16 @@ def test_should_decrease_credits_on_expected_subject_credits(
 
     assert client.credits[0].value == 5
     assert client.credits[1].value == 3
+
+
+def test_should_delete_client(memory_event_store, memory_repositories):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(2)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+
+    DeleteClientCommandHandler().execute(DeleteClientCommand(clients[1].id))
+
+    assert len(next(repository.get_all())) == 1

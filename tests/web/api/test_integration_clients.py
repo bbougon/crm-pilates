@@ -162,3 +162,21 @@ def test_should_add_credits_to_client(authenticated_user):
     )
 
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_should_delete_client(authenticated_user):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_client(
+            ClientBuilderForTest().with_credit(2, ClassroomSubject.MACHINE_TRIO).build()
+        )
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    client_to_update: Client = clients[0]
+
+    response: Response = http_client.delete(
+        f"clients/{str(client_to_update.id)}",
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
