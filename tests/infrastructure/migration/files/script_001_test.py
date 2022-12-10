@@ -16,12 +16,11 @@ from crm_pilates.infrastructure.event.sqlite.sqlite_event_store import (
 from crm_pilates.infrastructure.migration.migration_script import MigrationScript
 
 
-class Test1MigrationScript(MigrationScript):
+class FirstMigrationScriptForTest(MigrationScript):
     def __init__(self, argument) -> None:
         super().__init__(self.__class__.__name__, argument)
 
     def run_script(self):
-        print("Hello 2 ")
         uuid_dumps = partial(
             json.dumps,
             cls=MultipleJsonEncoders(UUIDEncoder, EnumEncoder, DateTimeEncoder),
@@ -41,4 +40,4 @@ class Test1MigrationScript(MigrationScript):
 
 
 if __name__ == "__main__":
-    Test1MigrationScript(sys.argv[1:]).execute()
+    FirstMigrationScriptForTest(sys.argv[1:]).execute()

@@ -49,39 +49,31 @@ def create_classroom(
     response: Response,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
-    try:
-        command = ClassroomScheduleCommand(
-            classroom_schedule.name,
-            classroom_schedule.position,
-            classroom_schedule.duration,
-            ClassroomSubject[classroom_schedule.subject],
-            classroom_schedule.start_date,
-            classroom_schedule.stop_date,
-            list(map(lambda attendee: attendee.id, classroom_schedule.attendees)),
-        )
-        from crm_pilates.command.response import Response
+    command = ClassroomScheduleCommand(
+        classroom_schedule.name,
+        classroom_schedule.position,
+        classroom_schedule.duration,
+        ClassroomSubject[classroom_schedule.subject],
+        classroom_schedule.start_date,
+        classroom_schedule.stop_date,
+        list(map(lambda attendee: attendee.id, classroom_schedule.attendees)),
+    )
+    from crm_pilates.command.response import Response
 
-        result: Response = command_bus_provider.command_bus.send(command)
-        event: ClassroomScheduled = result.event
-        response.headers["location"] = f"/classrooms/{event.root_id}"
-        return {
-            "name": event.name,
-            "id": event.root_id,
-            "position": event.position,
-            "subject": event.subject.value,
-            "schedule": {"start": event.schedule.start, "stop": event.schedule.stop},
-            "duration": ClassroomReadResponse.to_duration(event.duration),
-            "attendees": list(
-                map(lambda attendee: {"id": attendee["id"]}, event.attendees)
-            ),
-        }
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"One of the attendees with id '{e.unknown_id}' has not been found",
-        )
-    except DomainException as e:
-        raise APIHTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
+    result: Response = command_bus_provider.command_bus.send(command)
+    event: ClassroomScheduled = result.event
+    response.headers["location"] = f"/classrooms/{event.root_id}"
+    return {
+        "name": event.name,
+        "id": event.root_id,
+        "position": event.position,
+        "subject": event.subject.value,
+        "schedule": {"start": event.schedule.start, "stop": event.schedule.stop},
+        "duration": ClassroomReadResponse.to_duration(event.duration),
+        "attendees": list(
+            map(lambda attendee: {"id": attendee["id"]}, event.attendees)
+        ),
+    }
 
 
 @router.get(
@@ -91,28 +83,22 @@ def create_classroom(
     responses={404: {"description": "Classroom has not been found"}},
 )
 def get_classroom(id: UUID):
-    try:
-        detailed_classroom: DetailedClassroom = get_detailed_classroom(id)
-        return {
-            "name": detailed_classroom.name,
-            "id": detailed_classroom.id,
-            "position": detailed_classroom.position,
-            "subject": detailed_classroom.subject.value,
-            "schedule": {
-                "start": detailed_classroom.start,
-                "stop": detailed_classroom.stop,
-            },
-            "duration": {
-                "duration": detailed_classroom.duration.duration,
-                "time_unit": detailed_classroom.duration.time_unit,
-            },
-            "attendees": detailed_classroom.attendees,
-        }
-    except AggregateNotFoundException:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Classroom with id '{str(id)}' not found",
-        )
+    detailed_classroom: DetailedClassroom = get_detailed_classroom(id)
+    return {
+        "name": detailed_classroom.name,
+        "id": detailed_classroom.id,
+        "position": detailed_classroom.position,
+        "subject": detailed_classroom.subject.value,
+        "schedule": {
+            "start": detailed_classroom.start,
+            "stop": detailed_classroom.stop,
+        },
+        "duration": {
+            "duration": detailed_classroom.duration.duration,
+            "time_unit": detailed_classroom.duration.time_unit,
+        },
+        "attendees": detailed_classroom.attendees,
+    }
 
 
 @router.patch(

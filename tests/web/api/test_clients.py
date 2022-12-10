@@ -1,8 +1,4 @@
-import uuid
-from http import HTTPStatus
-
-import pytest
-from fastapi import Response, HTTPException
+from fastapi import Response
 
 from crm_pilates.domain.client.client import Client
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
@@ -136,27 +132,6 @@ def test_should_add_credits_to_client(memory_repositories):
     assert client.credits[0].value == 4
     assert client.credits[1].value == 10
     assert client.credits[1].subject == ClassroomSubject.MACHINE_DUO
-
-
-def test_should_return_an_error_when_client_not_found():
-    with pytest.raises(HTTPException) as e:
-        uuid_ = uuid.uuid4()
-        add_credits_to_client(
-            uuid_,
-            [
-                Credits.parse_obj(CreditsJsonBuilderForTest().mat(2).build()),
-                Credits.parse_obj(CreditsJsonBuilderForTest().machine_duo(10).build()),
-            ],
-            CommandBusProviderForTest().provide(),
-        )
-
-    assert e.value.detail == [
-        {
-            "msg": f"The client with id '{uuid_}' has not been found",
-            "type": "add_credits_to_client",
-        }
-    ]
-    assert e.value.status_code == HTTPStatus.NOT_FOUND
 
 
 def client_payload(client):

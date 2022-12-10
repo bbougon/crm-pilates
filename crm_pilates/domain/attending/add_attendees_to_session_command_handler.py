@@ -1,9 +1,13 @@
+import arrow
 from uuid import UUID
 
 from crm_pilates.command.command_bus import CommandBus
 from crm_pilates.command.response import Response
 from crm_pilates.command.saga_handler import SagaHandler
-from crm_pilates.domain.attending.session import ConfirmedSession
+from crm_pilates.domain.attending.session import (
+    ConfirmedSession,
+    InvalidSessionStartDateException,
+)
 from crm_pilates.domain.commands import SessionCreationCommand
 from crm_pilates.domain.exceptions import AggregateNotFoundException, DomainException
 from crm_pilates.domain.sagas import AddAttendeesToSessionSaga
@@ -51,10 +55,15 @@ class AddAttendeesToSessionSagaHandler(SagaHandler):
         if session:
             session_id = session.id
         else:
-            created_session: Response = self._command_bus.send(
-                SessionCreationCommand(saga.classroom_id, saga.session_date)
-            )
-            session_id = created_session.event.root_id
+            try:
+                created_session: Response = self._command_bus.send(
+                    SessionCreationCommand(saga.classroom_id, saga.session_date)
+                )
+                session_id = created_session.event.root_id
+            except InvalidSessionStartDateException:
+                raise DomainException(
+                    f"Cannot add attendees for the session starting at {arrow.get(saga.session_date)}."
+                )
 
         session: ConfirmedSession = (
             RepositoryProvider.write_repositories.session.get_by_id(session_id)

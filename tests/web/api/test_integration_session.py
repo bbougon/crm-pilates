@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from unittest.mock import ANY
 
@@ -160,6 +161,75 @@ def test_should_register_checkin(memory_repositories, event_bus, authenticated_u
             },
         ],
     )
+
+
+def test_should_handle_domain_exception_on_invalid_confirmed_session(
+    authenticated_user,
+):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(3)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(datetime(2019, 5, 7, 10))
+            .with_attendee(clients[0]._id)
+            .with_attendee(clients[1]._id)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+    classroom: Classroom = classrooms[0]
+    session_checkin_json = (
+        SessionCheckinJsonBuilderForTest()
+        .for_classroom(classroom)
+        .for_attendee(clients[0].id)
+        .at(datetime(2019, 5, 8, 10, 30))
+        .build()
+    )
+
+    response: Response = client.post(
+        "/sessions/checkin",
+        json=session_checkin_json,
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == [
+        {
+            "msg": f"Classroom '{classroom.name}' starting at '2019-05-07T10:00:00+00:00' cannot be set at '2019-05-08T10:30:00+00:00', closest possible dates are '2019-05-07T10:00:00+00:00' or '2019-05-14T10:00:00+00:00'",
+            "type": "session checkin",
+        }
+    ]
+
+
+def test_should_handle_aggregate_not_found_exception_on_checkin(
+    memory_event_store, event_bus, authenticated_user
+):
+    classroom_id = uuid.uuid4()
+    session_checkin_json = (
+        SessionCheckinJsonBuilderForTest()
+        .for_classroom_id(classroom_id)
+        .for_attendee(uuid.uuid4())
+        .at(datetime(2019, 5, 8, 10, 30))
+        .build()
+    )
+
+    response: Response = client.post(
+        "/sessions/checkin",
+        json=session_checkin_json,
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == [
+        {
+            "msg": f"Classroom with id '{str(classroom_id)}' not found",
+            "type": "session checkin",
+        }
+    ]
 
 
 @immobilus("2019-03-08 09:24:15.230")
@@ -426,6 +496,49 @@ def test_register_checkout(memory_repositories, event_bus, authenticated_user):
     )
 
 
+def test_should_handle_attendee_that_cannot_checkout(authenticated_user):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(3)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(arrow.get("2019-05-07T10:00:00+05:00").datetime)
+            .with_attendee(clients[0]._id)
+            .with_attendee(clients[1]._id)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+    classroom: Classroom = classrooms[0]
+    repository, session = (
+        SessionContextBuilderForTest()
+        .with_classroom(classroom)
+        .checkin(clients[0].id)
+        .at(arrow.get("2019-05-14T10:00:00+05:00").datetime)
+        .persist(RepositoryProvider.write_repositories.session)
+        .build()
+    )
+    unknown_attendee_id = uuid.uuid4()
+
+    response: Response = client.post(
+        f"/sessions/{str(session.id)}/checkout",
+        json={"attendee": str(unknown_attendee_id)},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == [
+        {
+            "msg": f"Attendee with id {str(unknown_attendee_id)} could not be checked out",
+            "type": "session checkout",
+        }
+    ]
+
+
 @immobilus("2019-05-07 08:24:15.230")
 def test_register_cancellation(memory_repositories, event_bus, authenticated_user):
     repository, clients = (
@@ -475,6 +588,80 @@ def test_register_cancellation(memory_repositories, event_bus, authenticated_use
     )
 
 
+def test_should_return_not_found_session_on_attendee_cancellation(authenticated_user):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(3)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(arrow.get("2020-05-12T10:00:00+00:00").datetime)
+            .with_attendee(clients[0]._id)
+            .with_attendee(clients[1]._id)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+    classroom: Classroom = classrooms[0]
+    session_cancellation_json = (
+        AttendeeSessionCancellationJsonBuilderForTest()
+        .for_classroom(classroom)
+        .at(arrow.get("2020-05-19T10:00:30+00:00").datetime)
+        .build()
+    )
+
+    response: Response = client.post(
+        f"/sessions/cancellation/{clients[1].id}",
+        json=session_cancellation_json,
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == [
+        {
+            "msg": "Cannot cancel attendee for the session starting at 2020-05-19T10:00:30+00:00. Session could not be found",
+            "type": "attendee session cancellation",
+        }
+    ]
+
+
+def test_should_return_classroom_not_found_on_attendee_cancellation(authenticated_user):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(3)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    classroom: Classroom = (
+        ClassroomBuilderForTest()
+        .starting_at(arrow.get("2020-05-12T10:00:00+00:00").datetime)
+        .with_attendee(clients[0]._id)
+        .build()
+    )
+    session_cancellation_json = (
+        AttendeeSessionCancellationJsonBuilderForTest()
+        .for_classroom(classroom)
+        .at(arrow.get("2020-05-19T10:00:00+00:00").datetime)
+        .build()
+    )
+
+    response: Response = client.post(
+        f"/sessions/cancellation/{clients[0].id}",
+        json=session_cancellation_json,
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == [
+        {
+            "msg": f"Classroom with id '{classroom.id}' not found",
+            "type": "attendee session cancellation",
+        }
+    ]
+
+
 @immobilus("2019-03-08 09:24:15.230")
 def test_should_add_attendees(memory_repositories, event_bus, authenticated_user):
     client_repository, clients = (
@@ -519,6 +706,82 @@ def test_should_add_attendees(memory_repositories, event_bus, authenticated_user
             },
         ],
     )
+
+
+@immobilus("2022-11-15 10:20:15")
+def test_should_return_400_if_session_not_at_expected_time(authenticated_user):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_client(ClientBuilderForTest().build())
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
+            .ending_at(arrow.get("2022-11-15T12:00:00+03:00").datetime)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+
+    response: Response = client.post(
+        "/sessions/attendees",
+        json=SessionAddAttendeesJsonBuilderForTest()
+        .for_classroom(classrooms[0])
+        .for_attendee(clients[0]._id)
+        .at(datetime.now())
+        .build(),
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == [
+        {
+            "msg": "Cannot add attendees for the session starting at 2022-11-15T10:20:15+00:00.",
+            "type": "add attendees to session",
+        }
+    ]
+
+
+@immobilus("2022-11-15 10:20:15.230")
+def test_should_not_validate_if_too_much_attendees_given(authenticated_user):
+    repository, clients = (
+        ClientContextBuilderForTest()
+        .with_clients(4)
+        .persist(RepositoryProvider.write_repositories.client)
+        .build()
+    )
+    repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classrooms(
+            ClassroomBuilderForTest()
+            .starting_at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
+            .ending_at(arrow.get("2022-11-15T12:00:00+03:00").datetime)
+            .with_position(1)
+        )
+        .persist(RepositoryProvider.write_repositories.classroom)
+        .build()
+    )
+
+    response: Response = client.post(
+        "/sessions/attendees",
+        json=SessionAddAttendeesJsonBuilderForTest()
+        .for_classroom(classrooms[0])
+        .for_attendee(clients[0]._id)
+        .for_attendee(clients[1]._id)
+        .at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
+        .build(),
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == [
+        {
+            "msg": "Cannot add attendees for the session starting at '2022-11-15T11:00:00+03:00', there is 1 position(s) available, you tried to add 2 attendee(s)",
+            "type": "add attendees to session",
+        }
+    ]
 
 
 def __client_credits(client: Client):

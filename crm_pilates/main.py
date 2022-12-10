@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from crm_pilates import settings
 from crm_pilates.api import api_router
-from crm_pilates.domain.exceptions import AggregateNotFoundException
+from crm_pilates.domain.exceptions import AggregateNotFoundException, DomainException
 from crm_pilates.domain.services import CipherServiceProvider
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.encryption.fernet_encryption_service import (
@@ -17,6 +17,7 @@ from crm_pilates.infrastructure.event.postgres.postgres_sql_event_store import (
 from crm_pilates.infrastructure.event_to_domain_loader import EventToDomainLoader
 from crm_pilates.infrastructure.exception_handlers.http_exception_handlers import (
     aggregate_not_found_handler,
+    domain_exception_handler,
 )
 from crm_pilates.infrastructure.migration.migration import Migration
 from crm_pilates.settings import config
@@ -32,6 +33,11 @@ app = FastAPI(
 app.add_exception_handler(
     exc_class_or_status_code=AggregateNotFoundException,
     handler=aggregate_not_found_handler,
+)
+
+app.add_exception_handler(
+    exc_class_or_status_code=DomainException,
+    handler=domain_exception_handler,
 )
 
 app.add_middleware(

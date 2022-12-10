@@ -1,6 +1,5 @@
 import calendar
 from datetime import datetime
-from http import HTTPStatus
 from typing import List
 from urllib.parse import urlencode
 from uuid import UUID
@@ -28,7 +27,6 @@ from crm_pilates.domain.commands import (
     GetSessionsInRangeCommand,
     SessionCheckoutCommand,
 )
-from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.domain.sagas import (
     SessionCheckinSaga,
     AttendeeSessionCancellationSaga,
@@ -37,7 +35,6 @@ from crm_pilates.domain.sagas import (
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.web.api.authentication import authentication_service
-from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.presentation.service.classroom_service import to_detailed_attendee
 from crm_pilates.web.schema.session_response import SessionResponse
 from crm_pilates.web.schema.session_schemas import (
@@ -123,31 +120,22 @@ def sessions(
 )
 def session_checkin(
     session_checkin: SessionCheckin,
-    response: Response,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
-    try:
-        from crm_pilates.command.response import Response
+    from crm_pilates.command.response import Response
 
-        checkin_event_result: Response = command_bus_provider.command_bus.send(
-            SessionCheckinSaga(
-                session_checkin.session_date,
-                session_checkin.classroom_id,
-                session_checkin.attendee,
-            )
+    checkin_event_result: Response = command_bus_provider.command_bus.send(
+        SessionCheckinSaga(
+            session_checkin.session_date,
+            session_checkin.classroom_id,
+            session_checkin.attendee,
         )
-        result: SessionCheckedIn = checkin_event_result.event
-        session: Session = RepositoryProvider.read_repositories.session.get_by_id(
-            result.root_id
-        )
-        return __map_session(result.root_id, session)
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found",
-        )
-    except DomainException as e:
-        raise APIHTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
+    )
+    result: SessionCheckedIn = checkin_event_result.event
+    session: Session = RepositoryProvider.read_repositories.session.get_by_id(
+        result.root_id
+    )
+    return __map_session(result.root_id, session)
 
 
 @router.post(
@@ -161,24 +149,16 @@ def session_checkout(
     session_checkout: SessionCheckout,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
-    try:
-        from crm_pilates.command.response import Response
+    from crm_pilates.command.response import Response
 
-        checkout_event_result: Response = command_bus_provider.command_bus.send(
-            SessionCheckoutCommand(session_id, session_checkout.attendee)
-        )
-        result: SessionCheckedOut = checkout_event_result.event
-        session: Session = RepositoryProvider.read_repositories.session.get_by_id(
-            result.root_id
-        )
-        return __map_session(result.root_id, session)
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"{e.entity_type} with id '{str(e.unknown_id)}' not found",
-        )
-    except DomainException as e:
-        raise APIHTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.message)
+    checkout_event_result: Response = command_bus_provider.command_bus.send(
+        SessionCheckoutCommand(session_id, session_checkout.attendee)
+    )
+    result: SessionCheckedOut = checkout_event_result.event
+    session: Session = RepositoryProvider.read_repositories.session.get_by_id(
+        result.root_id
+    )
+    return __map_session(result.root_id, session)
 
 
 @router.post(
@@ -190,31 +170,22 @@ def session_checkout(
 def attendee_session_cancellation(
     attendee_id: UUID,
     session_cancellation: AttendeeSessionCancellation,
-    response: Response,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
-    try:
-        from crm_pilates.command.response import Response
+    from crm_pilates.command.response import Response
 
-        checkout_event_result: Response = command_bus_provider.command_bus.send(
-            AttendeeSessionCancellationSaga(
-                session_cancellation.session_date,
-                attendee_id,
-                session_cancellation.classroom_id,
-            )
+    checkout_event_result: Response = command_bus_provider.command_bus.send(
+        AttendeeSessionCancellationSaga(
+            session_cancellation.session_date,
+            attendee_id,
+            session_cancellation.classroom_id,
         )
-        result: AttendeeSessionCancelled = checkout_event_result.event
-        session: Session = RepositoryProvider.read_repositories.session.get_by_id(
-            result.root_id
-        )
-        return __map_session(result.root_id, session)
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(status_code=HTTPStatus.NOT_FOUND, detail=e.message)
-    except DomainException:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Cannot cancel attendee for the session starting at {arrow.get(session_cancellation.session_date)}. Session could not be found",
-        )
+    )
+    result: AttendeeSessionCancelled = checkout_event_result.event
+    session: Session = RepositoryProvider.read_repositories.session.get_by_id(
+        result.root_id
+    )
+    return __map_session(result.root_id, session)
 
 
 @router.post(
@@ -227,29 +198,21 @@ def add_attendees_to_session(
     attendees_addition: AttendeesAddition,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
-    try:
-        from crm_pilates.command.response import Response
+    from crm_pilates.command.response import Response
 
-        add_attendees_result: Response = command_bus_provider.command_bus.send(
-            AddAttendeesToSessionSaga(
-                attendees_addition.session_date,
-                attendees_addition.classroom_id,
-                attendees_addition.attendees,
-            )
+    add_attendees_result: Response = command_bus_provider.command_bus.send(
+        AddAttendeesToSessionSaga(
+            attendees_addition.session_date,
+            attendees_addition.classroom_id,
+            attendees_addition.attendees,
         )
+    )
 
-        result: AttendeesToSessionAdded = add_attendees_result.event
-        session: Session = RepositoryProvider.read_repositories.session.get_by_id(
-            result.root_id
-        )
-        return __map_session(result.root_id, session)
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(status_code=HTTPStatus.NOT_FOUND, detail=e.message)
-    except DomainException as e:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Cannot add attendees for the session starting at {arrow.get(attendees_addition.session_date)}. {e.message}",
-        )
+    result: AttendeesToSessionAdded = add_attendees_result.event
+    session: Session = RepositoryProvider.read_repositories.session.get_by_id(
+        result.root_id
+    )
+    return __map_session(result.root_id, session)
 
 
 def __map_session(root_id: UUID, session: Session):

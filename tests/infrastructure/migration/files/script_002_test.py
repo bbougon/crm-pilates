@@ -16,7 +16,7 @@ from crm_pilates.infrastructure.event.sqlite.sqlite_event_store import (
 from crm_pilates.infrastructure.migration.migration_script import MigrationScript
 
 
-class Test2MigrationScript(MigrationScript):
+class SecondMigrationScriptForTest(MigrationScript):
     def __init__(self, argv) -> None:
         super().__init__(self.__class__.__name__, argv)
 
@@ -39,4 +39,4 @@ class Test2MigrationScript(MigrationScript):
 
 
 if __name__ == "__main__":
-    Test2MigrationScript(sys.argv[1:]).execute()
+    SecondMigrationScriptForTest(sys.argv[1:]).execute()

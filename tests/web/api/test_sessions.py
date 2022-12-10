@@ -1,24 +1,17 @@
-import uuid
 from datetime import datetime
-from http import HTTPStatus
 
 import arrow
 import pytest
 import pytz
-from fastapi import Response, HTTPException, status
+from fastapi import Response
 from immobilus import immobilus
 from mock.mock import ANY
 from pydantic.error_wrappers import ValidationError
 
 from crm_pilates.domain.client.client import Client
-from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
-from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
-    MemoryClassroomRepository,
-)
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
-from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.api.session import (
     session_checkin,
     next_sessions,
@@ -48,76 +41,6 @@ from tests.builders.builders_for_test import (
 )
 from tests.builders.providers_for_test import CommandBusProviderForTest
 from tests.helpers.helpers import expected_session_response
-
-
-def test_should_handle_domain_exception_on_invalid_confirmed_session():
-    repository, clients = (
-        ClientContextBuilderForTest()
-        .with_clients(3)
-        .persist(RepositoryProvider.write_repositories.client)
-        .build()
-    )
-    repository, classrooms = (
-        ClassroomContextBuilderForTest()
-        .with_classrooms(
-            ClassroomBuilderForTest()
-            .starting_at(datetime(2019, 5, 7, 10))
-            .with_attendee(clients[0]._id)
-            .with_attendee(clients[1]._id)
-        )
-        .persist(RepositoryProvider.write_repositories.classroom)
-        .build()
-    )
-    classroom: Classroom = classrooms[0]
-    response = Response()
-    session_checkin_json = SessionCheckin.parse_obj(
-        SessionCheckinJsonBuilderForTest()
-        .for_classroom(classroom)
-        .for_attendee(clients[0].id)
-        .at(datetime(2019, 5, 8, 10, 30))
-        .build()
-    )
-
-    try:
-        session_checkin(
-            session_checkin_json, response, CommandBusProviderForTest().provide()
-        )
-    except HTTPException as e:
-        assert e.status_code == status.HTTP_400_BAD_REQUEST
-        assert e.detail == [
-            {
-                "msg": f"Classroom '{classroom.name}' starting at '2019-05-07T10:00:00+00:00' cannot be set at '2019-05-08T10:30:00+00:00', closest possible dates are '2019-05-07T10:00:00+00:00' or '2019-05-14T10:00:00+00:00'",
-                "type": "session_checkin",
-            }
-        ]
-
-
-def test_should_handle_aggregate_not_found_exception_on_checkin(mocker):
-    classroom_id = uuid.uuid4()
-    mocker.patch.object(
-        MemoryClassroomRepository,
-        "get_by_id",
-        side_effect=AggregateNotFoundException(classroom_id, "Classroom"),
-    )
-    session_checkin_json = SessionCheckin.parse_obj(
-        SessionCheckinJsonBuilderForTest()
-        .for_classroom_id(classroom_id)
-        .for_attendee(uuid.uuid4())
-        .at(datetime(2019, 5, 8, 10, 30))
-        .build()
-    )
-    try:
-        session_checkin(
-            session_checkin_json, Response(), CommandBusProviderForTest().provide()
-        )
-    except HTTPException as e:
-        assert e.status_code == status.HTTP_404_NOT_FOUND
-        assert e.detail == [
-            {
-                "msg": f"Classroom with id '{str(classroom_id)}' not found",
-                "type": "session_checkin",
-            }
-        ]
 
 
 @immobilus(pytz.timezone("Europe/Paris").localize(datetime(2020, 3, 19, 8, 24)))
@@ -634,7 +557,7 @@ def test_confirm_session_on_timezone():
     )
 
     response = session_checkin(
-        session_checkin_json, Response(), CommandBusProviderForTest().provide()
+        session_checkin_json, CommandBusProviderForTest().provide()
     )
 
     assert response == expected_session_response(
@@ -720,68 +643,6 @@ def test_should_checkout_attendee():
     )
 
 
-def test_should_handle_unexisting_session_on_checkout():
-    session_checkout_json = SessionCheckout.parse_obj({"attendee": uuid.uuid4()})
-    session_id = uuid.uuid4()
-
-    with pytest.raises(HTTPException) as e:
-        session_checkout(
-            session_id, session_checkout_json, CommandBusProviderForTest().provide()
-        )
-
-    assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail == [
-        {
-            "msg": f"Session with id '{str(session_id)}' not found",
-            "type": "session_checkout",
-        }
-    ]
-
-
-def test_should_handle_attendee_that_cannot_checkout():
-    repository, clients = (
-        ClientContextBuilderForTest()
-        .with_clients(3)
-        .persist(RepositoryProvider.write_repositories.client)
-        .build()
-    )
-    repository, classrooms = (
-        ClassroomContextBuilderForTest()
-        .with_classrooms(
-            ClassroomBuilderForTest()
-            .starting_at(arrow.get("2019-05-07T10:00:00+05:00").datetime)
-            .with_attendee(clients[0]._id)
-            .with_attendee(clients[1]._id)
-        )
-        .persist(RepositoryProvider.write_repositories.classroom)
-        .build()
-    )
-    classroom: Classroom = classrooms[0]
-    repository, session = (
-        SessionContextBuilderForTest()
-        .with_classroom(classroom)
-        .checkin(clients[0].id)
-        .at(arrow.get("2019-05-14T10:00:00+05:00").datetime)
-        .persist(RepositoryProvider.write_repositories.session)
-        .build()
-    )
-    unknown_attendee_id = uuid.uuid4()
-    session_checkout_json = SessionCheckout.parse_obj({"attendee": unknown_attendee_id})
-
-    with pytest.raises(HTTPException) as e:
-        session_checkout(
-            session.id, session_checkout_json, CommandBusProviderForTest().provide()
-        )
-
-    assert e.value.status_code == HTTPStatus.BAD_REQUEST
-    assert e.value.detail == [
-        {
-            "msg": f"Attendee with id {str(unknown_attendee_id)} could not be checked out",
-            "type": "session_checkout",
-        }
-    ]
-
-
 def test_should_cancel_attendee():
     repository, clients = (
         ClientContextBuilderForTest()
@@ -811,7 +672,6 @@ def test_should_cancel_attendee():
     response = attendee_session_cancellation(
         clients[0].id,
         session_cancellation_json,
-        Response(),
         CommandBusProviderForTest().provide(),
     )
 
@@ -831,86 +691,6 @@ def test_should_cancel_attendee():
             )
         ],
     )
-
-
-def test_should_handle_unexisting_session_on_attendee_cancellation():
-    repository, clients = (
-        ClientContextBuilderForTest()
-        .with_clients(3)
-        .persist(RepositoryProvider.write_repositories.client)
-        .build()
-    )
-    repository, classrooms = (
-        ClassroomContextBuilderForTest()
-        .with_classrooms(
-            ClassroomBuilderForTest()
-            .starting_at(arrow.get("2020-05-12T10:00:00+00:00").datetime)
-            .with_attendee(clients[0]._id)
-            .with_attendee(clients[1]._id)
-        )
-        .persist(RepositoryProvider.write_repositories.classroom)
-        .build()
-    )
-    classroom: Classroom = classrooms[0]
-    session_cancellation_json = AttendeeSessionCancellation.parse_obj(
-        AttendeeSessionCancellationJsonBuilderForTest()
-        .for_classroom(classroom)
-        .at(arrow.get("2020-05-19T10:00:30+00:00").datetime)
-        .build()
-    )
-
-    with pytest.raises(HTTPException) as e:
-        attendee_session_cancellation(
-            clients[0].id,
-            session_cancellation_json,
-            Response(),
-            CommandBusProviderForTest().provide(),
-        )
-
-    assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail == [
-        {
-            "msg": "Cannot cancel attendee for the session starting at 2020-05-19T10:00:30+00:00. Session could not be found",
-            "type": "attendee_session_cancellation",
-        }
-    ]
-
-
-def test_should_handle_unexisting_classroom_on_attendee_cancellation():
-    repository, clients = (
-        ClientContextBuilderForTest()
-        .with_clients(3)
-        .persist(RepositoryProvider.write_repositories.client)
-        .build()
-    )
-    classroom: Classroom = (
-        ClassroomBuilderForTest()
-        .starting_at(arrow.get("2020-05-12T10:00:00+00:00").datetime)
-        .with_attendee(clients[0]._id)
-        .build()
-    )
-    session_cancellation_json = AttendeeSessionCancellation.parse_obj(
-        AttendeeSessionCancellationJsonBuilderForTest()
-        .for_classroom(classroom)
-        .at(arrow.get("2020-05-19T10:00:00+00:00").datetime)
-        .build()
-    )
-
-    with pytest.raises(HTTPException) as e:
-        attendee_session_cancellation(
-            clients[0].id,
-            session_cancellation_json,
-            Response(),
-            CommandBusProviderForTest().provide(),
-        )
-
-    assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail == [
-        {
-            "msg": f"Aggregate 'Classroom' with id '{classroom.id}' not found",
-            "type": "attendee_session_cancellation",
-        }
-    ]
 
 
 @immobilus("2019-07-05 10:20:15.230")
@@ -965,70 +745,6 @@ def test_should_return_sessions_for_uncredited_attendees():
 
 
 @immobilus("2022-11-15 10:20:15.230")
-def test_should_return_404_if_classroom_not_found():
-    repository, clients = (
-        ClientContextBuilderForTest()
-        .with_client(ClientBuilderForTest().build())
-        .persist(RepositoryProvider.write_repositories.client)
-        .build()
-    )
-    with pytest.raises(HTTPException) as e:
-        classroom_id = uuid.uuid4()
-        add_attendees_to_session(
-            AttendeesAddition(
-                classroom_id=classroom_id,
-                session_date=datetime.now(),
-                attendees=[clients[0].id],
-            ),
-            CommandBusProviderForTest().provide(),
-        )
-
-    assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail == [
-        {
-            "msg": f"Aggregate 'Classroom' with id '{classroom_id}' not found",
-            "type": "add_attendees_to_session",
-        }
-    ]
-
-
-@immobilus("2022-11-15 10:20:15.230")
-def test_should_return_404_if_session_not_at_expected_time():
-    repository, clients = (
-        ClientContextBuilderForTest()
-        .with_client(ClientBuilderForTest().build())
-        .persist(RepositoryProvider.write_repositories.client)
-        .build()
-    )
-    repository, classrooms = (
-        ClassroomContextBuilderForTest()
-        .with_classrooms(
-            ClassroomBuilderForTest()
-            .starting_at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
-            .ending_at(arrow.get("2022-11-15T12:00:00+03:00").datetime)
-        )
-        .persist(RepositoryProvider.write_repositories.classroom)
-        .build()
-    )
-
-    with pytest.raises(HTTPException) as e:
-        add_attendees_to_session(
-            AttendeesAddition(
-                classroom_id=classrooms[0].id,
-                session_date=datetime.now(),
-                attendees=[clients[0].id],
-            ),
-            CommandBusProviderForTest().provide(),
-        )
-
-    assert e.value.status_code == HTTPStatus.NOT_FOUND
-    assert e.value.detail[0]["msg"].startswith(
-        f"Cannot add attendees for the session starting at {arrow.get(datetime.now())}"
-    )
-    assert e.value.detail[0]["type"] == "add_attendees_to_session"
-
-
-@immobilus("2022-11-15 10:20:15.230")
 def test_should_not_validate_if_no_attendee_given():
     repository, classrooms = (
         ClassroomContextBuilderForTest()
@@ -1052,42 +768,6 @@ def test_should_not_validate_if_no_attendee_given():
         )
 
     assert e.value.raw_errors[0].exc.args[0] == "Please provide at least one attendee"
-
-
-@immobilus("2022-11-15 10:20:15.230")
-def test_should_not_validate_if_too_much_attendees_given():
-    repository, clients = (
-        ClientContextBuilderForTest()
-        .with_clients(4)
-        .persist(RepositoryProvider.write_repositories.client)
-        .build()
-    )
-    repository, classrooms = (
-        ClassroomContextBuilderForTest()
-        .with_classrooms(
-            ClassroomBuilderForTest()
-            .starting_at(arrow.get("2022-11-15T11:00:00+03:00").datetime)
-            .ending_at(arrow.get("2022-11-15T12:00:00+03:00").datetime)
-            .with_position(1)
-        )
-        .persist(RepositoryProvider.write_repositories.classroom)
-        .build()
-    )
-
-    with pytest.raises(APIHTTPException) as e:
-        add_attendees_to_session(
-            AttendeesAddition(
-                classroom_id=classrooms[0].id,
-                session_date=arrow.get("2022-11-15T11:00:00+03:00").datetime,
-                attendees=[clients[0].id, clients[1].id],
-            ),
-            CommandBusProviderForTest().provide(),
-        )
-
-    assert (
-        e.value.detail[0]["msg"]
-        == "Cannot add attendees for the session starting at 2022-11-15T11:00:00+03:00. Cannot add attendees, there is 1 position(s) available, you tried to add 2 attendee(s)"
-    )
 
 
 def __to_available_credits(

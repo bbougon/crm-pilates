@@ -1,3 +1,5 @@
+import uuid
+
 import arrow
 from dateutil.tz import tzutc
 from fastapi import status, Response
@@ -59,6 +61,23 @@ def test_create_classroom_with_attendees(persisted_event_store, authenticated_us
     }
 
 
+def test_handle_aggregate_not_found_exception_on_classroom_creation(authenticated_user):
+    unknown_uuid = uuid.uuid4()
+    classroom_json = (
+        ClassroomJsonBuilderForTest().with_attendees([unknown_uuid]).build()
+    )
+
+    response = client.post("/classrooms", json=classroom_json)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == [
+        {
+            "msg": f"One of the attendees with id '{unknown_uuid}' has not been found",
+            "type": "create classroom",
+        }
+    ]
+
+
 def test_should_not_create_a_classroom_if_not_authenticated(memory_event_store):
     response = client.post("/classrooms", json=ClassroomJsonBuilderForTest().build())
 
@@ -117,6 +136,20 @@ def test_get_classroom(memory_repositories, authenticated_user):
             },
         ],
     }
+
+
+def test_classroom_not_found(authenticated_user):
+    unknown_uuid = uuid.uuid4()
+
+    response: Response = client.get(f"/classrooms/{unknown_uuid}")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == [
+        {
+            "msg": f"Classroom with id '{str(unknown_uuid)}' not found",
+            "type": "get classroom",
+        }
+    ]
 
 
 def test_add_attendee_to_a_classroom(authenticated_user):

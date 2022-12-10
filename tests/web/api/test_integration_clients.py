@@ -124,7 +124,7 @@ def test_client_is_not_found(authenticated_user):
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json()["detail"] == [
-        {"msg": f"Client with id '{unknown_uuid}' not found", "type": "get_client"}
+        {"msg": f"Client with id '{unknown_uuid}' not found", "type": "get client"}
     ]
 
 
@@ -161,7 +161,26 @@ def test_should_add_credits_to_client(authenticated_user):
         json=[{"value": 2, "subject": "MACHINE_TRIO"}, {"value": 10, "subject": "MAT"}],
     )
 
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_should_return_not_found_when_adding_credits_to_unknown_client(
+    authenticated_user,
+):
+    unknown_uuid = uuid.uuid4()
+
+    response: Response = http_client.post(
+        f"clients/{str(unknown_uuid)}/credits",
+        json=[{"value": 2, "subject": "MACHINE_TRIO"}, {"value": 10, "subject": "MAT"}],
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == [
+        {
+            "msg": f"Client with id '{unknown_uuid}' not found",
+            "type": "add credits to client",
+        }
+    ]
 
 
 def test_should_delete_client(authenticated_user):

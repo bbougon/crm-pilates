@@ -1,4 +1,3 @@
-from http import HTTPStatus
 from typing import List, Union
 from uuid import UUID
 
@@ -12,11 +11,9 @@ from crm_pilates.domain.commands import (
     AddCreditsToClientCommand,
     DeleteClientCommand,
 )
-from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
 from crm_pilates.web.api.authentication import authentication_service
-from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.schema.client_response import ClientReadResponse
 from crm_pilates.web.schema.client_schemas import ClientCreation, Credits
 
@@ -86,14 +83,7 @@ def delete_client(
     },
 )
 def get_client(id: UUID):
-    try:
-        client: Client = RepositoryProvider.write_repositories.client.get_by_id(id)
-        return __map_client(client)
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Client with id '{e.unknown_id}' not found",
-        )
+    return __map_client(RepositoryProvider.write_repositories.client.get_by_id(id))
 
 
 @router.get(
@@ -116,7 +106,7 @@ def get_clients():
 
 @router.post(
     "/clients/{id}/credits",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
     tags=["clients"],
     description="""Update client:
                           - Add credits to client""",
@@ -127,15 +117,9 @@ def add_credits_to_client(
     _credits: List[Credits],
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
-    try:
-        command_bus_provider.command_bus.send(
-            AddCreditsToClientCommand(id, __to_client_credits(_credits))
-        )
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"The client with id '{e.unknown_id}' has not been found",
-        )
+    command_bus_provider.command_bus.send(
+        AddCreditsToClientCommand(id, __to_client_credits(_credits))
+    )
 
 
 def __to_client_credits(creation_credits):

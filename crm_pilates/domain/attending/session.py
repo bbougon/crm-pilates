@@ -170,7 +170,7 @@ class ConfirmedSession(Session, AggregateRoot):
     def add_attendees(self, attendees: [Attendee]) -> None:
         if len(attendees) > self.position:
             raise DomainException(
-                f"Cannot add attendees, there is {self.position} position(s) available, you tried to add {len(attendees)} attendee(s)"
+                f"Cannot add attendees for the session starting at '{self.start.isoformat()}', there is {self.position} position(s) available, you tried to add {len(attendees)} attendee(s)"
             )
         self.attendees.extend(list(set(attendees) - set(self.attendees)))
 

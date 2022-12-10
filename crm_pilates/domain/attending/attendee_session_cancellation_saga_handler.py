@@ -1,11 +1,17 @@
+import arrow
 from uuid import UUID
 
 from crm_pilates.command.saga_handler import SagaHandler
-from crm_pilates.domain.attending.session import Session, ConfirmedSession
+from crm_pilates.domain.attending.session import (
+    Session,
+    ConfirmedSession,
+    InvalidSessionStartDateException,
+)
 from crm_pilates.domain.attending.session_creation_command_handler import (
     ConfirmedSessionEvent,
 )
 from crm_pilates.domain.commands import SessionCreationCommand
+from crm_pilates.domain.exceptions import DomainException
 from crm_pilates.domain.sagas import AttendeeSessionCancellationSaga
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.event.event_store import Event, EventSourced
@@ -37,10 +43,15 @@ class AttendeeSessionCancellationSagaHandler(SagaHandler):
         if session:
             session_id = session.id
         else:
-            confirmed_session_event: ConfirmedSessionEvent = self._command_bus.send(
-                SessionCreationCommand(saga.classroom_id, saga.session_date)
-            )
-            session_id = confirmed_session_event.event.root_id
+            try:
+                confirmed_session_event: ConfirmedSessionEvent = self._command_bus.send(
+                    SessionCreationCommand(saga.classroom_id, saga.session_date)
+                )
+                session_id = confirmed_session_event.event.root_id
+            except InvalidSessionStartDateException:
+                raise DomainException(
+                    message=f"Cannot cancel attendee for the session starting at {arrow.get(saga.session_date)}. Session could not be found"
+                )
 
         confirmed_session: ConfirmedSession = (
             RepositoryProvider.write_repositories.session.get_by_id(session_id)

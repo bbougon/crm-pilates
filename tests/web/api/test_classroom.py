@@ -2,15 +2,14 @@ import uuid
 from datetime import datetime, timedelta
 
 import arrow
-import pytest
 import pytz
 from fastapi import HTTPException
 from fastapi import Response
 
+from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
-from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
     MemoryClassroomRepository,
 )
@@ -20,7 +19,6 @@ from crm_pilates.infrastructure.repository.memory.memory_client_repositories imp
 from crm_pilates.web.api.classroom import (
     create_classroom,
     update_classroom,
-    get_classroom,
 )
 from crm_pilates.web.schema.classroom_schemas import ClassroomSchedule, TimeUnit
 from tests.builders.builders_for_test import (
@@ -158,58 +156,6 @@ def test_should_create_classroom_with_attendees(memory_event_store):
     )
 
 
-def test_should_handle_business_exception_on_classroom_creation(
-    memory_event_store, mocker
-):
-    mocker.patch.object(
-        Classroom,
-        "all_attendees",
-        side_effect=DomainException("something wrong occurred"),
-    )
-    classroom_json = ClassroomJsonBuilderForTest().build()
-
-    try:
-        create_classroom(
-            ClassroomSchedule.parse_obj(classroom_json),
-            Response(),
-            CommandBusProviderForTest().provide(),
-        )
-    except HTTPException as e:
-        assert e.status_code == 409
-        assert e.detail == [
-            {"msg": "something wrong occurred", "type": "create_classroom"}
-        ]
-
-
-def test_handle_aggregate_not_found_exception_on_classroom_creation(
-    memory_event_store, mocker
-):
-    unknown_uuid = uuid.uuid4()
-    mocker.patch.object(
-        MemoryClientRepository,
-        "get_by_id",
-        side_effect=AggregateNotFoundException(unknown_uuid, Attendee.__name__),
-    )
-    classroom_json = (
-        ClassroomJsonBuilderForTest().with_attendees([unknown_uuid]).build()
-    )
-
-    try:
-        create_classroom(
-            ClassroomSchedule.parse_obj(classroom_json),
-            Response(),
-            CommandBusProviderForTest().provide(),
-        )
-    except HTTPException as e:
-        assert e.status_code == 404
-        assert e.detail == [
-            {
-                "msg": f"One of the attendees with id '{unknown_uuid}' has not been found",
-                "type": "create_classroom",
-            }
-        ]
-
-
 def test_add_attendee_to_classroom(memory_event_store):
     client_repository, clients = (
         ClientContextBuilderForTest().with_clients(2).persist().build()
@@ -304,20 +250,6 @@ def test_handle_business_exception_on_classroom_patch(mocker):
     except HTTPException as e:
         assert e.status_code == 409
         assert e.detail == [{"msg": "error occurred", "type": "update_classroom"}]
-
-
-def test_classroom_not_found():
-    unknown_uuid = uuid.uuid4()
-    with pytest.raises(HTTPException) as e:
-        get_classroom(unknown_uuid)
-
-    assert e.value.status_code == 404
-    assert e.value.detail == [
-        {
-            "msg": f"Classroom with id '{str(unknown_uuid)}' not found",
-            "type": "get_classroom",
-        }
-    ]
 
 
 def assert_response_has_expected_values(
