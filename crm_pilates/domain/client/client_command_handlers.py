@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import List
 from uuid import UUID
 
 from crm_pilates.command.command_handler import CommandHandler, Status
@@ -81,20 +81,16 @@ class ClientCreditsUpdated(Event):
 
 
 class AddCreditsToClientCommandHandler(CommandHandler):
-    def execute(
-        self, command: AddCreditsToClientCommand
-    ) -> Tuple[ClientCreditsUpdated, Status]:
+    def execute(self, command: AddCreditsToClientCommand) -> Status:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(
             command.id
         )
         client.add_credits(command.credits)
-        return ClientCreditsUpdated(client.id, client.credits), Status.UPDATED
+        return ClientCreditsUpdated(client.id, client.credits)
 
 
 class DecreaseClientCreditsCommandHandler(CommandHandler):
-    def execute(
-        self, command: DecreaseClientCreditsCommand
-    ) -> Tuple[ClientCreditsUpdated, Status]:
+    def execute(self, command: DecreaseClientCreditsCommand) -> Status:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(
             command.attendee.id
         )
@@ -102,13 +98,11 @@ class DecreaseClientCreditsCommandHandler(CommandHandler):
             command.session_id
         )
         client.decrease_credits_for(session.subject)
-        return ClientCreditsUpdated(client.id, client.credits), Status.UPDATED
+        return ClientCreditsUpdated(client.id, client.credits)
 
 
 class RefundClientCreditsCommandHandler(CommandHandler):
-    def execute(
-        self, command: RefundClientCreditsCommand
-    ) -> Tuple[ClientCreditsUpdated, Status]:
+    def execute(self, command: RefundClientCreditsCommand) -> ClientCreditsUpdated:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(
             command.attendee.id
         )
@@ -116,7 +110,7 @@ class RefundClientCreditsCommandHandler(CommandHandler):
             command.session_id
         )
         client.refund_credits_for(session.subject)
-        return ClientCreditsUpdated(client.id, client.credits), Status.UPDATED
+        return ClientCreditsUpdated(client.id, client.credits)
 
 
 class DeleteClientCommandHandler(CommandHandler):

@@ -180,3 +180,15 @@ def test_should_delete_client(authenticated_user):
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_should_return_not_found_on_unexisting_client_deletion(authenticated_user):
+    unknown_uuid = uuid.uuid4()
+    response: Response = http_client.delete(
+        f"clients/{str(unknown_uuid)}",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == [
+        {"msg": f"Client with id '{unknown_uuid}' not found", "type": "delete client"}
+    ]
