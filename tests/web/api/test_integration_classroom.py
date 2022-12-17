@@ -174,3 +174,26 @@ def test_add_attendee_to_a_classroom(authenticated_user):
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_handle_aggregate_not_found_on_classroom_patch(authenticated_user):
+    unknown_uuid = uuid.uuid4()
+    classroom_repository, classrooms = (
+        ClassroomContextBuilderForTest()
+        .with_classroom(ClassroomBuilderForTest().with_position(2))
+        .persist()
+        .build()
+    )
+
+    response: Response = client.patch(
+        f"/classrooms/{classrooms[0]._id}",
+        json={"attendees": [{"id": str(unknown_uuid)}]},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == [
+        {
+            "msg": f"One of the attendees with id '{unknown_uuid}' has not been found",
+            "type": "update classroom",
+        }
+    ]

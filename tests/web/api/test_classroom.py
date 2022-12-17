@@ -1,20 +1,13 @@
-import uuid
 from datetime import datetime, timedelta
 
 import arrow
 import pytz
-from fastapi import HTTPException
 from fastapi import Response
 
-from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
-from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
     MemoryClassroomRepository,
-)
-from crm_pilates.infrastructure.repository.memory.memory_client_repositories import (
-    MemoryClientRepository,
 )
 from crm_pilates.web.api.classroom import (
     create_classroom,
@@ -189,67 +182,6 @@ def test_add_attendee_to_classroom(memory_event_store):
     )
     assert clients[0]._id in attendees_ids
     assert clients[1]._id in attendees_ids
-
-
-def test_handle_aggregate_not_found_on_classroom_patch(mocker):
-    unknown_uuid = uuid.uuid4()
-    mocker.patch.object(
-        MemoryClientRepository,
-        "get_by_id",
-        side_effect=AggregateNotFoundException(unknown_uuid, Attendee.__name__),
-    )
-    classroom_repository, classrooms = (
-        ClassroomContextBuilderForTest()
-        .with_classroom(ClassroomBuilderForTest().with_position(2))
-        .persist()
-        .build()
-    )
-    RepositoryProviderForTest().for_classroom(
-        classroom_repository
-    ).for_client().provide()
-
-    try:
-        update_classroom(
-            classrooms[0]._id,
-            ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
-            CommandBusProviderForTest().provide(),
-        )
-    except HTTPException as e:
-        assert e.status_code == 404
-        assert e.detail == [
-            {
-                "msg": f"One of the attendees with id '{unknown_uuid}' has not been found",
-                "type": "update_classroom",
-            }
-        ]
-
-
-def test_handle_business_exception_on_classroom_patch(mocker):
-    unknown_uuid = uuid.uuid4()
-    mocker.patch.object(
-        MemoryClientRepository,
-        "get_by_id",
-        side_effect=DomainException("error occurred"),
-    )
-    classroom_repository, classrooms = (
-        ClassroomContextBuilderForTest()
-        .with_classroom(ClassroomBuilderForTest().with_position(2))
-        .persist()
-        .build()
-    )
-    RepositoryProviderForTest().for_classroom(
-        classroom_repository
-    ).for_client().provide()
-
-    try:
-        update_classroom(
-            classrooms[0]._id,
-            ClassroomPatchJsonBuilderForTest().with_attendee(unknown_uuid).build(),
-            CommandBusProviderForTest().provide(),
-        )
-    except HTTPException as e:
-        assert e.status_code == 409
-        assert e.detail == [{"msg": "error occurred", "type": "update_classroom"}]
 
 
 def assert_response_has_expected_values(

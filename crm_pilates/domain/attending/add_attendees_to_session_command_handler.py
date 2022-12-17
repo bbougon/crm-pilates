@@ -1,15 +1,18 @@
-import arrow
+from typing import List
 from uuid import UUID
+
+import arrow
 
 from crm_pilates.command.command_bus import CommandBus
 from crm_pilates.command.response import Response
 from crm_pilates.command.saga_handler import SagaHandler
+from crm_pilates.domain.attending.attendees import Attendees
 from crm_pilates.domain.attending.session import (
     ConfirmedSession,
     InvalidSessionStartDateException,
 )
 from crm_pilates.domain.commands import SessionCreationCommand
-from crm_pilates.domain.exceptions import AggregateNotFoundException, DomainException
+from crm_pilates.domain.exceptions import DomainException
 from crm_pilates.domain.sagas import AddAttendeesToSessionSaga
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.event.event_store import Event, EventSourced
@@ -42,16 +45,17 @@ class AddAttendeesToSessionSagaHandler(SagaHandler):
         super().__init__(command_bus)
 
     def execute(self, saga: AddAttendeesToSessionSaga) -> AttendeesToSessionAdded:
-        try:
-            for attendee in saga.attendees:
-                RepositoryProvider.read_repositories.client.get_by_id(attendee)
-        except AggregateNotFoundException:
-            raise DomainException(f"Attendee with id {attendee} has not been found")
+        attendees: List[Attendee] = Attendees.by_ids(list(saga.attendees))
         session = (
             RepositoryProvider.write_repositories.session.get_by_classroom_id_and_date(
                 saga.classroom_id, saga.session_date
             )
         )
+        session = self.__create_session(saga, session)
+        session.add_attendees(attendees)
+        return AttendeesToSessionAdded(session.id, attendees)
+
+    def __create_session(self, saga, session):
         if session:
             session_id = session.id
         else:
@@ -64,12 +68,7 @@ class AddAttendeesToSessionSagaHandler(SagaHandler):
                 raise DomainException(
                     f"Cannot add attendees for the session starting at {arrow.get(saga.session_date)}."
                 )
-
         session: ConfirmedSession = (
             RepositoryProvider.write_repositories.session.get_by_id(session_id)
         )
-        attendees = list(
-            map(lambda attendee: Attendee.create(attendee), saga.attendees)
-        )
-        session.add_attendees(attendees)
-        return AttendeesToSessionAdded(session.id, attendees)
+        return session

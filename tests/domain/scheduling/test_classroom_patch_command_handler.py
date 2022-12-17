@@ -1,16 +1,13 @@
-import uuid
 from datetime import datetime
 
-import pytest
 import pytz
 from immobilus import immobilus
 
+from crm_pilates.domain.commands import ClassroomPatchCommand
 from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.scheduling.classroom_patch_command_handler import (
     ClassroomPatchCommandHandler,
 )
-from crm_pilates.domain.commands import ClassroomPatchCommand
-from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.event.event_store import StoreLocator
 from tests.asserters.event_asserter import EventAsserter
 from tests.builders.builders_for_test import (
@@ -52,23 +49,4 @@ def test_classroom_patch_with_attendees(memory_event_store):
     assert events[0].root_id == classroom._id
     EventAsserter.assert_all_attendees_added(
         events[0].payload, [{"id": clients[0]._id}, {"id": clients[1]._id}]
-    )
-
-
-def test_cannot_patch_classroom_with_attendees_for_unknown_clients(memory_event_store):
-    classroom_repository, classrooms = (
-        ClassroomContextBuilderForTest().persist().build()
-    )
-    RepositoryProviderForTest().for_classroom(
-        classroom_repository
-    ).for_client().provide()
-    unknown_client_id = uuid.uuid4()
-
-    with pytest.raises(AggregateNotFoundException) as e:
-        ClassroomPatchCommandHandler().execute(
-            ClassroomPatchCommand(classrooms[0]._id, [unknown_client_id])
-        )
-
-    assert (
-        e.value.message == f"Aggregate 'Client' with id '{unknown_client_id}' not found"
     )

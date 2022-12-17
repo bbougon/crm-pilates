@@ -4,8 +4,8 @@ from typing import List
 from uuid import UUID
 
 from crm_pilates.command.command_handler import CommandHandler
+from crm_pilates.domain.attending.attendees import Attendees
 from crm_pilates.domain.commands import ClassroomScheduleCommand
-from crm_pilates.domain.exceptions import AggregateNotFoundException, DomainException
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom import Classroom, Schedule
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
@@ -73,19 +73,7 @@ class ClassroomScheduleCommandHandler(CommandHandler):
                 )
             ),
         )
-        try:
-            attendees: List[Attendee] = list(
-                map(
-                    lambda id: RepositoryProvider.write_repositories.attendee.get_by_id(
-                        id
-                    ),
-                    command.attendees,
-                )
-            )
-        except AggregateNotFoundException as e:
-            raise DomainException(
-                f"One of the attendees with id '{e.unknown_id}' has not been found"
-            )
+        attendees = Attendees.by_ids(command.attendees)
 
         classroom.all_attendees(attendees)
         RepositoryProvider.write_repositories.classroom.persist(classroom)

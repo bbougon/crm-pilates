@@ -1,17 +1,14 @@
-from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import status, APIRouter, Response, Depends
 
 from crm_pilates.domain.commands import ClassroomScheduleCommand, ClassroomPatchCommand
-from crm_pilates.domain.exceptions import DomainException, AggregateNotFoundException
 from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
     ClassroomScheduled,
 )
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.infrastructure.command_bus_provider import CommandBusProvider
 from crm_pilates.web.api.authentication import authentication_service
-from crm_pilates.web.api.exceptions import APIHTTPException
 from crm_pilates.web.presentation.domain.detailed_classroom import DetailedClassroom
 from crm_pilates.web.presentation.service.classroom_service import (
     get_detailed_classroom,
@@ -41,7 +38,7 @@ router = APIRouter(dependencies=[Depends(authentication_service)])
             },
         },
         404: {"description": "See body message details"},
-        409: {"description": "See body message details"},
+        400: {"description": "See body message details"},
     },
 )
 def create_classroom(
@@ -119,16 +116,8 @@ def update_classroom(
     classroom_patch: ClassroomPatch,
     command_bus_provider: CommandBusProvider = Depends(CommandBusProvider),
 ):
-    try:
-        command_bus_provider.command_bus.send(
-            ClassroomPatchCommand(
-                id, list(map(lambda client: client.id, classroom_patch.attendees))
-            )
+    command_bus_provider.command_bus.send(
+        ClassroomPatchCommand(
+            id, list(map(lambda client: client.id, classroom_patch.attendees))
         )
-    except AggregateNotFoundException as e:
-        raise APIHTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"One of the attendees with id '{e.unknown_id}' has not been found",
-        )
-    except DomainException as e:
-        raise APIHTTPException(status_code=HTTPStatus.CONFLICT, detail=e.message)
+    )

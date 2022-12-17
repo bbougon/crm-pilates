@@ -2,6 +2,7 @@ from typing import List
 from uuid import UUID
 
 from crm_pilates.command.command_handler import CommandHandler
+from crm_pilates.domain.attending.attendees import Attendees
 from crm_pilates.domain.commands import ClassroomPatchCommand
 from crm_pilates.domain.scheduling.attendee import Attendee
 from crm_pilates.domain.scheduling.classroom import Classroom
@@ -21,23 +22,11 @@ class AllAttendeesAdded(Event):
 
 class ClassroomPatchCommandHandler(CommandHandler):
     def execute(self, command: ClassroomPatchCommand) -> AllAttendeesAdded:
-        self.__check_attendees_are_clients(command)
+        attendees: List[Attendee] = Attendees.by_ids(command.attendees)
         classroom: Classroom = (
             RepositoryProvider.write_repositories.classroom.get_by_id(
                 command.classroom_id
             )
         )
-        attendees: List[Attendee] = list(
-            map(lambda attendee: Attendee(attendee), command.attendees)
-        )
         classroom.all_attendees(attendees)
         return AllAttendeesAdded(classroom._id, attendees)
-
-    @classmethod
-    def __check_attendees_are_clients(cls, command):
-        list(
-            map(
-                lambda id: RepositoryProvider.write_repositories.client.get_by_id(id),
-                command.attendees,
-            )
-        )

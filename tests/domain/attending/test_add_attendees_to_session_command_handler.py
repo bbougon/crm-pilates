@@ -121,4 +121,7 @@ def test_should_check_attendees_exist():
             )
         )
 
-    assert e.value.message == f"Attendee with id {unknown_id} has not been found"
+    assert (
+        e.value.message
+        == f"One of the attendees with id '{unknown_id}' has not been found"
+    )
