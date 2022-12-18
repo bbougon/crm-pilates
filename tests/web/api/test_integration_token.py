@@ -6,6 +6,7 @@ from crm_pilates.main import app
 from tests.faker.custom_authentication_service import (
     CustomAuthenticationService,
     UnauthorizedAuthenticationService,
+    AuthenticationExceptionAuthenticationService,
 )
 
 client = TestClient(app)
@@ -34,6 +35,25 @@ def test_should_return_unauthorized_if_authentication_fails():
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json() == {
-        "detail": [{"msg": "Incorrect username or password", "type": "create_token"}]
-    }
+    assert response.json()["detail"] == [
+        {"msg": "Incorrect username or password", "type": "create token"}
+    ]
+
+
+def test_should_handle_authentication_verification(mocker):
+    app.dependency_overrides[
+        concrete_authentication_service
+    ] = AuthenticationExceptionAuthenticationService
+    mocker.patch(
+        "tests.web.api.test_token.concrete_authentication_service",
+        new_callable=AuthenticationExceptionAuthenticationService,
+    )
+
+    response: Response = client.post(
+        "/token", {"username": "John", "password": "pass", "scope": "bearer"}
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == [
+        {"msg": "Incorrect username or password", "type": "create token"}
+    ]

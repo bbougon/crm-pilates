@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from crm_pilates import settings
 from crm_pilates.api import api_router
+from crm_pilates.authenticating.authentication import AuthenticationException
 from crm_pilates.domain.exceptions import AggregateNotFoundException, DomainException
 from crm_pilates.domain.services import CipherServiceProvider
 from crm_pilates.event.event_store import StoreLocator
@@ -18,6 +19,7 @@ from crm_pilates.infrastructure.event_to_domain_loader import EventToDomainLoade
 from crm_pilates.infrastructure.exception_handlers.http_exception_handlers import (
     aggregate_not_found_handler,
     domain_exception_handler,
+    authentication_exception_handler,
 )
 from crm_pilates.infrastructure.migration.migration import Migration
 from crm_pilates.settings import config
@@ -38,6 +40,11 @@ app.add_exception_handler(
 app.add_exception_handler(
     exc_class_or_status_code=DomainException,
     handler=domain_exception_handler,
+)
+
+app.add_exception_handler(
+    exc_class_or_status_code=AuthenticationException,
+    handler=authentication_exception_handler,
 )
 
 app.add_middleware(
