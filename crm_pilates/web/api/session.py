@@ -117,6 +117,12 @@ def sessions(
     tags=["classroom", "sessions"],
     status_code=status.HTTP_200_OK,
     response_model=SessionResponse,
+    responses={
+        400: {"description": "See body message details"},
+        404: {
+            "description": "You try to checkin an attendee on a session for a classroom that does not exist"
+        },
+    },
 )
 def session_checkin(
     session_checkin: SessionCheckin,
@@ -143,6 +149,10 @@ def session_checkin(
     tags=["classroom", "sessions"],
     status_code=status.HTTP_200_OK,
     response_model=SessionResponse,
+    responses={
+        400: {"description": "See body message details"},
+        404: {"description": "You want to checkout from a session that does not exist"},
+    },
 )
 def session_checkout(
     session_id: UUID,
@@ -166,6 +176,15 @@ def session_checkout(
     tags=["classroom", "sessions"],
     status_code=status.HTTP_201_CREATED,
     response_model=SessionResponse,
+    responses={
+        201: {
+            "description": "The session has been confirmed with the expected audience left (meaning the attendee has been removed from this session)"
+        },
+        400: {"description": "See body message details"},
+        404: {
+            "description": "You try to cancel an attendance on a classroom that does not exist"
+        },
+    },
 )
 def attendee_session_cancellation(
     attendee_id: UUID,
@@ -193,6 +212,12 @@ def attendee_session_cancellation(
     tags=["classroom", "sessions"],
     status_code=status.HTTP_200_OK,
     response_model=SessionResponse,
+    responses={
+        400: {"description": "See body message details"},
+        404: {
+            "description": "You want to add attendees to a classroom that does not exist"
+        },
+    },
 )
 def add_attendees_to_session(
     attendees_addition: AttendeesAddition,

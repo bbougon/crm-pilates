@@ -37,7 +37,6 @@ router = APIRouter(dependencies=[Depends(authentication_service)])
                 }
             },
         },
-        404: {"description": "See body message details"},
         400: {"description": "See body message details"},
     },
 )
@@ -107,8 +106,8 @@ def get_classroom(id: UUID):
     " if you want John to join, you must provide both Clara and John "
     "otherwise Clara will be removed",
     responses={
-        404: {"description": "See body message details"},
-        409: {"description": "See body message details"},
+        404: {"description": "The classrrom you try to update has not been found"},
+        400: {"description": "See body message details"},
     },
 )
 def update_classroom(
