@@ -2,7 +2,7 @@ from fastapi import Response, status
 from fastapi.testclient import TestClient
 
 from crm_pilates.infrastructure.services import concrete_authentication_service
-from crm_pilates.main import app
+from crm_pilates.app import app
 from tests.faker.custom_authentication_service import (
     CustomAuthenticationService,
     UnauthorizedAuthenticationService,

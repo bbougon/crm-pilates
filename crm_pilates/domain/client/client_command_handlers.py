@@ -113,8 +113,14 @@ class RefundClientCreditsCommandHandler(CommandHandler):
         return ClientCreditsUpdated(client.id, client.credits)
 
 
+@EventSourced
+class ClientDeleted(Event):
+    def _to_payload(self) -> dict:
+        return {"id": self.root_id}
+
+
 class DeleteClientCommandHandler(CommandHandler):
     def execute(self, saga: DeleteClientCommand) -> Event:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(saga.id)
         RepositoryProvider.write_repositories.client.delete(client)
-        pass
+        return ClientDeleted(saga.id)

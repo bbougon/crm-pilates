@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
-from crm_pilates.main import app
+from crm_pilates.app import app
 from tests.builders.builders_for_test import (
     ClassroomJsonBuilderForTest,
     ClientContextBuilderForTest,

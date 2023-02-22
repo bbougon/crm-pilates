@@ -34,7 +34,7 @@ from crm_pilates.infrastructure.repository.memory.memory_user_repository import 
     MemoryUserRepository,
 )
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
-from crm_pilates.main import app
+from crm_pilates.app import app
 from crm_pilates.web.api.authentication import authentication_service
 from tests.faker.custom_authentication_service import CustomAuthenticationService
 from tests.infrastructure.event.memory_event_store import MemoryEventStore

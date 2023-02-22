@@ -7,7 +7,7 @@ from mock.mock import ANY
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.client.client import Client
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
-from crm_pilates.main import app
+from crm_pilates.app import app
 from tests.builders.builders_for_test import (
     ClientJsonBuilderForTest,
     ClientContextBuilderForTest,

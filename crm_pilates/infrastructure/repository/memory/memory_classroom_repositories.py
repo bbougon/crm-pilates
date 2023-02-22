@@ -15,7 +15,15 @@ from crm_pilates.infrastructure.repository.memory.memory_repository import (
 
 
 class MemoryClassroomRepository(ClassroomRepository, MemoryRepository):
-    pass
+    def get_classrooms_where_attendee_in(self, attendee_id: UUID) -> List[Classroom]:
+        classrooms: List[Classroom] = []
+        for classroom in self.entities:
+            attendees = filter(
+                lambda attendee: attendee.id == attendee_id, classroom.attendees
+            )
+            if attendees:
+                classrooms.append(classroom)
+        return classrooms
 
 
 class MemoryClassRoomReadRepository(ClassroomRepository, MemoryRepository):

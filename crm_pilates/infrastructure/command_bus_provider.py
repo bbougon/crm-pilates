@@ -2,6 +2,9 @@ from crm_pilates.command.command_bus import CommandBus
 from crm_pilates.domain.attending.add_attendees_to_session_command_handler import (
     AddAttendeesToSessionSagaHandler,
 )
+from crm_pilates.domain.attending.remove_attendee_from_classroom_command_handler import (
+    RemoveAttendeeFromClassroomCommandHandler,
+)
 from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
     ClassroomScheduleCommandHandler,
 )
@@ -42,6 +45,7 @@ from crm_pilates.domain.commands import (
     DecreaseClientCreditsCommand,
     RefundClientCreditsCommand,
     DeleteClientCommand,
+    RemoveAttendeeFromClassroomCommand,
 )
 from crm_pilates.domain.attending.next_sessions_command_handler import (
     NextSessionsCommandHandler,
@@ -74,6 +78,7 @@ command_handlers = {
     DecreaseClientCreditsCommand.__name__: DecreaseClientCreditsCommandHandler(),
     RefundClientCreditsCommand.__name__: RefundClientCreditsCommandHandler(),
     DeleteClientCommand.__name__: DeleteClientCommandHandler(),
+    RemoveAttendeeFromClassroomCommand.__name__: RemoveAttendeeFromClassroomCommandHandler(),
 }
 
 saga_handlers = {

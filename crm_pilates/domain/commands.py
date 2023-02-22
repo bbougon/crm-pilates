@@ -125,3 +125,8 @@ class RefundClientCreditsCommand(Command):
 @dataclass
 class DeleteClientCommand(Command):
     id: UUID
+
+
+@dataclass
+class RemoveAttendeeFromClassroomCommand(Command):
+    id: UUID

@@ -180,3 +180,6 @@ def test_should_delete_client(memory_event_store, memory_repositories):
     DeleteClientCommandHandler().execute(DeleteClientCommand(clients[1].id))
 
     assert len(next(repository.get_all())) == 1
+    events = StoreLocator.store.get_all()
+    assert len(events) == 1
+    assert events[0].type == "ClientDeleted"
