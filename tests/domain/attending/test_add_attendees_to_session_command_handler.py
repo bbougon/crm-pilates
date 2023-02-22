@@ -58,7 +58,7 @@ def test_should_source_attendees_to_session_added_events():
         2020, 4, 3, 10, 24, 15, 230000, tzinfo=pytz.utc
     )
     EventAsserter.assert_add_attendees_to_session(
-        events[1].payload, result.root_id, [clients[1].id], "REGISTERED"
+        events[1].payload, result.root_id, [clients[1].id]
     )
 
 
@@ -103,7 +103,7 @@ def test_should_add_attendees_on_already_confirmed_session():
         2020, 8, 3, 10, 24, 15, 230000, tzinfo=pytz.utc
     )
     EventAsserter.assert_add_attendees_to_session(
-        events[0].payload, result.root_id, [clients[1].id, clients[2].id], "REGISTERED"
+        events[0].payload, result.root_id, [clients[1].id, clients[2].id]
     )
 
 

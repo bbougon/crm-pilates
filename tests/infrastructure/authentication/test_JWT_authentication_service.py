@@ -10,7 +10,7 @@ import pytest
 
 
 @immobilus("2022-07-29T16:12:08.473979")
-def test_should_authenticate_user_by_creating_a_JWT_token(memory_repositories):
+def test_should_authenticate_user_by_creating_a_JWT_token():
     RepositoryProvider.write_repositories.user.persist(
         UserBuilderForTest().username("charles").password("password").build()
     )
@@ -24,9 +24,7 @@ def test_should_authenticate_user_by_creating_a_JWT_token(memory_repositories):
     )
 
 
-def test_should_raise_authentication_exception_when_password_is_wrong(
-    memory_repositories,
-):
+def test_should_raise_authentication_exception_when_password_is_wrong():
     with pytest.raises(AuthenticationException):
         RepositoryProvider.write_repositories.user.persist(
             UserBuilderForTest().username("charles").password("password").build()
@@ -37,7 +35,7 @@ def test_should_raise_authentication_exception_when_password_is_wrong(
 
 
 @immobilus("2022-07-29T16:22:08.473979")
-def test_should_validate_token(memory_event_store):
+def test_should_validate_token():
     RepositoryProvider.write_repositories.user.persist(
         UserBuilderForTest().username("charles").password("password").build()
     )
@@ -48,7 +46,7 @@ def test_should_validate_token(memory_event_store):
 
 
 @immobilus("2022-07-29T16:22:08.473979")
-def test_should_not_validate_token_when_not_signed_with_private_key(memory_event_store):
+def test_should_not_validate_token_when_not_signed_with_private_key():
     with pytest.raises(AuthenticationException) as e:
         RepositoryProvider.write_repositories.user.persist(
             UserBuilderForTest().username("charles").password("password").build()
@@ -62,7 +60,7 @@ def test_should_not_validate_token_when_not_signed_with_private_key(memory_event
 
 
 @immobilus("2022-07-29T16:22:08.473979")
-def test_should_not_validate_token_when_unexpected_payload(memory_event_store):
+def test_should_not_validate_token_when_unexpected_payload():
     with pytest.raises(AuthenticationException) as e:
         RepositoryProvider.write_repositories.user.persist(
             UserBuilderForTest().username("charles").password("password").build()
@@ -76,7 +74,7 @@ def test_should_not_validate_token_when_unexpected_payload(memory_event_store):
 
 
 @immobilus("2022-07-29T16:22:08.473979")
-def test_should_not_validate_token_when_user_is_not_found(memory_event_store):
+def test_should_not_validate_token_when_user_is_not_found():
     with pytest.raises(AuthenticationException) as e:
         RepositoryProvider.write_repositories.user.persist(
             UserBuilderForTest().username("Henri").password("password").build()
@@ -90,7 +88,7 @@ def test_should_not_validate_token_when_user_is_not_found(memory_event_store):
 
 
 @immobilus("2022-07-29T16:22:08.473979")
-def test_should_not_validate_if_token_expired(memory_event_store):
+def test_should_not_validate_if_token_expired():
     with pytest.raises(AuthenticationException) as e:
         RepositoryProvider.write_repositories.user.persist(
             UserBuilderForTest().username("Henri").password("password").build()

@@ -2,9 +2,6 @@ from crm_pilates.command.command_bus import CommandBus
 from crm_pilates.domain.attending.add_attendees_to_session_command_handler import (
     AddAttendeesToSessionSagaHandler,
 )
-from crm_pilates.domain.attending.remove_attendee_from_classroom_command_handler import (
-    RemoveAttendeeFromClassroomCommandHandler,
-)
 from crm_pilates.domain.scheduling.classroom_schedule_command_handler import (
     ClassroomScheduleCommandHandler,
 )
@@ -54,6 +51,9 @@ from crm_pilates.domain.sagas import (
     SessionCheckinSaga,
     AttendeeSessionCancellationSaga,
     AddAttendeesToSessionSaga,
+)
+from crm_pilates.domain.scheduling.remove_attendee_from_classroom_command_handler import (
+    RemoveAttendeeFromClassroomCommandHandler,
 )
 from crm_pilates.event.event_subscribers import (
     SessionCheckedInEventSubscriber,

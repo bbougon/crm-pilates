@@ -181,5 +181,6 @@ def test_should_delete_client(memory_event_store, memory_repositories):
 
     assert len(next(repository.get_all())) == 1
     events = StoreLocator.store.get_all()
-    assert len(events) == 1
+    assert len(events) == 2
     assert events[0].type == "ClientDeleted"
+    assert events[1].type == "AttendeeRemovedFromClassroom"

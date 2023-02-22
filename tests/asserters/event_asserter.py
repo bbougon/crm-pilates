@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 from uuid import UUID
 
 
@@ -107,7 +108,6 @@ class EventAsserter:
         payload: dict,
         expected_id: UUID,
         expected_attendee_ids: [UUID],
-        expected_attendance: str,
     ):
         expected_payload = {
             "session_id": expected_id,
@@ -118,6 +118,13 @@ class EventAsserter:
                 )
             ),
         }
+        cls.__assert_payload(payload, expected_payload)
+
+    @classmethod
+    def assert_attendee_removed(
+        cls, payload: dict, root_id: UUID, classrooms: List[UUID]
+    ):
+        expected_payload = {"attendee_id": root_id, "classrooms": classrooms}
         cls.__assert_payload(payload, expected_payload)
 
     @classmethod
