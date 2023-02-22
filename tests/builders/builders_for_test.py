@@ -45,9 +45,13 @@ from crm_pilates.domain.client.client import Client, Credits
 from crm_pilates.domain.client.client_command_handlers import (
     ClientCreated,
     ClientCreditsUpdated,
+    ClientDeleted,
 )
 from crm_pilates.domain.commands import ClientCredits
 from crm_pilates.domain.repository import Repository
+from crm_pilates.domain.scheduling.remove_attendee_from_classroom_command_handler import (
+    AttendeeRemovedFromClassroom,
+)
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository.memory.memory_classroom_repositories import (
     MemoryClassroomRepository,
@@ -601,7 +605,12 @@ class EventBuilderForTest(Builder):
 
     def classroom(self, classroom: Classroom = None) -> EventBuilderForTest:
         classroom = classroom or ClassroomBuilderForTest().build()
-        self.event_to_store.append(self.__classroom_created([], classroom))
+        self.event_to_store.append(
+            self.__classroom_created(
+                [Attendee.create(attendee.id) for attendee in classroom.attendees],
+                classroom,
+            )
+        )
         self.classrooms.append(classroom)
         return self
 
@@ -637,7 +646,7 @@ class EventBuilderForTest(Builder):
         )
         return self
 
-    def classroom_with_attendees(self, nb_attendees: int):
+    def classroom_with_attendees(self, nb_attendees: int) -> EventBuilderForTest:
         attendees: [Client] = (
             list(itertools.islice(self.clients, nb_attendees))
             if self.clients
@@ -776,6 +785,21 @@ class EventBuilderForTest(Builder):
         attendees = [Attendee.create(attendee) for attendee in added_attendees]
         self.event_to_store.append((AttendeesToSessionAdded, (session_id, attendees)))
 
+        return self
+
+    def remove_client(self, client: Client) -> EventBuilderForTest:
+        self.event_to_store.append((ClientDeleted, (client.id,)))
+        return self
+
+    def removed_attendee(
+        self, client: Client, classrooms: List[Classroom]
+    ) -> EventBuilderForTest:
+        self.event_to_store.append(
+            (
+                AttendeeRemovedFromClassroom,
+                (client.id, [classroom.id for classroom in classrooms]),
+            )
+        )
         return self
 
     def __to_event(self, _call, _args):

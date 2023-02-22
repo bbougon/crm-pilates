@@ -32,7 +32,7 @@ class ClassroomScheduled(Event):
         schedule: Schedule,
         attendees: List[Attendee],
     ):
-        self.__root_id = id
+        self.root_id = id
         self.name = name
         self.position = position
         self.subject = subject

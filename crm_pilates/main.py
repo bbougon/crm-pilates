@@ -1,6 +1,7 @@
 import logging
 
-from crm_pilates import settings, app  # noqa
+from crm_pilates import settings
+from crm_pilates.app import app as app  # noqa
 from crm_pilates.domain.services import CipherServiceProvider
 from crm_pilates.event.event_store import StoreLocator
 from crm_pilates.infrastructure.encryption.fernet_encryption_service import (

@@ -1,11 +1,14 @@
+import uuid
 from datetime import datetime, timedelta
 from uuid import UUID
 
 import pytz
+import pytest
 from immobilus import immobilus
 
 from crm_pilates.domain.attending.session import Session, ConfirmedSession
 from crm_pilates.domain.client.client import Client
+from crm_pilates.domain.exceptions import AggregateNotFoundException
 from crm_pilates.domain.scheduling.attendee import Attendance
 from crm_pilates.domain.scheduling.classroom import Classroom
 from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
@@ -428,3 +431,38 @@ def test_should_load_added_attendees_with_no_duplication(persisted_event_store):
     assert confirmed_session.attendees[0].attendance == Attendance.REGISTERED
     assert confirmed_session.attendees[1].attendance == Attendance.REGISTERED
     assert confirmed_session.attendees[2].attendance == Attendance.REGISTERED
+
+
+def test_should_remove_deleted_clients(persisted_event_store):
+    client = ClientBuilderForTest().build()
+    classroom = (
+        ClassroomBuilderForTest()
+        .with_attendee(client.id)
+        .with_attendees([uuid.uuid4(), uuid.uuid4()])
+        .build()
+    )
+    events = (
+        EventBuilderForTest()
+        .client(client)
+        .nb_client(2)
+        .classroom(classroom)
+        .remove_client(client)
+        .removed_attendee(client, [classroom])
+        .build()
+    )
+    first_client_id: UUID = events[0].root_id
+    second_client_id: UUID = events[1].root_id
+    third_client_id: UUID = events[2].root_id
+    classroom_id: UUID = events[3].root_id
+
+    EventToDomainLoader().load()
+
+    assert RepositoryProvider.read_repositories.client.get_by_id(second_client_id)
+    assert RepositoryProvider.read_repositories.client.get_by_id(third_client_id)
+    with pytest.raises(AggregateNotFoundException):
+        assert RepositoryProvider.read_repositories.client.get_by_id(first_client_id)
+    classroom: Classroom = RepositoryProvider.read_repositories.classroom.get_by_id(
+        classroom_id
+    )
+    assert classroom
+    assert len(classroom.attendees) == 2

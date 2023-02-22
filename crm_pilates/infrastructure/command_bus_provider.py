@@ -58,6 +58,7 @@ from crm_pilates.domain.scheduling.remove_attendee_from_classroom_command_handle
 from crm_pilates.event.event_subscribers import (
     SessionCheckedInEventSubscriber,
     SessionCheckedOutEventSubscriber,
+    ClientDeletedEventSubscriber,
 )
 from crm_pilates.infrastructure.event_bus_provider import EventBusProvider
 
@@ -94,5 +95,8 @@ SessionCheckedInEventSubscriber(CommandBusProvider.command_bus).subscribe(
     EventBusProvider.event_bus
 )
 SessionCheckedOutEventSubscriber(CommandBusProvider.command_bus).subscribe(
+    EventBusProvider.event_bus
+)
+ClientDeletedEventSubscriber(CommandBusProvider.command_bus).subscribe(
     EventBusProvider.event_bus
 )

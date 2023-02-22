@@ -26,6 +26,7 @@ from crm_pilates.domain.client.client import Client, Credits
 from crm_pilates.domain.client.client_command_handlers import (
     ClientCreditsUpdated,
     ClientCreated,
+    ClientDeleted,
 )
 from crm_pilates.domain.scheduling.attendee import Attendee, Attendance
 from crm_pilates.domain.scheduling.classroom import (
@@ -43,6 +44,9 @@ from crm_pilates.domain.scheduling.duration import (
     Duration,
     HourTimeUnit,
     MinuteTimeUnit,
+)
+from crm_pilates.domain.scheduling.remove_attendee_from_classroom_command_handler import (
+    AttendeeRemovedFromClassroom,
 )
 from crm_pilates.domain.services import CipherServiceProvider
 from crm_pilates.event.event_store import StoreLocator, Event
@@ -284,6 +288,42 @@ class CreditsToClientAddedMapper(EventToDomainMapper):
         pass
 
 
+class ClientDeletedMapper(EventToDomainMapper):
+    def map(self, event: ClientDeleted) -> EventToDomainMapper:
+        payload = event.payload
+        client_id = uuid.UUID(payload["id"])
+        self.client: Client = RepositoryProvider.write_repositories.client.get_by_id(
+            client_id
+        )
+        return self
+
+    def and_persist(self) -> None:
+        RepositoryProvider.write_repositories.client.delete(self.client)
+
+
+class AttendeeRemovedFromClassroomMapper(EventToDomainMapper):
+    def map(self, event: AttendeeRemovedFromClassroom) -> EventToDomainMapper:
+        payload = event.payload
+        attendee_id = uuid.UUID(payload["attendee_id"])
+        classroom_ids: List[str] = payload["classrooms"]
+        classrooms = [
+            RepositoryProvider.write_repositories.classroom.get_by_id(
+                uuid.UUID(classroom_id)
+            )
+            for classroom_id in classroom_ids
+        ]
+        for classroom in classrooms:
+            attendees = filter(
+                lambda attendee: attendee.id == attendee_id, classroom.attendees
+            )
+            for attendee in attendees:
+                classroom.attendees.remove(attendee)
+        return self
+
+    def and_persist(self) -> None:
+        pass
+
+
 class EventToDomainLoader:
     def __init__(self) -> None:
         self.mappers = {
@@ -296,6 +336,8 @@ class EventToDomainLoader:
             AttendeeSessionCancelled.event.__name__: EventToAttendeeSessionCancelledMapper,
             ClientCreditsUpdated.event.__name__: CreditsToClientAddedMapper,
             AttendeesToSessionAdded.event.__name__: AttendeesToSessionAddedMapper,
+            ClientDeleted.event.__name__: ClientDeletedMapper,
+            AttendeeRemovedFromClassroom.event.__name__: AttendeeRemovedFromClassroomMapper,
         }
 
     def load(self) -> None:
