@@ -85,6 +85,9 @@ def create_database():
         connection.execute(
             """CREATE TABLE IF NOT EXISTS users (id text, username text, password text, config text)"""
         )
+        connection.execute(
+            """CREATE TABLE IF NOT EXISTS migration (id SERIAL PRIMARY KEY, timestamp_ timestamp, script_path text)"""
+        )
         connection.commit()
 
 
@@ -97,6 +100,7 @@ def clean_database(create_database):
     with psycopg.connect(settings.DATABASE_URL) as connection:
         connection.execute("DELETE FROM event")
         connection.execute("DELETE FROM users")
+        connection.execute("DELETE FROM migration")
         connection.commit()
 
 
