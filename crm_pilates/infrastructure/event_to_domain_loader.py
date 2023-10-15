@@ -24,10 +24,13 @@ from crm_pilates.domain.attending.session_creation_command_handler import (
 )
 from crm_pilates.domain.client.client import Client, Credits
 from crm_pilates.domain.client.client_command_handlers import (
-    ClientCreditsUpdated,
     ClientCreated,
     ClientDeleted,
+    ClientCreditsAdded,
+    ClientCreditsDecreased,
+    ClientCreditsRefund,
 )
+from crm_pilates.domain.client.client_credits_updated import ClientCreditsUpdated
 from crm_pilates.domain.scheduling.attendee import Attendee, Attendance
 from crm_pilates.domain.scheduling.classroom import (
     Classroom,
@@ -266,8 +269,14 @@ class EventToAttendeeSessionCancelledMapper(EventToDomainMapper):
         pass
 
 
-class CreditsToClientAddedMapper(EventToDomainMapper):
-    def map(self, event: ClientCreditsUpdated) -> EventToDomainMapper:
+class CreditsToClientMapper(EventToDomainMapper):
+    def map(
+        self,
+        event: ClientCreditsUpdated
+        | ClientCreditsAdded
+        | ClientCreditsDecreased
+        | ClientCreditsRefund,
+    ) -> EventToDomainMapper:
         payload = event.payload
         client_id = uuid.UUID(payload["id"])
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(
@@ -334,7 +343,10 @@ class EventToDomainLoader:
             SessionCheckedIn.event.__name__: EventToSessionCheckedInMapper,
             SessionCheckedOut.event.__name__: EventToSessionCheckedOutMapper,
             AttendeeSessionCancelled.event.__name__: EventToAttendeeSessionCancelledMapper,
-            ClientCreditsUpdated.event.__name__: CreditsToClientAddedMapper,
+            ClientCreditsUpdated.event.__name__: CreditsToClientMapper,
+            ClientCreditsAdded.event.__name__: CreditsToClientMapper,
+            ClientCreditsDecreased.event.__name__: CreditsToClientMapper,
+            ClientCreditsRefund.event.__name__: CreditsToClientMapper,
             AttendeesToSessionAdded.event.__name__: AttendeesToSessionAddedMapper,
             ClientDeleted.event.__name__: ClientDeletedMapper,
             AttendeeRemovedFromClassroom.event.__name__: AttendeeRemovedFromClassroomMapper,

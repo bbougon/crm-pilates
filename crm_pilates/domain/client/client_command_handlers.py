@@ -11,6 +11,7 @@ from crm_pilates.domain.commands import (
     RefundClientCreditsCommand,
     DeleteClientCommand,
 )
+from crm_pilates.domain.scheduling.classroom_type import ClassroomSubject
 from crm_pilates.domain.services import encrypt
 from crm_pilates.event.event_store import Event, EventSourced
 from crm_pilates.infrastructure.repository_provider import RepositoryProvider
@@ -59,7 +60,6 @@ class ClientCreationCommandHandler(CommandHandler):
         )
 
 
-@EventSourced
 class ClientCreditsUpdated(Event):
     def __init__(self, root_id: UUID, credits: List[Credits]) -> None:
         self.credits = credits
@@ -80,17 +80,36 @@ class ClientCreditsUpdated(Event):
         }
 
 
+@EventSourced
+class ClientCreditsDecreased(ClientCreditsUpdated):
+    def __init__(
+        self, root_id: UUID, credits: List[Credits], subject: ClassroomSubject = None
+    ) -> None:
+        super().__init__(root_id, credits)
+        self.subject = subject
+
+
+@EventSourced
+class ClientCreditsAdded(ClientCreditsUpdated):
+    pass
+
+
+@EventSourced
+class ClientCreditsRefund(ClientCreditsUpdated):
+    pass
+
+
 class AddCreditsToClientCommandHandler(CommandHandler):
     def execute(self, command: AddCreditsToClientCommand) -> Status:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(
             command.id
         )
         client.add_credits(command.credits)
-        return ClientCreditsUpdated(client.id, client.credits)
+        return ClientCreditsAdded(client.id, client.credits)
 
 
 class DecreaseClientCreditsCommandHandler(CommandHandler):
-    def execute(self, command: DecreaseClientCreditsCommand) -> Status:
+    def execute(self, command: DecreaseClientCreditsCommand) -> ClientCreditsDecreased:
         client: Client = RepositoryProvider.write_repositories.client.get_by_id(
             command.attendee.id
         )
@@ -98,7 +117,7 @@ class DecreaseClientCreditsCommandHandler(CommandHandler):
             command.session_id
         )
         client.decrease_credits_for(session.subject)
-        return ClientCreditsUpdated(client.id, client.credits)
+        return ClientCreditsDecreased(client.id, client.credits, session.subject)
 
 
 class RefundClientCreditsCommandHandler(CommandHandler):
@@ -110,7 +129,7 @@ class RefundClientCreditsCommandHandler(CommandHandler):
             command.session_id
         )
         client.refund_credits_for(session.subject)
-        return ClientCreditsUpdated(client.id, client.credits)
+        return ClientCreditsRefund(client.id, client.credits)
 
 
 @EventSourced

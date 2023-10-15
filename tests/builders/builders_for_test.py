@@ -44,9 +44,12 @@ from crm_pilates.domain.attending.session_repository import SessionRepository
 from crm_pilates.domain.client.client import Client, Credits
 from crm_pilates.domain.client.client_command_handlers import (
     ClientCreated,
-    ClientCreditsUpdated,
     ClientDeleted,
+    ClientCreditsAdded,
+    ClientCreditsRefund,
+    ClientCreditsDecreased,
 )
+from crm_pilates.domain.client.client_credits_updated import ClientCreditsUpdated
 from crm_pilates.domain.commands import ClientCredits
 from crm_pilates.domain.repository import Repository
 from crm_pilates.domain.scheduling.remove_attendee_from_classroom_command_handler import (
@@ -637,10 +640,41 @@ class EventBuilderForTest(Builder):
         self.clients.append(client)
         return self
 
-    def added_credits_for_machine_duo(self, client, nb_credits) -> EventBuilderForTest:
+    def updated_credits_for_machine_duo(
+        self, client, nb_credits
+    ) -> EventBuilderForTest:
         self.event_to_store.append(
             (
                 ClientCreditsUpdated,
+                (client.id, [Credits(nb_credits, ClassroomSubject.MACHINE_DUO)]),
+            )
+        )
+        return self
+
+    def added_credits_for_machine_duo(self, client, nb_credits) -> EventBuilderForTest:
+        self.event_to_store.append(
+            (
+                ClientCreditsAdded,
+                (client.id, [Credits(nb_credits, ClassroomSubject.MACHINE_DUO)]),
+            )
+        )
+        return self
+
+    def decreased_credits_for_machine_duo(
+        self, client, nb_credits
+    ) -> EventBuilderForTest:
+        self.event_to_store.append(
+            (
+                ClientCreditsDecreased,
+                (client.id, [Credits(nb_credits, ClassroomSubject.MACHINE_DUO)]),
+            )
+        )
+        return self
+
+    def refund_credits_for_machine_duo(self, client, nb_credits) -> EventBuilderForTest:
+        self.event_to_store.append(
+            (
+                ClientCreditsRefund,
                 (client.id, [Credits(nb_credits, ClassroomSubject.MACHINE_DUO)]),
             )
         )
