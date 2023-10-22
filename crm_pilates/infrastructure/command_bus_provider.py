@@ -59,8 +59,16 @@ from crm_pilates.event.event_subscribers import (
     SessionCheckedInEventSubscriber,
     SessionCheckedOutEventSubscriber,
     ClientDeletedEventSubscriber,
+    ClientCreditDecreasedEventSubscriber,
 )
 from crm_pilates.infrastructure.event_bus_provider import EventBusProvider
+from crm_pilates.infrastructure.notifier.brevo_message_notifier import (
+    BrevoMessageNotifier,
+)
+from crm_pilates.infrastructure.notifier.memory_message_notifier import (
+    MemoryMessageNotifier,
+)
+from crm_pilates.settings import config
 
 
 class CommandBusProvider:
@@ -100,3 +108,7 @@ SessionCheckedOutEventSubscriber(CommandBusProvider.command_bus).subscribe(
 ClientDeletedEventSubscriber(CommandBusProvider.command_bus).subscribe(
     EventBusProvider.event_bus
 )
+notifier = (
+    BrevoMessageNotifier() if config("BREVO_API_KEY") else MemoryMessageNotifier()
+)
+ClientCreditDecreasedEventSubscriber(notifier).subscribe(EventBusProvider.event_bus)

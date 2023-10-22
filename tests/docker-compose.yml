@@ -12,6 +12,3 @@ services:
       - 5433:5432
     volumes:
       - "./volumes/tests/db/data:/var/lib/postgresql/data"
-    build:
-      context: ..
-      target: development

@@ -61,9 +61,51 @@ def test_should_load_clients_with_credits(persisted_event_store):
     assert client.credits[1].subject == ClassroomSubject.MACHINE_TRIO
 
 
+def test_should_load_updated_credits_to_client(persisted_event_store):
+    client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
+    EventBuilderForTest().client(client).nb_client(2).updated_credits_for_machine_duo(
+        client, 10
+    ).build()
+
+    EventToDomainLoader().load()
+
+    client = RepositoryProvider.read_repositories.client.get_by_id(client.id)
+    assert len(client.credits) == 1
+    assert client.credits[0].value == 10
+    assert client.credits[0].subject == ClassroomSubject.MACHINE_DUO
+
+
 def test_should_load_added_credits_to_client(persisted_event_store):
     client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
     EventBuilderForTest().client(client).nb_client(2).added_credits_for_machine_duo(
+        client, 10
+    ).build()
+
+    EventToDomainLoader().load()
+
+    client = RepositoryProvider.read_repositories.client.get_by_id(client.id)
+    assert len(client.credits) == 1
+    assert client.credits[0].value == 10
+    assert client.credits[0].subject == ClassroomSubject.MACHINE_DUO
+
+
+def test_should_load_refund_credits_to_client(persisted_event_store):
+    client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
+    EventBuilderForTest().client(client).nb_client(2).refund_credits_for_machine_duo(
+        client, 10
+    ).build()
+
+    EventToDomainLoader().load()
+
+    client = RepositoryProvider.read_repositories.client.get_by_id(client.id)
+    assert len(client.credits) == 1
+    assert client.credits[0].value == 10
+    assert client.credits[0].subject == ClassroomSubject.MACHINE_DUO
+
+
+def test_should_load_decreased_credits_to_client(persisted_event_store):
+    client = ClientBuilderForTest().with_credit(2, ClassroomSubject.MAT).build()
+    EventBuilderForTest().client(client).nb_client(2).decreased_credits_for_machine_duo(
         client, 10
     ).build()
 

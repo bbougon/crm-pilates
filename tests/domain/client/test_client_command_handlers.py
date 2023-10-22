@@ -94,7 +94,7 @@ def test_should_store_credits_to_client_added(memory_event_store, memory_reposit
     )
 
     events = StoreLocator.store.get_all()
-    assert events[0].type == "ClientCreditsUpdated"
+    assert events[0].type == "ClientCreditsAdded"
     EventAsserter.assert_client_credits_updated(
         events[0].payload,
         client.id,
@@ -128,11 +128,13 @@ def test_should_decrease_credits_event_with_unprovided_credits(
         .build()
     )
 
-    DecreaseClientCreditsCommandHandler().execute(
+    response = DecreaseClientCreditsCommandHandler().execute(
         DecreaseClientCreditsCommand(session.id, Attendee.create(client.id))
     )
 
     assert client.credits[0].value == -1
+    assert response.credits[0].value == -1
+    assert response.subject == ClassroomSubject.MACHINE_PRIVATE
 
 
 @immobilus("2020-05-03 10:00:00.000")
