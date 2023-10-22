@@ -50,9 +50,9 @@ def test_should_send_an_email_to_notify_the_client_he_reaches_low_credit():
     RepositoryProvider.write_repositories.client.persist(client)
     email_notifier = DummyEmailNotifier()
 
-    ClientCreditDecreasedEventSubscriber(
-        CommandBusProviderForTest().provide().command_bus, email_notifier
-    ).consume(ClientCreditsDecreased(client.id, client.credits, ClassroomSubject.MAT))
+    ClientCreditDecreasedEventSubscriber(email_notifier).consume(
+        ClientCreditsDecreased(client.id, client.credits, ClassroomSubject.MAT)
+    )
 
     assert email_notifier.email_notified is True
     assert email_notifier.email_information == {
@@ -72,9 +72,9 @@ def test_should_send_an_email_with_corresponding_credits():
     RepositoryProvider.write_repositories.client.persist(client)
     email_notifier = DummyEmailNotifier()
 
-    ClientCreditDecreasedEventSubscriber(
-        CommandBusProviderForTest().provide().command_bus, email_notifier
-    ).consume(ClientCreditsDecreased(client.id, client.credits, ClassroomSubject.MAT))
+    ClientCreditDecreasedEventSubscriber(email_notifier).consume(
+        ClientCreditsDecreased(client.id, client.credits, ClassroomSubject.MAT)
+    )
 
     assert email_notifier.email_notified is True
     assert email_notifier.email_information == {
@@ -93,8 +93,8 @@ def test_should_not_send_an_email_if_low_credits_not_reached():
     RepositoryProvider.write_repositories.client.persist(client)
     email_notifier = DummyEmailNotifier()
 
-    ClientCreditDecreasedEventSubscriber(
-        CommandBusProviderForTest().provide().command_bus, email_notifier
-    ).consume(ClientCreditsDecreased(client.id, client.credits, ClassroomSubject.MAT))
+    ClientCreditDecreasedEventSubscriber(email_notifier).consume(
+        ClientCreditsDecreased(client.id, client.credits, ClassroomSubject.MAT)
+    )
 
     assert email_notifier.email_notified is False

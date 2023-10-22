@@ -3,7 +3,7 @@ from typing import TypedDict
 
 
 class Body(TypedDict):
-    pass
+    template: str
 
 
 class Message(TypedDict):

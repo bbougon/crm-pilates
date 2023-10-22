@@ -30,12 +30,12 @@ services:
       DATABASE_URL: postgresql://crm-pilates:example@crm-pilates-postgres:5432/crm-pilates
       SECRET_KEY: "683ed7b9228d007f40b60de125fbb35681e94bdd23c45e2e0394fe470e1d55bb"
       SECRET_ENCRYPTION_KEY: "5gA4NPnTXIr_m096D3JzZF8b3ZFLpoEk4RYwjKg-FRc="
-#    volumes:
-#      - "./crm_pilates/command:/crm-pilates/crm_pilates/command"
-#      - "./crm_pilates/domain:/crm-pilates/crm_pilates/domain"
-#      - "./crm_pilates/event:/crm-pilates/crm_pilates/event"
-#      - "./crm_pilates/infrastructure:/crm-pilates/crm_pilates/infrastructure"
-#      - "./crm_pilates/web:/crm-pilates/crm_pilates/web"
+    volumes:
+      - "./crm_pilates/command:/crm-pilates/crm_pilates/command"
+      - "./crm_pilates/domain:/crm-pilates/crm_pilates/domain"
+      - "./crm_pilates/event:/crm-pilates/crm_pilates/event"
+      - "./crm_pilates/infrastructure:/crm-pilates/crm_pilates/infrastructure"
+      - "./crm_pilates/web:/crm-pilates/crm_pilates/web"
     build:
       context: .
       target: development

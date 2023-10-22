@@ -53,7 +53,6 @@ class ClientDeletedEventSubscriber(EventSubscriber):
 
 
 class ClientCreditsDecreasedEmailBody(Body):
-    template: str
     parameters: TypedDict(
         "parameters", {"date": str, "subject": str, "credits_left": int}
     )
@@ -64,8 +63,8 @@ class ClientCreditsDecreasedEmail(Message):
 
 
 class ClientCreditDecreasedEventSubscriber(EventSubscriber):
-    def __init__(self, event: str, email_notifier: MessageNotifier) -> None:
-        super().__init__(event)
+    def __init__(self, email_notifier: MessageNotifier) -> None:
+        super().__init__("ClientCreditsDecreased")
         self.email_notifier = email_notifier
 
     def consume(self, event: ClientCreditsDecreased):
