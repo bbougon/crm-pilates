@@ -33,7 +33,7 @@ psycopg = "^3.0.15"
 python-jose = {version = "^3.3.0", extras = ["cryptography"]}
 passlib = {version = "^1.7.4", extras = ["bcrypt"]}
 python-multipart = "^0.0.5"
-cryptography = "^38.0.3"
+cryptography = "^41.0.6"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.2"
